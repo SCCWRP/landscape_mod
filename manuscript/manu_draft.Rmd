@@ -1,0 +1,88 @@
+---
+title: "Quantifying biological constraints on stream integrity for classification and priorization"
+output: 
+  pdf_document:
+    keep_tex: true
+    includes: 
+      in_header: head.tex
+bibliography: refs.bib
+author: 'Marcus W. Beck (marcusb@sccwpr.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Phil Markle (phil@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Eric D. Stein (erics@sccwrp.org)'
+urlcolor: blue
+link-citations: true
+---
+
+```{r setup, echo = F, warning = F, message = F, results = 'hide'}
+# figure path, chunk options
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F)
+
+# libraries
+library(tidyverse)
+library(Jabbrev)
+
+# functions
+fls <- list.files('../R', full.names = T)
+sapply(fls, source)
+
+# extract bib entries from online
+bib_scrp('manu_draft.Rmd', 'refs.bib')
+```
+
+# Introduction
+
+Low scoring sites for bioassessment indices can occur for several reasons. 
+
+Some reasons can be effectively managed, others cannot. "Fixing" sites can also have varying expenses and assurance of outcomes. This is why we prioritize.
+
+Priorization requires models, expert knowledge, and value sets.  Context can be used to prioritize.
+
+One approach to prioritizing is to identify locations where efforts are likely to have desired outcomes. This requires identifying biological constraints, or landscape-level limits on the potential range of biological conditions. 
+
+We don't have good constraint tools to develop a context of expectation of what's possible at a site.  This can help prioritize locations where management efforts will or will not have the intended outcomes. 
+
+# Methods
+
+## Data sources
+
+Streamcat [@Hill16], \ac{nhd} [@USGS14], \ac{csci} [@Mazor16]
+
+## Building and validating landscape models
+
+A prediction model of \ac{csci} scores was built to estimate likely ranges of scores associated with land use gradients.  Land use parameters were urgan and agricultural land cover in the stream catchment (STREAMCAT). The model is incomplete by design such that \ac{csci} scores were modelled only in relation to landscape-level variables that are not easily targeted by management.  The model provided an explanation of variation in scores related to constraints on biology. Unexplained variation was considered representative of all other environmental variables that occur at different spatial scales.  Maybe describe modelling approach in [@Mazor16] - which variables were used to develop \ac{csci}.   
+
+Models were developed using quantile random forests to estimate a range of likely \ac{csci} scores in different landscapes [@Liaw02;@Cutler07].  The model predictions were used to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted.  Calibration data were selected as xyz.
+
+## Classifying streams and prioritizing sites
+
+\ac{nhd}
+Methods and stakeholder involvement, case study
+
+# Results
+
+## Model performance and validation
+
+Where does the model perform well, how does performance vary with validation and calibration datasets.
+
+## State-wide patterns
+
+What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
+
+Statewide map. 
+
+## Case study
+
+San Gabriel River Regional Monitoring Program
+
+Extent, classification, prioritization - probabilistic assessment to make broader conclusions. 
+
+Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
+
+What to do with unclassified streams - typical urban, typical ag. 
+
+# Discussion
+
+# Supplement
+
+Online application.
+
+# References
+

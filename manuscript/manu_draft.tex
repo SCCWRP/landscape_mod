@@ -1,0 +1,238 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={Quantifying biological constraints on stream integrity for classification and priorization},
+            pdfauthor={Marcus W. Beck (marcusb@sccwpr.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Phil Markle (phil@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Eric D. Stein (erics@sccwrp.org)},
+            colorlinks=true,
+            linkcolor=Maroon,
+            citecolor=Blue,
+            urlcolor=blue,
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Quantifying biological constraints on stream integrity for
+classification and priorization}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Marcus W. Beck
+(\href{mailto:marcusb@sccwpr.org}{\nolinkurl{marcusb@sccwpr.org}}),
+Raphael D. Mazor
+(\href{mailto:raphaelm@sccwrp.org}{\nolinkurl{raphaelm@sccwrp.org}}),
+Scott Johnson
+(\href{mailto:scott@aquaticbioassay.com}{\nolinkurl{scott@aquaticbioassay.com}}),
+Phil Markle (\href{mailto:phil@lacsd.org}{\nolinkurl{phil@lacsd.org}}),
+Peter D. Ode
+(\href{mailto:peter.ode@wildlife.ca.gov}{\nolinkurl{peter.ode@wildlife.ca.gov}}),
+Eric D. Stein
+(\href{mailto:erics@sccwrp.org}{\nolinkurl{erics@sccwrp.org}})}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \date{}
+  \predate{}\postdate{}
+
+\usepackage{lineno}
+\linenumbers
+\usepackage{setspace}
+\linespread{2}
+\usepackage{cleveref}
+\usepackage{acronym}
+\acrodef{csci}[CSCI]{California Stream Condition Index}
+\acrodef{nhd}[NHD]{National Hydrography Dataset Plus}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}\label{introduction}
+
+Low scoring sites for bioassessment indices can occur for several
+reasons.
+
+Some reasons can be effectively managed, others cannot. ``Fixing'' sites
+can also have varying expenses and assurance of outcomes. This is why we
+prioritize.
+
+Priorization requires models, expert knowledge, and value sets. Context
+can be used to prioritize.
+
+One approach to prioritizing is to identify locations where efforts are
+likely to have desired outcomes. This requires identifying biological
+constraints, or landscape-level limits on the potential range of
+biological conditions.
+
+We don't have good constraint tools to develop a context of expectation
+of what's possible at a site. This can help prioritize locations where
+management efforts will or will not have the intended outcomes.
+
+\section{Methods}\label{methods}
+
+\subsection{Data sources}\label{data-sources}
+
+Streamcat (Hill et al. \protect\hyperlink{ref-Hill16}{2016}), \ac{nhd}
+(USGS (US Geological Survey) \protect\hyperlink{ref-USGS14}{2014}),
+\ac{csci} (Mazor et al. \protect\hyperlink{ref-Mazor16}{2016})
+
+\subsection{Building and validating landscape
+models}\label{building-and-validating-landscape-models}
+
+A prediction model of \ac{csci} scores was built to estimate likely
+ranges of scores associated with land use gradients. Land use parameters
+were urgan and agricultural land cover in the stream catchment
+(STREAMCAT). The model is incomplete by design such that \ac{csci}
+scores were modelled only in relation to landscape-level variables that
+are not easily targeted by management. The model provided an explanation
+of variation in scores related to constraints on biology. Unexplained
+variation was considered representative of all other environmental
+variables that occur at different spatial scales. Maybe describe
+modelling approach in (Mazor et al.
+\protect\hyperlink{ref-Mazor16}{2016}) - which variables were used to
+develop \ac{csci}.
+
+Models were developed using quantile random forests to estimate a range
+of likely \ac{csci} scores in different landscapes (Liaw and Wiener
+\protect\hyperlink{ref-Liaw02}{2002}; D. R. Cutler et al.
+\protect\hyperlink{ref-Cutler07}{2007}). The model predictions were used
+to describe where bioassessment targets are unlikely to be met or where
+streams are unlikely to be impacted. Calibration data were selected as
+xyz.
+
+\subsection{Classifying streams and prioritizing
+sites}\label{classifying-streams-and-prioritizing-sites}
+
+\ac{nhd} Methods and stakeholder involvement, case study
+
+\section{Results}\label{results}
+
+\subsection{Model performance and
+validation}\label{model-performance-and-validation}
+
+Where does the model perform well, how does performance vary with
+validation and calibration datasets.
+
+\subsection{State-wide patterns}\label{state-wide-patterns}
+
+What is the consistency of patterns? For example, percent stream miles
+as xyz by PSA.
+
+Statewide map.
+
+\subsection{Case study}\label{case-study}
+
+San Gabriel River Regional Monitoring Program
+
+Extent, classification, prioritization - probabilistic assessment to
+make broader conclusions.
+
+Relationships with environmental variables for constrained/unconstrained
+locations. Maybe apply to hardened/non-hardened reaches in constrained
+locations.
+
+What to do with unclassified streams - typical urban, typical ag.
+
+\section{Discussion}\label{discussion}
+
+\section{Supplement}\label{supplement}
+
+Online application.
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-Cutler07}{}
+Cutler, D. R., T. C. Edwards Jr., K. H. Beard, A. Cutler, K. T. Hess, J.
+Gibson, and J. J. Lawler. 2007. ``Random Forests for Classification in
+Ecology.'' \emph{Ecology} 88 (11): 2783--92.
+doi:\href{https://doi.org/10.1890/07-0539.1}{10.1890/07-0539.1}.
+
+\hypertarget{ref-Hill16}{}
+Hill, R. A., M. H. Weber, S. G. Leibowitz, A. R. Olsen, and D. J.
+Thornbrugh. 2016. ``The Stream-Catchment (StreamCat) Dataset: A Database
+of Watershed Metrics for the Conterminous United States.'' \emph{Journal
+of the American Water Resources Assocation} 52: 120--28.
+doi:\href{https://doi.org/10.1111/1752-1688.12372}{10.1111/1752-1688.12372}.
+
+\hypertarget{ref-Liaw02}{}
+Liaw, Andy, and Matthew Wiener. 2002. ``Classification and Regression by
+randomForest.'' \emph{R News} 2 (3): 18--22.
+\url{http://CRAN.R-project.org/doc/Rnews/}.
+
+\hypertarget{ref-Mazor16}{}
+Mazor, R. D., A. C. Rehn, P. R. Ode, M. Engeln, K. C. Schiff, E. D.
+Stein, D. J. Gillett, D. B. Herbst, and C. P. Hawkins. 2016.
+``Bioassessment in Complex Environments: Designing an Index for
+Consistent Meaning in Different Settings.'' \emph{Freshwater Science} 35
+(1): 249--71.
+
+\hypertarget{ref-USGS14}{}
+USGS (US Geological Survey). 2014. ``National Hydrography Dataset
+available on the World Wide Web.''
+
+
+\end{document}
