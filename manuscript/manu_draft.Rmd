@@ -29,11 +29,11 @@ bib_scrp('manu_draft.Rmd', 'refs.bib')
 
 # Introduction
 
-* Degraded biological condition in aquatic environments can occur for several reasons. Some causes of poor condition can be effectively managed, others cannot. Fixing or restoring sites can have varying expenses and assurance of outcomes. This is why we prioritize.
+* Degraded biological condition in streams can occur from individual or multiple stressors acting at different scales [@Novotny05;@Townsend08;@Leps15]. Identifying and mitigating causes of poor condition requires an understanding of how stressors propogate across space and time.  Incomplete knowledge on drivers of change or high level of uncertainty in how biology is linked to drivers can lead to ineffective management actions. Varying expenses and assurance of outcomes (e.g., varying costs and challenges of urban stream restoration [@Kenney12;@Shoredits13]) 
 
-* One approach to prioritize is to identify locations where efforts are likely to have desired outcomes. This requires identifying biological constraints or limits on the potential range of biological conditions. Identifying an appropriate context for observed conditions can be used to prioritize.  Context can be defined by models, expert knowledge, and/or defined value sets.
+* Stream restoration relies extensively on identification and prioritization of sites where activities are expected to have desired outcomes. This requires an understanding of how stressors affect biological integrity to place bounds on reasonable expectations for what is likely to be a possible outcome of a management action.  This requires identifying biological constraints or limits on the potential range of biological conditions. Identifying an appropriate context for observed conditions can be used to prioritize.  Context can be defined by models, expert knowledge, and/or defined value sets.
 
-* We don't have good constraint tools to develop a context of expectation of what's possible at a site.  This can help prioritize locations where management efforts will or will not have the intended outcomes. 
+* We don't have good constraint tools to develop a context of expectation of what's possible at a site.  This can help prioritize locations where management efforts will or will not have the intended outcomes. Biological filters act at different scales [@Poff97] and we can use this information to describe an expectation for prioritization that is scale-specific.  Landscape-level constraints are particularly relevant for macroinvertebrate communities in streams [@Sponseller01]
 
 * The goal of this study is to demonstrate application of a landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity. The model provides an estimate of context for biological condition that provides an expectation of what is likely to be achieved at a given site relative to large-scale drivers of stream health. The model was developed and applied to all stream reaches in California.  A case study is used to demonstrate how the model can be used to classify and prioritize using guidance from a stakeholder group. 
 
@@ -61,6 +61,8 @@ Models were developed using quantile random forests to estimate a range of likel
 
 * Methods for estimating stream class - possibly/likely constrained, possibly/likely unconstrained, certainty and \ac{csci} threshold, some sites were unclassified
 
+**Figure** 
+
 * Methods for estimating site performance - over, expected, underperforming, discussion of site types
 
 * Sensitivity analysis - how do classes, performance categories change with thresholds and certainty
@@ -71,21 +73,21 @@ Models were developed using quantile random forests to estimate a range of likel
 
 ## State-wide patterns
 
-Where does the model perform well, how does performance vary with validation and calibration datasets.
+* Where does the model perform well, how does performance vary with validation and calibration datasets.
 
-What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
+* What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
 
 *Figure* Statewide map. 
 
 ## Case study
 
-San Gabriel River Regional Monitoring Program
+* San Gabriel River Regional Monitoring Program
 
-Extent, classification, prioritization - probabilistic assessment to make broader conclusions. 
+* Extent, classification, prioritization - probabilistic assessment to make broader conclusions. 
 
-Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
+* Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
 
-What to do with unclassified streams - typical urban, typical ag. 
+* What to do with unclassified streams - typical urban, typical ag. 
 
 *Tables* Priority by type, by perspective
 
