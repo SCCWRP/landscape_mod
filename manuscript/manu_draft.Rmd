@@ -47,7 +47,7 @@ bib_scrp('manu_draft.Rmd', 'refs.bib')
 
 * Streamcat data linked to \ac{nhd} [@USGS14], reach as individual unit for model output
 
-* \ac{csci} as measure of stream integrity [@Ode16;@Mazor16], brief description of index
+The \ac{csci} [@Ode16;@Mazor16] was used as a measure of biological condition to assess site performance relative to reach classification.  Benthic macroinvertebrate data used to calculate \ac{csci} scores were collected at nearly 4800 sites between 2000 and 2014.  Field data were collected during baseflow conditions typically between May and July following methods in @Ode07.  The \ac{csci} is a predictive index of stream health that compares the observed taxa and metrics at a site to those expected under reference conditions.  Expected conditions at a site are based on models that estimate the likely macroinvertebrate community in relation to factors that naturally influence biology, e.g., watershed size, elevation, climate, etc.  The \ac{csci} score at a site is based on an observed-to-expected ratio of taxa and a predictive multimetric index (pMMI) composed of six individual metrics that describe the structure and function of the macroinvertebrate community.  The index score at a site can vary from approximately 0 to 1.4, with higher values indicating an observed community with minimal deviation from reference conditions.  Because the index was developed to minimize the influence of natural gradients, the index scores have consistent meaning across the state [@Reynoldson97].  A threshold score based on a selected lower percentile of scores at all reference sites is used to define nominally low and high scoring sites.
 
 ## Building and validating landscape models
 
