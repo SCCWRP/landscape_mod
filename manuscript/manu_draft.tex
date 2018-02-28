@@ -25,7 +25,7 @@
 \usepackage{hyperref}
 \PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
 \hypersetup{unicode=true,
-            pdftitle={Quantifying biological constraints on stream integrity for classification and priorization},
+            pdftitle={Quantifying biological constraints on stream integrity for classification and management priorization},
             pdfauthor={Marcus W. Beck (marcusb@sccwpr.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Phil Markle (phil@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Eric D. Stein (erics@sccwrp.org)},
             colorlinks=true,
             linkcolor=Maroon,
@@ -78,7 +78,7 @@
 
 \setlength{\droptitle}{-2em}
   \title{Quantifying biological constraints on stream integrity for
-classification and priorization}
+classification and management priorization}
   \pretitle{\vspace{\droptitle}\centering\huge}
   \posttitle{\par}
   \author{Marcus W. Beck
@@ -101,11 +101,14 @@ D. Stein (\href{mailto:erics@sccwrp.org}{\nolinkurl{erics@sccwrp.org}})}
 \usepackage{lineno}
 \linenumbers
 \usepackage{setspace}
-\linespread{2}
+\linespread{1}
 \usepackage{cleveref}
 \usepackage{acronym}
 \acrodef{csci}[CSCI]{California Stream Condition Index}
 \acrodef{nhd}[NHD]{National Hydrography Dataset Plus}
+\acrodef{pmmi}[pMMI]{predictive multimetric index}
+\acrodef{sgr}[SGR]{San Gabriel River}
+\acrodef{sgrrmp}[SGRRMP]{San Gabriel River Regional Monitoring Program}
 
 \begin{document}
 \maketitle
@@ -156,7 +159,10 @@ D. Stein (\href{mailto:erics@sccwrp.org}{\nolinkurl{erics@sccwrp.org}})}
   to large-scale drivers of stream health. The model was developed and
   applied to all stream reaches in California. A case study is used to
   demonstrate how the model can be used to classify and prioritize using
-  guidance from a stakeholder group.
+  guidance from a regional stakeholder group. Active stakeholder
+  involvement was critical in applying the landscape models to define a
+  framework for decision-making because priorities varied with
+  management objectives.
 \end{itemize}
 
 \section{Methods}\label{methods}
@@ -190,55 +196,130 @@ site to those expected under reference conditions. Expected conditions
 at a site are based on models that estimate the likely macroinvertebrate
 community in relation to factors that naturally influence biology, e.g.,
 watershed size, elevation, climate, etc. The \ac{csci} score at a site
-is based on an observed-to-expected ratio of taxa and a predictive
-multimetric index (pMMI) composed of six individual metrics that
-describe the structure and function of the macroinvertebrate community.
-The index score at a site can vary from approximately 0 to 1.4, with
-higher values indicating an observed community with minimal deviation
-from reference conditions. Because the index was developed to minimize
-the influence of natural gradients, the index scores have consistent
-meaning across the state (Reynoldson et al.
+is based on an observed-to-expected ratio of taxa and a \ac{pmmi}
+composed of six individual metrics that describe the structure and
+function of the macroinvertebrate community. The index score at a site
+can vary from 0 to 1.4, with higher values indicating an observed
+community with less deviation from reference conditions. Because the
+index was developed to minimize the influence of natural gradients, the
+index scores have consistent meaning across the state (Reynoldson et al.
 \protect\hyperlink{ref-Reynoldson97}{1997}). A threshold score based on
-a selected lower percentile of scores at all reference sites is used to
-define nominally low and high scoring sites.
+a selected lower percentile of scores (e.g., 10\%) at all reference
+sites is used to define nominally low and high scoring sites.
 
 \subsection{Building and validating landscape
 models}\label{building-and-validating-landscape-models}
 
-A prediction model of the \ac{csci} was built to estimate likely ranges
-of scores associated with land use gradients. Land use parameters were
-urgan and agricultural land cover in the stream catchment (STREAMCAT).
-The model is incomplete by design such that \ac{csci} scores were
-modelled only in relation to landscape-level variables that are not
-easily targeted by management. The model provided an explanation of
-variation in scores related to constraints on biology and unexplained
-variation was considered representative of additional, unmeasured
-environmental variables that influence stream biointegrity. Maybe
-describe modelling approach in (Mazor et al.
-\protect\hyperlink{ref-Mazor16}{2016}) - which variables were used to
-develop \ac{csci}.
+A prediction model of the \ac{csci} was developed to estimate likely
+ranges of scores associated with land use gradients. Land use as urban
+and agricultural was quantified for the catchment of each stream reach
+in California using the StreamCat database (Hill et al.
+\protect\hyperlink{ref-Hill16}{2016}). \ac{csci} scores were modelled
+using only the the estimates of urban and agricultural land use as the
+developed portion of the landscape within each stream reach. The model
+was incomplete by design to describe scores only in relation to
+large-scale constraints on biological condition that are not easily
+controlled by management actions or where costs to mitigate are likely
+to be excessive. The remainder of the variation in scores not related to
+landscape constraints could be attributed to additional, unmeasured
+environmental variables that influence stream biointegrity. Deviation of
+observed scores from the model predictions were considered diagnostic of
+variation not related to landscape effects.
 
-Models were developed using quantile random forests to estimate a range
-of likely \ac{csci} scores in different landscapes (Liaw and Wiener
-\protect\hyperlink{ref-Liaw02}{2002}; D. R. Cutler et al.
-\protect\hyperlink{ref-Cutler07}{2007}). The model predictions were used
-to describe where bioassessment targets are unlikely to be met or where
-streams are unlikely to be impacted. Calibration and validation data
-were selected as xyz.
+Models were developed using quantile regression forests to estimate
+ranges of likely \ac{csci} scores in different landscapes (N.
+Meinshausen \protect\hyperlink{ref-Meinshausen06}{2006}; Nicolai
+Meinshausen \protect\hyperlink{ref-Meinshausen17}{2017}). Quantile
+models evaluate the conditional response across the range of values that
+are expected, such as the lower and upper percentiles of the
+distribution, as compared to only the mean response with conventional
+models (Cade and Noon \protect\hyperlink{ref-Cade03}{2003}). This allows
+use of model predictions to describe where bioassessment targets are
+unlikely to be met or where streams are unlikely to be impacted by
+placing bounds on the range of expectations relative to landscape
+constraints. Random forest models also provide robust predictions by
+evaluating different subsets of observations from random splits of the
+predictor variables. The final predictions are the averaged response
+across several models. These models have been used extensively in
+bioassessment applications (Carlisle, Falcone, and Meador
+\protect\hyperlink{ref-Carlisle09}{2009}; Chen et al.
+\protect\hyperlink{ref-Chen14}{2014}; Mazor et al.
+\protect\hyperlink{ref-Mazor16}{2016}) and can produce unbiased
+estimates that are relatively invariant to noisy relationships or
+non-normal distributions (Breiman
+\protect\hyperlink{ref-Breiman01}{2001}; Hastie, Tibshirani, and
+Friedman \protect\hyperlink{ref-Hastie09}{2009}). Quantile regression
+forests were used to predict \ac{csci} scores in each stream reach from
+the 5\textsuperscript{th} to the 95\textsuperscript{th} percentile of
+expectations at five percent intervals (i.e., 5\textsuperscript{th},
+10\textsuperscript{th}, etc.).
+
+Landscape eestimates for the catchments of all \ac{nhd} stream reaches
+in California were separated into calibration and validation data.
 
 \subsection{Classifying streams and prioritizing
 sites}\label{classifying-streams-and-prioritizing-sites}
 
+A framework for identifying site priorities for categories of management
+actions was developed using a three-step process. First, estimates of
+the range of expected \ac{csci} scores at each stream reach in relation
+to land use were used to define reach classifications. Second, the
+relationship between observed \ac{csci} scores and the reach
+classifications were then used to assign a relative performance value
+for each monitoring site. Third, site performance categories in relation
+to reach classification and bioassessment targets were used to define
+management priorities. This framework was developed through close
+interaction with a regional stakeholder group with broad representation
+of interests in stream management. This process was used to demonstrate
+how the landscape model can be used as a management tool given that
+priorities will vary by interests and location. As such, the results are
+provided as a guide to facilitate decision-making rather than a
+prescription of targeted actions to manage stream health.
+
+Stream reach and bioassessment data from the \ac{sgr} Watershed in
+southern California were used to develop reach classifications, site
+performance categories, and management priorities from the landscape
+models. A strong land use gradient occurs in the \ac{sgr} watershed.
+Headwaters begin in the San Gabriel mountains where the land is
+primarily undeveloped or protected for reacreational use, whereas the
+lower watershed is in a heavily urbanized region of Los Angeles County.
+The San Gabriel river is dammed at four locations for flood control in
+the upper watershed and is hydrologically connected to the Los Angeles
+river to the west through the Whittier Reservoir in the lower watershed.
+Spreading grounds are present in the middle of the watershed for
+groundwater recharge during high flow. Nearly all of the stream reaches
+in the lower half of the watershed are channelized with concrete or
+other reinforcements.
+
+\emph{Figure} SGR watershed
+
+The \ac{sgr} watershed contains a diverse group of stakeholders from
+local municipalities, water districts, water quality regulatory
+agencies, consulting groups, and non-government organizations.
+Collectively, the \ac{sgrrmp} includes stakeholders from these groups
+that cooperatively work to increase awareness of issues in the \ac{sgr}
+watershed and work to improve coordination of compliance and ambient
+monitoring efforts. The stakeholder workgroup included individuals from
+the \ac{sgrrmp} with interests in water supply, improvements to water
+quality, habitat protection or creation, and storm water permitting.
+Individuals were selected for partipation to include a variety of
+mangement interests and based on willingness to adopt tools developed
+from the landscape models. The stakeholder workgroup met monthly over a
+six-month period to discuss model applications and to refine the
+interpretation of results. Stakeholder involement was critical for
+developing an assessment framework that met the needs of all engaged
+parties and ensured that final products were more likely to be
+incorporated into formal processes of decision-making.
+
 \begin{itemize}
-\item
-  Description of SGRRMP and stakeholder group
+\tightlist
 \item
   Methods for estimating stream class - possibly/likely constrained,
   possibly/likely unconstrained, certainty and \ac{csci} threshold, some
   sites were unclassified
 \end{itemize}
 
-\textbf{Figure}
+\emph{Figure} classification and performance
 
 \begin{itemize}
 \item
@@ -292,6 +373,8 @@ sites}\label{classifying-streams-and-prioritizing-sites}
   values, etc.
 \item
   Link with engineered channels study.
+\item
+  Values of stakeholder interactions.
 \end{itemize}
 
 \section{Supplement}\label{supplement}
@@ -302,11 +385,32 @@ Online application.
 \addcontentsline{toc}{section}{References}
 
 \hypertarget{refs}{}
-\hypertarget{ref-Cutler07}{}
-Cutler, D. R., T. C. Edwards Jr., K. H. Beard, A. Cutler, K. T. Hess, J.
-Gibson, and J. J. Lawler. 2007. ``Random Forests for Classification in
-Ecology.'' \emph{Ecology} 88 (11): 2783--92.
-doi:\href{https://doi.org/10.1890/07-0539.1}{10.1890/07-0539.1}.
+\hypertarget{ref-Breiman01}{}
+Breiman, L. 2001. ``Random Forests.'' \emph{Machine Learning} 45: 5--32.
+
+\hypertarget{ref-Cade03}{}
+Cade, B. S., and B. R. Noon. 2003. ``A Gentle Introduction to Quantile
+Regression for Ecologists.'' \emph{Frontiers in Ecology and the
+Environment} 1 (8): 412--20.
+
+\hypertarget{ref-Carlisle09}{}
+Carlisle, D. M., J. Falcone, and M. R. Meador. 2009. ``Predicting the
+Biological Condition of Streams: Use of Geospatial Indicators of Natural
+and Anthropogenic Characteristics of Watersheds.'' \emph{Environmental
+Monitoring and Assessment} 151 (1-4): 143--60.
+doi:\href{https://doi.org/10.1007/s10661-008-0256-z}{10.1007/s10661-008-0256-z}.
+
+\hypertarget{ref-Chen14}{}
+Chen, K., R. M. Hughes, S. Xu, J. Zhang, D. Cai, and B. Wang. 2014.
+``Evaluating Performance of Macroinvertebrate-Based Adjusted and
+Unadjusted Multi-Metric Indices (MMI) Using Multi-Season and Multi-Year
+Samples.'' \emph{Ecological Indicators} 36: 142--51.
+doi:\href{https://doi.org/10.1016/j.ecolind.2013.07.006}{10.1016/j.ecolind.2013.07.006}.
+
+\hypertarget{ref-Hastie09}{}
+Hastie, T., R. Tibshirani, and J. Friedman. 2009. \emph{The Elements of
+Statistical Learning: Data Mining, Inference, and Prediction}. 2nd ed.
+New York: Springer.
 
 \hypertarget{ref-Hill16}{}
 Hill, R. A., M. H. Weber, S. G. Leibowitz, A. R. Olsen, and D. J.
@@ -329,17 +433,20 @@ Multiple Stressor Environment.'' \emph{Science of the Total Environment}
 536: 546--56.
 doi:\href{https://doi.org/10.1016/j.scitotenv.2015.07.083}{10.1016/j.scitotenv.2015.07.083}.
 
-\hypertarget{ref-Liaw02}{}
-Liaw, Andy, and Matthew Wiener. 2002. ``Classification and Regression by
-randomForest.'' \emph{R News} 2 (3): 18--22.
-\url{http://CRAN.R-project.org/doc/Rnews/}.
-
 \hypertarget{ref-Mazor16}{}
 Mazor, R. D., A. C. Rehn, P. R. Ode, M. Engeln, K. C. Schiff, E. D.
 Stein, D. J. Gillett, D. B. Herbst, and C. P. Hawkins. 2016.
 ``Bioassessment in Complex Environments: Designing an Index for
 Consistent Meaning in Different Settings.'' \emph{Freshwater Science} 35
 (1): 249--71.
+
+\hypertarget{ref-Meinshausen06}{}
+Meinshausen, N. 2006. ``Quantile Regression Forests.'' \emph{Journal of
+Machine Learning Research} 7: 983--99.
+
+\hypertarget{ref-Meinshausen17}{}
+Meinshausen, Nicolai. 2017. \emph{QuantregForest: Quantile Regression
+Forests}. \url{https://CRAN.R-project.org/package=quantregForest}.
 
 \hypertarget{ref-Novotny05}{}
 Novotny, V., A. Bartosová, N. O'Reilly, and T. Ehlinger. 2005.
