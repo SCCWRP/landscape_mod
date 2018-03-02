@@ -104,6 +104,8 @@ D. Stein (\href{mailto:erics@sccwrp.org}{\nolinkurl{erics@sccwrp.org}})}
 \linespread{1}
 \usepackage{cleveref}
 \usepackage{acronym}
+\usepackage{booktabs}
+\usepackage{multirow}
 \acrodef{csci}[CSCI]{California Stream Condition Index}
 \acrodef{nhd}[NHD]{National Hydrography Dataset Plus}
 \acrodef{pmmi}[pMMI]{predictive multimetric index}
@@ -359,10 +361,37 @@ defined as being below or above the \ac{csci} threshold. For possibly
 constrained and possibly unconstrained reaches, sites that were
 performing as expected were addtionally defined as being below or above
 the \ac{csci} threshold. In total, sixteen site types were defined for
-the three reach classifcation and three site performance
-classifications.
+the three reach classification and three site performance
+classifications (\cref{tab:typetab}).
 
 \emph{Table} reach classification, site performance types and categories
+
+\begin{table}[!tbp]
+\caption{Possible site types based on stream reach classification, site performance, and observed \ac{csci} score. The observed score column describes where a \ac{csci} score is observed relative to the lower and upper percentiles (e.g., 5\textsuperscript{th} and 95\textsuperscript{th}) of expected scores for a reach and the chosen \ac{csci} threshold (e.g., 10\textsuperscript{th} percentile of scores at reference sites or 0.79) for nominally low or high values.\label{tab:typetab}} 
+\begin{center}
+\begin{tabular}{llll}
+\hline\hline
+\multicolumn{1}{l}{Reach expectation}&\multicolumn{1}{c}{Site performance}&\multicolumn{1}{c}{Observed score}&\multicolumn{1}{c}{Type}\tabularnewline
+\hline
+\textbf{likely unconstrained}&over scoring&$\geq$ 95\textsuperscript{th}&1\tabularnewline
+&expected&5\textsuperscript{th} to 95\textsuperscript{th}&2\tabularnewline
+&under scoring&0.79 to 5\textsuperscript{th}&3\tabularnewline
+&under scoring&\textless  0.79&4\tabularnewline
+\textbf{possibly unconstrained}&over scoring&$\geq$ 95\textsuperscript{th}&5\tabularnewline
+&expected&0.79 to 95\textsuperscript{th}&6\tabularnewline
+&expected&5\textsuperscript{th} to 0.79&7\tabularnewline
+&under scoring&\textless  5\textsuperscript{th}&8\tabularnewline
+\textbf{possibly constrained}&over scoring&$\geq$ 95\textsuperscript{th}&9\tabularnewline
+&expected&0.79 to 95\textsuperscript{th}&10\tabularnewline
+&expected&5\textsuperscript{th} to 0.79&11\tabularnewline
+&under scoring&\textless  5\textsuperscript{th}&12\tabularnewline
+\textbf{likely constrained}&over scoring&$\geq$ 0.79&13\tabularnewline
+&over scoring&95\textsuperscript{th} to 0.79&14\tabularnewline
+&expected&5\textsuperscript{th} to 95\textsuperscript{th}&15\tabularnewline
+&under scoring&\textless  5\textsuperscript{th}&16\tabularnewline
+\hline
+\end{tabular}\end{center}
+\end{table}
 
 Each site type was used to define a priority as a demonstration of how
 results from the landscape model can help achieve different stream

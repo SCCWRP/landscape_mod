@@ -17,6 +17,7 @@ knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F)
 
 # libraries
 library(tidyverse)
+library(Hmisc)
 library(Jabbrev)
 
 # functions
@@ -25,6 +26,9 @@ sapply(fls, source)
 
 # extract bib entries from online
 bib_scrp('manu_draft.Rmd', 'refs.bib')
+
+# data
+load(file = '../data/typetab.RData')
 ```
 
 # Introduction
@@ -75,9 +79,36 @@ Identifying site priorities began with defining a classification framework for s
 
 *Figure* classification and performance
 
-Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classifcation and three site performance classifications.
+Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (\cref{tab:typetab}).
 
 *Table* reach classification, site performance types and categories
+
+```{r, results = 'asis', eval = T}
+# table content format
+totab <- typetab %>% 
+  mutate(
+    `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
+    `Observed score` = gsub('th', '\\\\textsuperscript{th}', `Observed score`), 
+    `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('\\textbf{', `Reach expectation`, '}')), 
+    Type = as.character(Type)
+  ) %>% 
+  select(-Sites)
+
+# table stuff
+cap.val <- 'Possible site types based on stream reach classification, site performance, and observed \\ac{csci} score. The observed score column describes where a \\ac{csci} score is observed relative to the lower and upper percentiles (e.g., 5\\textsuperscript{th} and 95\\textsuperscript{th}) of expected scores for a reach and the chosen \\ac{csci} threshold (e.g., 10\\textsuperscript{th} percentile of scores at reference sites or 0.79) for nominally low or high values.'
+
+# table
+cat(capture.output(
+  latex(
+  totab[, -1],
+  rowname = totab$`Reach expectation`,
+  rowlabel = 'Reach expectation', 
+  file = '',
+  caption = cap.val,
+  caption.loc = 'top',
+  label = 'tab:typetab'
+  ))[-1], sep = '\n') 
+```
 
 Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback. 
 
@@ -126,4 +157,5 @@ Finally, some stream reaches were unclassifed following application of the lands
 Online application.
 
 # References
+
 
