@@ -65,7 +65,7 @@ Stream reach and bioassessment data from the \ac{sgr} watershed in southern Cali
 
 The \ac{sgr} watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the \ac{sgrrmp} includes stakeholders from these groups that cooperatively work to increase awareness of issues in the \ac{sgr} watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the \ac{sgrrmp} with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for partipation to include a variety of mangement interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal processes of decision-making. 
 
-## Reach classification and site prioritization
+## Reach classification, site performance, and prioritization
 
 A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected \ac{csci} scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed \ac{csci} scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health. 
 
@@ -79,11 +79,15 @@ Site performance categories were further split relative to location to the selec
 
 *Table* reach classification, site performance types and categories
 
-* Sensitivity analysis - how do classes, performance categories change with thresholds and certainty
+Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback. 
 
-* Unclassified reaches
+*Figure* Site types template figure for prioritization
 
-* Prioritization of types - stakeholder involvement
+## Sensitivity analyses and unclassified reaches
+
+Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model and the \ac{csci} threshold for defining nominally low or high scores.  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5\textsuperscript{th} and 95\textsuperscript{th} percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25\textsuperscript{th} to 75\textsuperscript{th} percentile) to assume less certainty in the model is provided.  The \ac{csci} threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10\textsuperscript{th} percentile of scores at all reference (non-impacted) sites that were used to calibrate the \ac{csci} index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the \ac{csci} threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
+
+Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate \ac{csci} predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for 'typically' urban and agriculture reaches that relies on the range of expectations for reaches with similar land use by region.
 
 # Results
 
@@ -110,6 +114,8 @@ Site performance categories were further split relative to location to the selec
 # Discussion
 
 * What do priorities really mean? Depends on your interests, needs, values, etc.
+
+* Changing certainty or \ac{csci} treshold - mechanistic effets and implications. Mechanistically, reducing certainty in the model predictions by using a smaller range of score expectations will reduce the amount of stream reaches in the possibly constrained or possibly unconstrained category. Reducing the certainty will also change more sites from the "expected" perfomance category to the under- or over-performing category.
 
 * Link with engineered channels study.
 
