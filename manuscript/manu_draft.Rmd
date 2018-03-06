@@ -45,7 +45,7 @@ load(file = '../data/typetab.RData')
 
 ## Study area and data sources
 
-* Brief description of CA, stream types and designated uses, PSA regions, management interests (e.g., southern vs. northern CA)
+Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate.  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central part of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
 
 * Streamcat database used to quantify watershed land use at all sites [@Hill16]
 
@@ -81,8 +81,6 @@ Identifying site priorities began with defining a classification framework for s
 
 Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (\cref{tab:typetab}).
 
-*Table* reach classification, site performance types and categories
-
 ```{r, results = 'asis', eval = T}
 # table content format
 totab <- typetab %>% 
@@ -114,6 +112,8 @@ Each site type was used to define a priority as a demonstration of how results f
 
 *Figure* Site types template figure for prioritization
 
+*Figure* App screenshot
+
 ## Sensitivity analyses and unclassified reaches
 
 Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model and the \ac{csci} threshold for defining nominally low or high scores.  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5\textsuperscript{th} and 95\textsuperscript{th} percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25\textsuperscript{th} to 75\textsuperscript{th} percentile) to assume less certainty in the model is provided.  The \ac{csci} threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10\textsuperscript{th} percentile of scores at all reference (non-impacted) sites that were used to calibrate the \ac{csci} index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the \ac{csci} threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
@@ -132,26 +132,57 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 ## Case study
 
-* San Gabriel River Regional Monitoring Program
-
-* Extent, classification, prioritization - probabilistic assessment to make broader conclusions. 
+* Extent, classification, prioritization
 
 * Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
 
-* What to do with unclassified streams - typical urban, typical ag. 
+*Figure* Summary of extent of reach classification, site performance, selected examples
 
-*Tables* Priority by type, by perspective
+*Tables* Priority table(s) from stakeholder group
+
+## Sensitivity analysis
+
+* Statewide results - reach classification, site performance
+
+* SGR application - where do priorities change? Do overall patterns remain?
+
+*Table* Sensitivity results
+
+## Unclassified reaches
+
+* Extent of typical ag, typical urban statewide
+
+* Framework for assigning unclassified reach to a class
+
+* Statewide patterns, SGR patterns
+
+*Table* Summary by location
 
 # Discussion
 
-* What do priorities really mean? Depends on your interests, needs, values, etc.
+* What is the value of identifying constrained channels?
+     * Use of more data to develop context of assessment
+     * Targeted management for desired outcomes
 
-* Changing certainty or \ac{csci} treshold - mechanistic effets and implications. Mechanistically, reducing certainty in the model predictions by using a smaller range of score expectations will reduce the amount of stream reaches in the possibly constrained or possibly unconstrained category. Reducing the certainty will also change more sites from the "expected" perfomance category to the under- or over-performing category.
+* What is useful about our approach compared to alternatives?
+     * Field-based methods to identify modified channels vs. landscape modelling
+     * Related directly to biological condition and regulatory standards
+     * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
 
-* Link with engineered channels study.
+* What contributed to our success in defining priorities? 
+     * Stakeholder involvement guided process, contributed to achieving goals
+     * An interactive/iterative approach was used - we provided tools to facilitate (web apps) and we did not assume priorities
 
-* Values of stakeholder interactions.
+* Caveats of our aproach
+     * What do priorities really mean? Depends on your interests, needs, values, etc.
+     * Constrained may not always mean constrained - CSCI vs other biological indicators
+     * Site-specific approaches are warranted in certain cases
+     * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
 
+* Future work
+     * Link with engineered channels study
+     * Priorities statewide, application to larger regions possible (national-scale)
+     
 # Supplement
 
 Online application.
