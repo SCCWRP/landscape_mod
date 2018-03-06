@@ -1,0 +1,168 @@
+---
+title: "Quantifying biological constraints on stream integrity for classification and management priorization"
+output: 
+  word_document:
+    reference_docx: my_styles.docx
+bibliography: refs.bib
+author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Phil Markle (pmarkle@lacsd.org), Joshua Westfall (jwestfall@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Eric D. Stein (erics@sccwrp.org)'
+urlcolor: blue
+link-citations: true
+---
+
+# Introduction
+
+* Effective stream management can depend on identification and prioritization of locations where activities are expected to have desired outcomes. 
+     * Difficulty defining priorities one site at a time (or setting priorities without data)
+     * Placing bounds on known drivers of change can reduce uncertainty in decisions
+     * Understanding effects of landscape on stream integrity is particularly relevant for targeted action
+     
+* We don't have good tools to develop a context of expectation of what's possible at a site.
+     * This can help prioritize management actions.
+     * Context can be defined by models, expert knowledge, and/or defined values
+     * Stakeholder involvement is critical in this process
+     
+* Goal: demonstrate application of a landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity. 
+     * Statewide application of the model
+     * A case study is used to demonstrate how the model can be used to classify and prioritize by watershed using guidance from a regional stakeholder group.
+     
+# Methods
+
+### Study area and data sources
+
+* Brief description of CA, stream types and designated uses, PSA regions, management interests (e.g., southern vs. northern CA)
+
+* Data sources
+     * Streamcat database used to quantify watershed land use at all sites
+     * Streamcat data linked to NHD, reach as individual unit for model output
+     * CSCI as measure of biological condition
+
+### Building and validating landscape models
+
+* Development of landscape model using statewide data
+
+* Ag/Urban land in catchment as predictor of constraint
+     * Chosen through vetted stakeholder process at the state level
+     * Model incomplete by design, goal of explaining portion of biological response from large-scale constraints
+     
+* Quantile regression forests and range of model output
+
+* Split between calibration/validation data, evaluation of performance  
+
+### San Gabriel River watershed case study
+
+* Overview of SGR watershed, land use, upper/lower watershed, etc.
+
+* SGR management groups and SGRRMP
+
+* General process of involving stakeholders in developing model, identifying priorities
+     * Use of interactive application to facilitate
+
+*Figure* SGR watershed 
+
+### Reach classification, site performance, and prioritization
+
+* Summary of framework for identifying site priorities for management actions
+     * Reach classifciation - all reaches
+     * Site performance - all sites
+     * Management priorities - by site types, extrapolated to all sites
+
+* Details about classification framework for stream reaches
+     * Range of CSCI expectations at a reach relative to a chosen CSCI threshold
+     * Likely constrained, possibly constrained, possibly unconstrained, likely unconstrained
+
+* Details about identifying site performance
+     * Sites with observed scores above the upper limit of the reach expectation as "over-performing" and sites below the lower limit as "under-performing", within range as "expected"
+     * Identified for each of four reach classications
+     * Further identified based on location to CSCI threshold to define "types" to prioritize
+
+* Stakeholder process to assign management priorities by site types
+
+*Figure* flowchart for classification and performance identification
+
+*Table* reach classification, site performance types and categories
+
+*Figure* Site types template figure for prioritization
+
+*Figure* Screenshot of web application
+
+### Sensitivity analyses
+
+* Reach classifications and site performance depend on the range of score expectations and the CSCI threshold
+
+* Sensitivity analysis to evaluate effect of certainty in the model and CSCI threshold (strict, lax) on stream miles by priority category
+
+### Unclassified reaches
+
+* Some reaches were unclassifed if data were insufficient or if a catchment could not be defined
+
+* Latter was more common, particularly in engineered channels or agricultural ditches
+
+* A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches
+
+# Results
+
+### State-wide patterns
+
+* Where does the model perform well, how does performance vary with validation and calibration datasets.
+
+* What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
+
+*Figure* Statewide map. 
+
+### Case study
+
+* Extent, classification, prioritization
+
+* Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
+
+*Figure* Summary of extent of reach classification, site performance, selected examples
+
+*Tables* Priority table(s) from stakeholder group
+
+### Sensitivity analysis
+
+* Statewide results - reach classification, site performance
+
+* SGR application - where do priorities change? Do overall patterns remain?
+
+*Table* Sensitivity results
+
+### Unclassified reaches
+
+* Extent of typical ag, typical urban statewide
+
+* Framework for assigning unclassified reach to a class
+
+* Statewide patterns, SGR patterns
+
+*Table* Summary by location
+
+# Discussion
+
+* What is the value of identifying constrained channels?
+     * Use of more data to develop context of assessment
+     * Targeted management for desired outcomes
+
+* What is useful about our approach compared to alternatives?
+     * Field-based methods to identify modified channels vs. landscape modelling
+     * Related directly to biological condition and regulatory standards
+     * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
+
+* What contributed to our success in defining priorities? 
+     * Stakeholder involvement guided process, contributed to achieving goals
+     * An interactive/iterative approach was used - we provided tools to facilitate (web apps) and we did not assume priorities
+
+* Caveats of our aproach
+     * What do priorities really mean? Depends on your interests, needs, values, etc.
+     * Constrained may not always mean constrained - CSCI vs other biological indicators
+     * Site-specific approaches are warranted in certain cases
+     * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
+
+* Future work
+     * Link with engineered channels study
+     * Priorities statewide, application to larger regions possible (national-scale)
+     
+# Supplement
+
+Online application.
+
