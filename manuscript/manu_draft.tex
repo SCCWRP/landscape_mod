@@ -191,43 +191,55 @@ fresh water during their life history (J. Howard and Revenga
 \protect\hyperlink{ref-Howard15}{2015}). Approximately 30\% of streams
 in California are perennial with the remaining as intermittent or
 ephemeral for portions of the year. Much of California is publicly owned
-and is used heavily for recreation. A large portion of the central part
-of the state is agricultural (i.e., Central Valley), whereas dense areas
-of urban development are in the southwest (i.e., Los Angeles and San
-Diego) and central (San Francisco Bay area) coast areas. Developed lands
-increased in California by 38\% from 1973 to 2000 (Sleeter et al.
-\protect\hyperlink{ref-Sleeter11}{2011}).
+and is used heavily for recreation. A large portion of the central
+region of the state is agricultural (i.e., Central Valley), whereas
+dense areas of urban development are in the southwest (i.e., Los Angeles
+and San Diego) and central (San Francisco Bay area) coast areas.
+Developed lands increased in California by 38\% from 1973 to 2000
+(Sleeter et al. \protect\hyperlink{ref-Sleeter11}{2011}).
 
-\begin{itemize}
-\item
-  Streamcat database used to quantify watershed land use at all sites
-  (Hill et al. \protect\hyperlink{ref-Hill16}{2016})
-\item
-  Streamcat data linked to \ac{nhd} (USGS (US Geological Survey)
-  \protect\hyperlink{ref-USGS14}{2014}), reach as individual unit for
-  model output
-\end{itemize}
+Stream data from the \ac{nhd} (USGS (US Geological Survey)
+\protect\hyperlink{ref-USGS14}{2014}) were used to identify reaches in
+California for modelling biological integrity. The \ac{nhd} is a surface
+water framework that maps drainage networks and associated features
+(e.g., streams, lakes, canals, etc.) in the United States. Stream flow
+lines in the \ac{nhd} are developed from flow accumulation models that
+estimate location of a stream given slope and elevation changes from
+existing elevation datasets. As such, flow lines in California represent
+both perennial, intermittent, and ephemeral streams that have wide
+variation in observed flow throughout the year. Stream reaches
+designated in the \ac{nhd} were used as the discrete spatial unit for
+modelling biological integrity. A reach is defined as a continuous piece
+of surface water with similar hydrologic characteristics (USGS (US
+Geological Survey) \protect\hyperlink{ref-USGS14}{2014}). Hydrography
+data were combined with landscape metrics available from the StreamCat
+Dataset (Hill et al. \protect\hyperlink{ref-Hill16}{2016}) to estimate
+land use at the catchment (nearby landscape flowing directly into a
+stream) and the entire upstream watershed for each reach. The StreamCat
+Dataset was developed specifically for the \ac{nhd} to leverage the
+topology of stream connections to estimate cumulative landscape metrics
+of all reaches.
 
 The \ac{csci} (Ode et al. \protect\hyperlink{ref-Ode16}{2016}; Mazor et
 al. \protect\hyperlink{ref-Mazor16}{2016}) was used as a measure of
-biological condition to assess site performance relative to reach
-classification. Benthic macroinvertebrate data used to calculate
-\ac{csci} scores were collected at nearly 4800 sites between 2000 and
-2014. Field data were collected during baseflow conditions typically
-between May and July following methods in Ode
-(\protect\hyperlink{ref-Ode07}{2007}). The \ac{csci} is a predictive
-index of stream health that compares the observed taxa and metrics at a
-site to those expected under reference conditions. Expected conditions
-at a site are based on models that estimate the likely macroinvertebrate
-community in relation to factors that naturally influence biology, e.g.,
-watershed size, elevation, climate, etc. The \ac{csci} score at a site
-is based on an observed-to-expected ratio of taxa and a \ac{pmmi}
-composed of six individual metrics that describe the structure and
-function of the macroinvertebrate community. The index score at a site
-can vary from 0 to 1.4, with higher values indicating an observed
-community with less deviation from reference conditions. Because the
-index was developed to minimize the influence of natural gradients, the
-index scores have consistent meaning across the state (Reynoldson et al.
+biological condition in California streams. Benthic macroinvertebrate
+data used to calculate \ac{csci} scores were collected at nearly 3400
+sites (6270 with repeat visits) between 2000 and 2016. Field data were
+collected during baseflow conditions typically between May and July
+following methods in Ode (\protect\hyperlink{ref-Ode07}{2007}). The
+\ac{csci} is a predictive index of stream health that compares the
+observed taxa and metrics at a site to those expected under reference
+conditions. Expected conditions at a site are based on models that
+estimate the likely macroinvertebrate community in relation to factors
+that naturally influence biology, e.g., watershed size, elevation,
+climate, etc. The \ac{csci} score at a site is based on an
+observed-to-expected ratio of taxa and a \ac{pmmi} composed of six
+individual metrics that describe the structure and function of the
+macroinvertebrate community. The index score at a site can vary from 0
+to 1.4, with higher values indicating an observed community with less
+deviation from reference conditions. Because the index was developed to
+minimize the influence of natural gradients, the index scores have
+consistent meaning across the state (Reynoldson et al.
 \protect\hyperlink{ref-Reynoldson97}{1997}). A threshold score based on
 a selected lower percentile of scores (e.g., 10\%) at all reference
 sites is used to define nominally low and high scoring sites.
@@ -546,7 +558,8 @@ performance, selected examples
   \tightlist
   \item
     Field-based methods to identify modified channels vs.~landscape
-    modelling
+    modelling (({\textbf{???}}) as alternative example of landscape
+    modelling)
   \item
     Related directly to biological condition and regulatory standards
   \item
