@@ -19,6 +19,9 @@ knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F)
 library(tidyverse)
 library(Hmisc)
 library(Jabbrev)
+library(gridExtra)
+library(sf)
+library(maptools)
 
 # functions
 source('../R/funcs.R')
@@ -29,6 +32,8 @@ bib_scrp('manu_draft.Rmd', 'refs.bib')
  # data
 load(file = '../data/typetab.RData')
 load(file = '../data/csci_raw.RData')
+load(file = '../data/ludat.RData')
+load(file = '../data/calishp.RData')
 ```
 
 # Abstract 
@@ -50,6 +55,38 @@ Management decisions to restore or maintain aquatic resources are greatly improv
 ## Study area and data sources
 
 Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate.  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
+
+```{r fig.height = 6, fig.width = 8, fig.cap = 'test'}
+calishp <- calishp %>% 
+  as('Spatial') %>% 
+  fortify
+
+lucol <- RColorBrewer::brewer.pal(9, 'RdYlGn')[c(7, 5, 1)]
+
+toplo <- ludat %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  mutate(id = factor(id, levels = c(1, 2, 3), labels = c('Open, mixed', 'Agriculture', 'Developed'))) %>% 
+  rename(`Land\nuse` = id)
+
+p1 <- ggplot() + 
+  geom_polygon(data = calishp, aes(x = long, y = lat, group = group), fill = NA, colour = NA) + 
+  geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land\nuse`, group = group)) + 
+  coord_map() + 
+  scale_fill_manual(values = lucol) +
+  theme_void(base_family = 'serif') + 
+  theme(legend.position = 'top')
+
+p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
+  scale_colour_gradientn(colours = c('#d7191c', '#abd9e9', '#2c7bb6')) +
+  geom_polygon(data = calishp, aes(x = long, y = lat, group = group), fill = NA, colour = 'grey') +
+  geom_point() +
+  coord_map() + 
+  theme_void(base_family = 'serif') + 
+  theme(legend.position = 'top')
+
+grid.arrange(p1, p2, ncol = 2)
+```
 
 Stream data from the \ac{nhd} [@USGS14] were used to identify reaches in California for modelling biological integrity. The \ac{nhd} is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the \ac{nhd} are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the \ac{nhd} were used as the discrete spatial unit for modelling biological integrity.  A reach is defined as a continuous piece of surface water with similar hydrologic characteristics [@USGS14].  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the \ac{nhd} to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
 
