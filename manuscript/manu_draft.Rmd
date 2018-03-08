@@ -1,5 +1,5 @@
 ---
-title: "Quantifying biological constraints on stream integrity for classification and management priorization"
+title: "Achievable management goals using expectations of stream biological integrity relative to landscape constraints"
 output: 
   pdf_document:
     keep_tex: true
@@ -21,15 +21,19 @@ library(Hmisc)
 library(Jabbrev)
 
 # functions
-fls <- list.files('../R', full.names = T)
-sapply(fls, source)
+source('../R/funcs.R')
 
 # extract bib entries from online
 bib_scrp('manu_draft.Rmd', 'refs.bib')
 
-# data
+ # data
 load(file = '../data/typetab.RData')
+load(file = '../data/csci_raw.RData')
 ```
+
+# Abstract 
+
+Management decisions to restore or maintain aquatic resources are greatly informed by assessment tools that use biological indicators as surrogates of environmental condition.  A general goal is that a resource should support biota that exhibit the full range of elements and processes that are expected relative to a region’s natural environment.  This goal is impractical in many environments where large scale drivers on the landscape impose constraints on the expected upper limit of biological integrity.  We demonstrate application of a statewide landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity.  The model provides a context for what is likely to be achieved at a given site independent of an actual bioassessment score.  With this approach, sites can be ranked as over- or under-performing relative to an expectation that is appropriate for the landscape. Using a visualization tool based on this model, a local stakeholder group from the San Gabriel River watershed prioritized areas for different management actions.  The application provided context to identify a few under-performing regions (in both developed and undeveloped areas) from a dauntingly large number of low-scoring sites.  The application was also used to identify regions where protective measures or additional monitoring were needed.  Landscape models and interactive tools that effectively deliver an assessment context can help set achievable management goals.
 
 # Introduction
 
@@ -112,9 +116,11 @@ Each site type was used to define a priority as a demonstration of how results f
 
 *Figure* App screenshot
 
-## Sensitivity analyses and unclassified reaches
+## Sensitivity analyses
 
 Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model and the \ac{csci} threshold for defining nominally low or high scores.  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5\textsuperscript{th} and 95\textsuperscript{th} percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25\textsuperscript{th} to 75\textsuperscript{th} percentile) to assume less certainty in the model is provided.  The \ac{csci} threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10\textsuperscript{th} percentile of scores at all reference (non-impacted) sites that were used to calibrate the \ac{csci} index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the \ac{csci} threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
+
+## Unclassified reaches
 
 Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate \ac{csci} predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for 'typically' urban and agriculture reaches that relies on the range of expectations for reaches with similar land use by region.
 
@@ -163,7 +169,8 @@ Finally, some stream reaches were unclassifed following application of the lands
      * Targeted management for desired outcomes
 
 * What is useful about our approach compared to alternatives?
-     * Field-based methods to identify modified channels vs. landscape modelling (@Hill17 as alternative example of landscape modelling)
+     * Field-based methods to identify modified channels vs. landscape modelling
+     * [@Hill17] as alternative example of landscape modelling
      * Related directly to biological condition and regulatory standards
      * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
 
