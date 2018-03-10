@@ -14,6 +14,28 @@ prj <- geo_wgs84
 csci_raw <- read_csv('data/raw/csci_raw.txt')
 save(csci_raw, file = 'data/csci_raw.RData', compress = 'xz')
 
+## 
+# counties, for plots
+calicnt <- readOGR('S:/Spatial_Data/CA_Counties/cnty24k97.shp') %>%
+  spTransform(prj) %>% 
+  st_as_sf
+save(calicnt, file = 'data/calicnt.RData', compress = 'xz')
+
+##
+# state outline, used to extract gap lu
+calishp <- readOGR('S:/Spatial_Data/States/California.shp') %>%
+  spTransform(prj) %>% 
+  st_as_sf
+save(calishp, file = 'data/calishp.RData', compress = 'xz')
+
+##
+# psa 6
+calipsa <- readOGR('S:/Spatial_Data/RCMP_needs editting/Inputs/PSA6_090111/PSA6_2011.shp') %>% 
+  spTransform(prj) %>% 
+  st_as_sf
+save(calipsa, file = 'data/calipsa.RData', compress = 'xz')
+
+
 ##
 # land use data from gap
 # https://gapanalysis.usgs.gov/gaplandcover/data/download/
@@ -31,17 +53,12 @@ gapland <- raster('Z:/MarcusBeck/GIS/gaplf2011lc_v30_CA/gaplf2011lc_v30_ca.tif')
 rcmat <- c(-1, 554, 1, 554, 557, 2, 557, 579, 1, 579, 584, 3) %>%
   matrix(., ncol = 3, byrow = T)
 
-# cali poly, use to extract
-calishp <- readOGR('S:/Spatial_Data/States/California.shp') %>%
-  spTransform(prj) %>% 
-  st_as_sf
-save(calishp, file = 'data/calishp.RData', compress = 'xz')
-
 # get cali shapefile in format for clip
 data(calishp)
+toprj <- crs(gapland) %>% 
+  as.character
 calishp <- calishp %>% 
-  as('Spatial') %>% 
-  spTransform(crs(gapland))
+  st_transform(toprj)
 
 # reclassify, aggregate, vectorize, clip, simplify, dissolve by feature, transform
 # takes a minute
@@ -49,6 +66,7 @@ ludat <- gapland %>%
   reclassify(rcmat) %>% 
   aggregate(fact = 10, fun = modal) %>% 
   rasterToPolygons(dissolve = T) %>% 
+  st_as_sf %>% 
   st_intersection(calishp) %>% 
   ms_simplify(as(., 'Spatial')) %>% 
   st_as_af %>% 

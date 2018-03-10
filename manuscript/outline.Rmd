@@ -1,5 +1,5 @@
 ---
-title: "Quantifying biological constraints on stream integrity for classification and management priorization"
+title: "Prioritizing management goals for stream biological integrity within the context of landscape constraints"
 output: 
   word_document:
     reference_docx: my_styles.docx
