@@ -14,27 +14,12 @@ prj <- geo_wgs84
 csci_raw <- read_csv('data/raw/csci_raw.txt')
 save(csci_raw, file = 'data/csci_raw.RData', compress = 'xz')
 
-## 
-# counties, for plots
-calicnt <- readOGR('S:/Spatial_Data/CA_Counties/cnty24k97.shp') %>%
-  spTransform(prj) %>% 
-  st_as_sf
-save(calicnt, file = 'data/calicnt.RData', compress = 'xz')
-
-##
-# state outline, used to extract gap lu
-calishp <- readOGR('S:/Spatial_Data/States/California.shp') %>%
-  spTransform(prj) %>% 
-  st_as_sf
-save(calishp, file = 'data/calishp.RData', compress = 'xz')
-
 ##
 # psa 6
 calipsa <- readOGR('S:/Spatial_Data/RCMP_needs editting/Inputs/PSA6_090111/PSA6_2011.shp') %>% 
   spTransform(prj) %>% 
   st_as_sf
 save(calipsa, file = 'data/calipsa.RData', compress = 'xz')
-
 
 ##
 # land use data from gap
