@@ -22,6 +22,41 @@ calipsa <- readOGR('S:/Spatial_Data/RCMP_needs editting/Inputs/PSA6_090111/PSA6_
 save(calipsa, file = 'data/calipsa.RData', compress = 'xz')
 
 ##
+# psa labels by centroid, deserts modoc has two
+psalab <- calipsa %>% 
+  as('Spatial') %>% 
+  rmapshaper::ms_explode() %>% 
+  st_as_sf %>% 
+  mutate(
+    AREA = st_area(.), 
+    AREA = gsub('\\sm\\^2$', '', AREA), 
+    AREA = as.numeric(AREA)
+  ) %>% 
+  group_by(PSA6) %>% 
+  top_n(2, AREA) %>% 
+  ungroup %>% 
+  filter(!(PSA6 == 'South Coast' & AREA < 1e10)) %>% 
+  filter(!(PSA6 == 'Chaparral' & AREA < 1e10)) %>% 
+  st_centroid
+
+psalab <- psalab %>% 
+  st_coordinates %>% 
+  data.frame %>% 
+  rename(
+    long = X, 
+    lat = Y
+  ) %>% 
+  mutate(
+    Region = psalab$PSA6,
+    Region = factor(Region, 
+      levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+      labels = c('CV', 'C', 'DM', 'NC', 'SN', 'SC')
+    )
+  )
+
+save(psalab, file = 'data/psalab.RData', compress = 'xz')
+
+##
 # land use data from gap
 # https://gapanalysis.usgs.gov/gaplandcover/data/download/
 

@@ -24,6 +24,7 @@ library(sf)
 library(maptools)
 library(maps)
 library(grid)
+library(ggrepel)
 
 # functions
 source('../R/funcs.R')
@@ -36,6 +37,7 @@ load(file = '../data/typetab.RData')
 load(file = '../data/csci_raw.RData')
 load(file = '../data/ludat.RData')
 load(file = '../data/calipsa.RData')
+load(file = '../data/psalab.RData')
 ```
 
 # Abstract 
@@ -63,7 +65,7 @@ Many streams are failing to achieve desired biological condition and require man
 
 ## Study area and data sources
 
-```{r calimap, fig.height = 4.5, fig.width = 10, fig.cap = 'Regions (left), land use (middle), and distribution of stream \\ac{csci} scores (right) in California.  Grey lines are county boundadries. Regions are CV: Central Valley, C: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream \\ac{csci} scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, C: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 lucol <- RColorBrewer::brewer.pal(9, 'RdYlGn')[c(7, 5, 1)]
 
@@ -72,9 +74,6 @@ country <- map_data('state')
 
 # state base
 calista <- map_data('state', region = 'california')
-
-# county base
-calicnt <- map_data('county', region = 'california')
 
 # psa data fortified
 psadat <- calipsa %>% 
@@ -87,51 +86,50 @@ psadat <- calipsa %>%
     levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
     labels = c('CV', 'C', 'DM', 'NC', 'SN', 'SC')
     ))
-toplo1 <- calipsa %>% 
+psafrt <- calipsa %>% 
   dplyr::select(-PSA_REGION, -AREA, -PERIMETER, -PSA8) %>% 
   as('Spatial') %>% 
   fortify %>% 
   left_join(psadat, by = 'id')
 
+# psalab
+psalab <- psalab %>% 
+  mutate(
+    Region = as.character(Region),
+    Region = paste0('italic(', Region, ')')
+    )
+
 # land use data fortified  
-toplo2 <- ludat %>% 
+toplo <- ludat %>% 
   as('Spatial') %>% 
   fortify %>% 
-  mutate(id = factor(id, levels = c(1, 2, 3), labels = c('Open, mixed', 'Agriculture', 'Developed'))) %>% 
+  mutate(id = factor(id, levels = c(1, 2, 3), labels = c('Open, mixed', 'Agriculture', 'Urban'))) %>% 
   rename(`Land use` = id)
 
-# psa plot
 p1 <- ggplot() + 
-  geom_polygon(data = toplo1, aes(x = long, y = lat, fill = Region, group = group)) + 
-  geom_polygon(data = calicnt, aes(x = long, y = lat, group = group), fill = NA, colour = 'grey') + 
+  geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land use`, group = group)) + 
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.1) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
-  coord_map() + 
-  # scale_fill_manual(values = lucol) +
-  theme_void(base_family = 'serif') + 
-  theme(
-    legend.position = 'top'
-    ) +
-  ggsn::scalebar(location = 'bottomleft', y.min = 33, y.max = 35, x.min = -124, x.max = -120, 
-           dist = 200, st.dist=.2, st.size = 4, height = 0.1, dd2km = T, model = 'WGS84')
-
-p2 <- ggplot() + 
-  geom_polygon(data = toplo2, aes(x = long, y = lat, fill = `Land use`, group = group)) + 
-  geom_polygon(data = calicnt, aes(x = long, y = lat, group = group), fill = NA, colour = 'grey') +
-  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
+  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 5) + 
   coord_map() + 
   scale_fill_manual(values = lucol) +
   theme_void(base_family = 'serif') + 
-  theme(legend.position = 'top') + 
-  guides(fill = guide_legend(ncol = 2))
+  theme(
+    legend.position = 'top', 
+    ) + 
+  guides(fill = guide_legend(ncol = 3)) +
+  ggsn::scalebar(location = 'bottomleft', y.min = 33, y.max = 35, x.min = -124, x.max = -120, 
+           dist = 150, st.dist=.15, st.size = 3, height = 0.1, dd2km = T, model = 'WGS84')
 
-p3 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
+p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   scale_colour_gradientn(colours = c('#d7191c', '#abd9e9', '#2c7bb6')) +
-  geom_polygon(data = calicnt, aes(x = long, y = lat, group = group), fill = NA, colour = 'grey') +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
   geom_point(size = 1.5) +
   coord_map() + 
   theme_void(base_family = 'serif') + 
-  theme(legend.position = 'top')
+  theme(legend.position = 'top') + 
+  guides(colour = guide_colourbar(barheight = 0.5, barwidth = 8))
 
 pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   geom_polygon( fill = NA, color = "black", size = 0.3) +
@@ -140,14 +138,12 @@ pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   theme_void() 
   
 grid.newpage()
-v1 <- viewport(width = 1, height = 1, x = 0.22, y = 0.5) 
-v2 <- viewport(width = 1, height = 1, x = 0.5, y = 0.5) 
-v3 <- viewport(width = 1, height = 1, x = 0.78, y = 0.5) 
-v4 <- viewport(width = 0.2, height = 0.2, x = 0.9, y = 0.65)
+v1 <- viewport(width = 1, height = 1, x = 0.3, y = 0.5) 
+v2 <- viewport(width = 1, height = 1, x = 0.7, y = 0.5) 
+v3 <- viewport(width = 0.25, height = 0.25, x = 0.85, y = 0.65)
 print(p1, vp = v1) 
 print(p2, vp = v2)
-print(p3, vp = v3)
-print(pinset, vp = v4)
+print(pinset, vp = v3)
 ```
 
 Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (\cref{fig:calimap}).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
