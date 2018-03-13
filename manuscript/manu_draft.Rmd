@@ -44,13 +44,20 @@ Many streams are failing to achieve desired biological condition and require man
 
 # Introduction
 
-* Degraded biological condition in streams can occur from individual or multiple stressors acting at different scales [@Novotny05;@Townsend08;@Leps15]. Identifying and mitigating causes of poor condition requires an understanding of how stressors propogate across space and time.  Incomplete knowledge on drivers of change or high level of uncertainty in how biology is linked to drivers can lead to ineffective management actions. Placing bounds on effects of known drivers of change can reduce expenses and increase assurance of outcomes for targeted management (e.g., varying costs and challenges of urban stream restoration [@Kenney12;@Shoredits13]) 
+* Degraded biological condition in streams can occur from individual or multiple stressors acting at different scales [@Novotny05;@Townsend08;@Leps15].
 
-* Effective stream management can depend on identification and prioritization of sites where activities are expected to have desired outcomes. This requires an understanding of how stressors affect biological integrity to place bounds on reasonable expectations for what is likely to be a possible outcome of a management action.  This requires identifying biological constraints or limits on the potential range of biological conditions. Identifying an appropriate context for observed conditions can be used to prioritize.  Context can be defined by models, expert knowledge, and/or defined value sets.
+*	In many urban and agricultural areas the majority of stream miles are not healthy and in need of some level of management (cite SWAMP, SMC, NRSA)
 
-* We don't have good constraint tools to develop a context of expectation of what's possible at a site.  This can help prioritize locations where management efforts will or will not have the intended outcomes. Biological filters act at different scales [@Poff97] and we can use this information to describe an expectation for prioritization that is scale-specific.  Landscape-level constraints are particularly relevant for macroinvertebrate communities in streams [@Sponseller01]
+* Unfortunately, there are not sufficient resources to restore all streams to reference conditions, nor is it practical (e.g., varying costs and challenges of urban stream restoration [@Kenney12;@Shoredits13])
 
-* The goal of this study is to demonstrate application of a landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity. The model provides an estimate of context for biological condition that provides an expectation of what is likely to be achieved at a given site relative to large-scale drivers of stream health. The model was developed and applied to all stream reaches in California.  A case study is used to demonstrate how the model can be used to classify and prioritize using guidance from a regional stakeholder group. Active stakeholder involvement was critical in applying the landscape models to define a framework for decision-making because priorities varied with management objectives.
+* Need a way to comprehensively evaluate streams across large spatial scales for “management potential”.  Biological filters act at different scales [@Poff97] and we can use this information to describe an expectation for prioritization that is scale-specific. This allows establishment of reasonable expectations and prioritization of limited resources most effectively. Landscape-level constraints are particularly relevant for macroinvertebrate communities in streams [@Sponseller01]
+
+* Once these large spatial scales are understood, sites can be prioritized by local managers to ensure resources are wisely allocated. 
+     
+* Goal: demonstrate application of a landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity. 
+     * Build on knowledge and relationships developed through existing monitoring programs and apply that in a predictive manner across entire landscapes to inform decisions
+     * Statewide application of the model -  The model provides an estimate of context for biological condition that provides an expectation of what is likely to be achieved at a given site relative to large-scale drivers of stream health. The model was developed and applied to all stream reaches in California.
+     * A case study is used to demonstrate how the model can be used to classify and prioritize by watershed using guidance from a regional stakeholder group. Specific questions that were addressed through the case study. Active stakeholder involvement was critical in applying the landscape models to define a framework for decision-making because priorities varied with management objectives.
 
 # Methods
 
@@ -220,7 +227,7 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 # Results
 
-## State-wide patterns
+### State-wide patterns
 
 * Where does the model perform well, how does performance vary with validation and calibration datasets.
 
@@ -228,7 +235,7 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Figure* Statewide map. 
 
-## Case study
+### Case study
 
 * Extent, classification, prioritization
 
@@ -238,15 +245,15 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Tables* Priority table(s) from stakeholder group
 
-## Sensitivity analysis
+### Sensitivity analysis
 
 * Statewide results - reach classification, site performance
 
-* SGR application - where do priorities change? Do overall patterns remain?
+* SGR application - where do priorities change related to which variables the model is most sensitive to? Do overall patterns remain?
 
 *Table* Sensitivity results
 
-## Unclassified reaches
+### Unclassified reaches
 
 * Extent of typical ag, typical urban statewide
 
@@ -259,12 +266,13 @@ Finally, some stream reaches were unclassifed following application of the lands
 # Discussion
 
 * What is the value of identifying constrained channels?
+     * Identification of constrained channels allows us to determine how best to spend limited resources and to focus on reaches where we have a decent chance of improving the biological condition.
      * Use of more data to develop context of assessment
      * Targeted management for desired outcomes
+     * Informing decisions about future monitoring (i.e., prioritize future monitoring locations)
 
 * What is useful about our approach compared to alternatives?
-     * Field-based methods to identify modified channels vs. landscape modelling
-     * [@Hill17] as alternative example of landscape modelling
+     * Field-based methods to identify constrained channels vs. landscape modelling
      * Related directly to biological condition and regulatory standards
      * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
 
@@ -279,8 +287,10 @@ Finally, some stream reaches were unclassifed following application of the lands
      * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
 
 * Future work
+     * Ability to link with other assessment tools besides CSCI
      * Link with engineered channels study
-     * Priorities statewide, application to larger regions possible (national-scale)
+     * Priorities statewide
+     * Application to larger regions possible (national-scale), or how it can be applied in other areas
      
 # Supplement
 

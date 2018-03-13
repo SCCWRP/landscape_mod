@@ -11,19 +11,18 @@ link-citations: true
 
 # Introduction
 
-* Effective stream management can depend on identification and prioritization of locations where activities are expected to have desired outcomes. 
-     * Difficulty defining priorities one site at a time (or setting priorities without data)
-     * Placing bounds on known drivers of change can reduce uncertainty in decisions
-     * Understanding effects of landscape on stream integrity is particularly relevant for targeted action
-     
-* We don't have good tools to develop a context of expectation of what's possible at a site.
-     * This can help prioritize management actions.
-     * Context can be defined by models, expert knowledge, and/or defined values
-     * Stakeholder involvement is critical in this process
+*	In many urban and agricultural areas the majority of stream miles are not healthy and in need of some level of management (cite SWAMP, SMC, NRSA)
+
+* Unfortunately, there are not sufficient resources to restore all streams to reference conditions, nor is it practical
+
+* Need a way to comprehensively evaluate streams across large spatial scales for “management potential”.  This allows establishment of reasonable expectations and prioritization of limited resources most effectively
+
+* Once these large spatial scales are understood, sites can be prioritized by local managers to ensure resources are wisely allocated. 
      
 * Goal: demonstrate application of a landscape model to classify and prioritize stream monitoring sites using estimated constraints on biological integrity. 
+     * Build on knowledge and relationships developed through existing monitoring programs and apply that in a predictive manner across entire landscapes to inform decisions
      * Statewide application of the model
-     * A case study is used to demonstrate how the model can be used to classify and prioritize by watershed using guidance from a regional stakeholder group.
+     * A case study is used to demonstrate how the model can be used to classify and prioritize by watershed using guidance from a regional stakeholder group. Specific questions that were addressed through the case study.
      
 # Methods
 
@@ -61,21 +60,16 @@ link-citations: true
 
 ### Reach classification, site performance, and prioritization
 
-* Summary of framework for identifying site priorities for management actions
-     * Reach classifciation - all reaches
-     * Site performance - all sites
-     * Management priorities - by site types, extrapolated to all sites
-
 * Details about classification framework for stream reaches
-     * Range of CSCI expectations at a reach relative to a chosen CSCI threshold
+     * Range of CSCI expectations at a reach relative to a chosen CSCI threshold (i.e., as a basis for defining reach classification)
      * Likely constrained, possibly constrained, possibly unconstrained, likely unconstrained
 
 * Details about identifying site performance
      * Sites with observed scores above the upper limit of the reach expectation as "over-performing" and sites below the lower limit as "under-performing", within range as "expected"
-     * Identified for each of four reach classications
+     * Identified for each of four reach classifications
      * Further identified based on location to CSCI threshold to define "types" to prioritize
 
-* Stakeholder process to assign management priorities by site types
+* Stakeholder process to assign management priorities by site types - observed scores in relation to stream class, performance, and CSCI threshol defines how a site is prioritized, also based on management interest (monitoring, permitting, etc.)
 
 *Figure* flowchart for classification and performance identification
 
@@ -123,7 +117,7 @@ link-citations: true
 
 * Statewide results - reach classification, site performance
 
-* SGR application - where do priorities change? Do overall patterns remain?
+* SGR application - where do priorities change related to which variables the model is most sensitive to? Do overall patterns remain?
 
 *Table* Sensitivity results
 
@@ -140,11 +134,13 @@ link-citations: true
 # Discussion
 
 * What is the value of identifying constrained channels?
+     * Identification of constrained channels allows us to determine how best to spend limited resources and to focus on reaches where we have a decent chance of improving the biological condition.
      * Use of more data to develop context of assessment
      * Targeted management for desired outcomes
+     * Informing decisions about future monitoring (i.e., prioritize future monitoring locations)
 
 * What is useful about our approach compared to alternatives?
-     * Field-based methods to identify modified channels vs. landscape modelling
+     * Field-based methods to identify constrained channels vs. landscape modelling
      * Related directly to biological condition and regulatory standards
      * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
 
@@ -159,8 +155,10 @@ link-citations: true
      * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
 
 * Future work
+     * Ability to link with other assessment tools besides CSCI
      * Link with engineered channels study
-     * Priorities statewide, application to larger regions possible (national-scale)
+     * Priorities statewide
+     * Application to larger regions possible (national-scale), or how it can be applied in other areas
      
 # Supplement
 
