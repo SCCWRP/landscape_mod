@@ -65,7 +65,7 @@ Many streams are failing to achieve desired biological condition and require man
 
 ## Study area and data sources
 
-```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream \\ac{csci} scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, C: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream \\ac{csci} scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, Ch: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 lucol <- RColorBrewer::brewer.pal(9, 'RdYlGn')[c(7, 5, 1)]
 
@@ -84,7 +84,7 @@ psadat <- calipsa %>%
   rename(PSA = PSA6) %>% 
   mutate(Region = factor(PSA, 
     levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
-    labels = c('CV', 'C', 'DM', 'NC', 'SN', 'SC')
+    labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
     ))
 psafrt <- calipsa %>% 
   dplyr::select(-PSA_REGION, -AREA, -PERIMETER, -PSA8) %>% 
@@ -96,7 +96,7 @@ psafrt <- calipsa %>%
 psalab <- psalab %>% 
   mutate(
     Region = as.character(Region),
-    Region = paste0('italic(', Region, ')')
+    Region = paste0('bolditalic(', Region, ')')
     )
 
 # land use data fortified  
@@ -109,13 +109,25 @@ toplo <- ludat %>%
 p1 <- ggplot() + 
   geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land use`, group = group)) + 
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.1) +
-  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
-  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 5) + 
+  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5))
+
+theta <- seq(pi/8, 2*pi, length.out=16)
+xo <- diff(range(psalab$long))/200
+yo <- diff(range(psalab$lat))/200
+for(i in theta) {
+  p1 <- p1 + geom_text_repel(data = psalab, 
+    aes_q(x = bquote(long +.(cos(i)*xo)),
+          y = bquote(lat +.(sin(i)*yo)),
+          label = ~Region), point.padding = NA, parse = T, family = 'serif', size = 5, colour = 'black')
+    
+}
+p1 <- p1 + 
+  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 5, colour = 'white') + 
   coord_map() + 
   scale_fill_manual(values = lucol) +
   theme_void(base_family = 'serif') + 
   theme(
-    legend.position = 'top', 
+    legend.position = 'top'
     ) + 
   guides(fill = guide_legend(ncol = 3)) +
   ggsn::scalebar(location = 'bottomleft', y.min = 33, y.max = 35, x.min = -124, x.max = -120, 
@@ -123,9 +135,9 @@ p1 <- ggplot() +
 
 p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   scale_colour_gradientn(colours = c('#d7191c', '#abd9e9', '#2c7bb6')) +
+  geom_point(size = 1.25) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
-  geom_point(size = 1.5) +
   coord_map() + 
   theme_void(base_family = 'serif') + 
   theme(legend.position = 'top') + 
