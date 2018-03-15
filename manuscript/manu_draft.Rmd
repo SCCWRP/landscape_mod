@@ -111,6 +111,7 @@ p1 <- ggplot() +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.1) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5))
 
+# text with outline magic
 theta <- seq(pi/8, 2*pi, length.out=16)
 xo <- diff(range(psalab$long))/200
 yo <- diff(range(psalab$lat))/200
