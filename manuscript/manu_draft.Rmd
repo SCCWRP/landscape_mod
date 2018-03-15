@@ -25,6 +25,10 @@ library(maptools)
 library(maps)
 library(grid)
 library(ggrepel)
+library(RColorBrewer)
+library(ggridges)
+library(scales)
+library(quantregForest)
 
 # functions
 source('../R/funcs.R')
@@ -38,6 +42,7 @@ load(file = '../data/csci_raw.RData')
 load(file = '../data/ludat.RData')
 load(file = '../data/calipsa.RData')
 load(file = '../data/psalab.RData')
+load(file = '../data/rf_full.RData')
 ```
 
 # Abstract 
@@ -184,6 +189,104 @@ The \ac{sgr} watershed contains a diverse group of stakeholders from local munic
 ## Reach classification, site performance, and prioritization
 
 A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected \ac{csci} scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed \ac{csci} scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health. 
+
+```{r ridges, fig.height = 6, fig.width = 9, fig.cap = 'test'}
+##
+# plot data
+
+# plot data globals
+sel <- 10
+
+# plot data
+set.seed(12345)
+rnd <- predict(rf_full, what = function(x) sample(x, 100, replace = T)) %>%
+  data.frame %>%
+  mutate(id = 1:nrow(.)) %>%
+  .[sample(1:nrow(.), sel),] %>%
+  gather('var', 'val', -id) %>%
+  group_by(id) %>%
+  mutate(medv = median(val)) %>%
+  ungroup %>%
+  arrange(medv) %>% 
+  mutate(
+    id = factor(id, levels = unique(id), labels = rev(1:sel)),
+    id = as.character(id)
+    ) 
+  
+# stream class labels, have to do manually
+exp <- data.frame(
+  id = as.character(1:sel), 
+  exp = c('lu', 'pu', 'pu', 'pu', 'pu', 'pu', 'pc', 'lc', 'lc', 'lc'), 
+  stringsAsFactors = F
+  ) %>% 
+  mutate(
+    exp = factor(exp, 
+                 levels = c('lu', 'pu', 'pc', 'lc'),
+                 labels = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'))
+  )
+
+# site scrs
+scr <- matrix(runif(40, 0, 1.4), ncol = 4) %>%  
+  data.frame %>% 
+  mutate(id = as.character(1:nrow(.))) %>% 
+  gather('rep', 'scr', -id) %>% 
+  select(-rep)
+
+
+rnd <- rnd %>% 
+  left_join(exp, by = 'id') %>%
+  left_join(scr, by = 'id') %>% 
+  mutate(id = factor(id, levels = rev(1:sel)))
+
+##
+# plots
+
+# stream class colors
+exp_col <- RColorBrewer::brewer.pal(9, 'Paired')[c(6, 2, 5, 1)] %>% 
+  alpha(., 0.8)  
+
+# plot globals
+min_ht <- 0.4
+ht <- 2
+bnd <- 0.11
+
+# base 
+pbase<- ggplot(rnd, aes(x = val, y = id)) + 
+  geom_density_ridges(bandwidth = 0.1, alpha = 0.3, colour = NA, fill = 'grey', scale = ht) +
+  scale_x_continuous(limits = c(0, 1.4)) + 
+  theme_minimal(base_family = 'serif') + 
+  theme(
+    legend.position = 'none', 
+    axis.title.x = element_blank(), 
+    axis.title.y = element_blank()
+    )
+
+p1 <- pbase +
+  geom_density_ridges_gradient(aes(fill = ..x..), bandwidth = bnd, rel_min_height = 0.001, colour = 'black', scale = ht) +
+  scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
+  ggtitle('(a) Range of expected CSCI\nscores for stream reaches')
+
+p2 <- pbase + 
+  geom_density_ridges_gradient(aes(fill = ..x..), bandwidth = bnd, rel_min_height = min_ht, colour = 'black', scale = ht) + 
+  geom_vline(xintercept = 0.79, linetype = 'dashed') + 
+  scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) + 
+  ggtitle('(b) Expected scores with\nthreshold and cutoff')
+
+p3 <- pbase + 
+  geom_density_ridges(aes(fill = exp), bandwidth = 0.1, rel_min_height = min_ht, colour = 'black', scale = ht) +
+  geom_vline(xintercept = 0.79, linetype = 'dashed') + 
+  scale_fill_manual(values = exp_col) +
+  ggtitle('(c) Stream reach classifications')
+
+# p4 <- pbase + 
+#   geom_density_ridges(aes(fill = exp), bandwidth = 0.1, rel_min_height = min_ht, colour = 'black', scale = ht) +
+#   geom_point(aes(x = scr)) +
+#   geom_vline(xintercept = 0.79, linetype = 'dashed') + 
+#   scale_fill_manual(values = exp_col) +
+#   ggtitle('(c) Stream reach classifications')
+
+grid.arrange(p1, p2, p3, left = 'Stream reach', bottom = 'Expected CSCI scores', ncol = 3)
+```
 
 Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints.  Classifications were developed using the range of \ac{csci} expectations at a reach relative to a chosen threshold for the \ac{csci} to define nominally low or high scores.  The reach classification was based solely on the intersection of the \ac{csci} expectations at a reach with chosen \ac{csci} threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of \ac{csci} score expectations entirely below the thresholds were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that included the \ac{csci} thresholds were considered possibly constrained or possibly unconstrained, where the distinction was based on location of the median expectation of a reach relative to the threshold.  
 
