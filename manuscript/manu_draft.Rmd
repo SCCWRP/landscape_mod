@@ -1,10 +1,8 @@
 ---
 title: "Prioritizing management goals for stream biological integrity within the context of landscape constraints"
 output: 
-  pdf_document:
-    keep_tex: true
-    includes: 
-      in_header: head.tex
+  bookdown::word_document2:
+    reference_docx: my_styles.docx
 bibliography: refs.bib
 author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Phil Markle (pmarkle@lacsd.org), Joshua Westfall (jwestfall@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Eric D. Stein (erics@sccwrp.org)'
 urlcolor: blue
@@ -34,7 +32,7 @@ library(quantregForest)
 source('../R/funcs.R')
 
 # extract bib entries from online
-bib_scrp('manu_draft.Rmd', 'refs.bib')
+# bib_scrp('manu_draft.Rmd', 'refs.bib')
 
  # data
 load(file = '../data/typetab.RData')
@@ -164,7 +162,7 @@ print(p2, vp = v2)
 print(pinset, vp = v3)
 ```
 
-Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (\cref{fig:calimap}).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
+Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (\@ref(fig:calimap)).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
 
 Stream data from the \ac{nhd} [@USGS14] were used to identify reaches in California for modelling biological integrity. The \ac{nhd} is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the \ac{nhd} are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the \ac{nhd} were used as the discrete spatial unit for modelling biological integrity.  A reach is defined as a continuous piece of surface water with similar hydrologic characteristics [@USGS14].  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the \ac{nhd} to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
 
@@ -288,20 +286,20 @@ p3 <- pbase +
 grid.arrange(p1, p2, p3, left = 'Stream reach', bottom = 'Expected CSCI scores', ncol = 3)
 ```
 
-Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints.  Classifications were developed using the range of \ac{csci} expectations at a reach relative to a chosen threshold for the \ac{csci} to define nominally low or high scores.  The reach classification was based solely on the intersection of the \ac{csci} expectations at a reach with chosen \ac{csci} threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of \ac{csci} score expectations entirely below the thresholds were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that included the \ac{csci} thresholds were considered possibly constrained or possibly unconstrained, where the distinction was based on location of the median expectation of a reach relative to the threshold.  
+Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints (\@ref(fig:ridges)).  Classifications were developed using the range of \ac{csci} expectations at a reach relative to a chosen threshold for the \ac{csci} to define nominally low or high scores.  The reach classification was based solely on the intersection of the \ac{csci} expectations at a reach with chosen \ac{csci} threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of \ac{csci} score expectations entirely below the thresholds were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that included the \ac{csci} thresholds were considered possibly constrained or possibly unconstrained, where the distinction was based on location of the median expectation of a reach relative to the threshold.  
 
 \ac{csci} scores from biomonitoring data were used to define performance of a sample site relative to the stream reach classification. For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), the site performance was defined relative to the bounds of the expected \ac{csci} scores.  This provided a definition of site performance that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95\textsuperscript{th} percentile of expected scores) were considered "over-performing" and sites below the lower limit were "under-performing".  Sites with \ac{csci} scores within the range of expectations were as "expected".   
 
 *Figure* classification and performance
 
-Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (\cref{tab:typetab}).
+Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (Table \@ref(tab:typetab)).
 
-```{r, results = 'asis', eval = T}
+```{r typetab, tidy = F}
 # table content format
 totab <- typetab %>% 
   mutate(
     `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
-    `Observed score` = gsub('th', '\\\\textsuperscript{th}', `Observed score`), 
+    `Observed score` = gsub('th', '$^{th}$', `Observed score`), 
     `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('\\textbf{', `Reach expectation`, '}')), 
     Type = as.character(Type)
   ) %>% 
@@ -310,17 +308,18 @@ totab <- typetab %>%
 # table stuff
 cap.val <- 'Possible site types based on stream reach classification, site performance, and observed \\ac{csci} score. The observed score column describes where a \\ac{csci} score is observed relative to the lower and upper percentiles (e.g., 5\\textsuperscript{th} and 95\\textsuperscript{th}) of expected scores for a reach and the chosen \\ac{csci} threshold (e.g., 10\\textsuperscript{th} percentile of scores at reference sites or 0.79) for nominally low or high values.'
 
-# table
-cat(capture.output(
-  latex(
-  totab[, -1],
-  rowname = totab$`Reach expectation`,
-  rowlabel = 'Reach expectation', 
-  file = '',
-  caption = cap.val,
-  caption.loc = 'top',
-  label = 'tab:typetab'
-  ))[-1], sep = '\n') 
+# # table
+# cat(capture.output(
+#   latex(
+#   totab[, -1],
+#   rowname = totab$`Reach expectation`,
+#   rowlabel = 'Reach expectation', 
+#   file = '',
+#   caption = cap.val,
+#   caption.loc = 'top',
+#   label = 'tab:typetab'
+#   ))[-1], sep = '\n') 
+knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
 Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback. 
