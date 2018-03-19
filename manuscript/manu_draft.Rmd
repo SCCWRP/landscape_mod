@@ -11,7 +11,11 @@ link-citations: true
 
 ```{r setup, echo = F, warning = F, message = F, results = 'hide'}
 # figure path, chunk options
-knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, dev.args = list(family = 'serif'))
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%',
+  fig.process = function(x) {
+  x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+  if (file.rename(x, x2)) x2 else x
+  })
 
 # libraries
 library(tidyverse)
@@ -27,6 +31,7 @@ library(RColorBrewer)
 library(ggridges)
 library(scales)
 library(quantregForest)
+library(leaflet)
 
 # functions
 source('../R/funcs.R')
@@ -68,7 +73,7 @@ Many streams are failing to achieve desired biological condition and require man
 
 ## Study area and data sources
 
-```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream \\ac{csci} scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, Ch: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream CSCI scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, Ch: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 lucol <- RColorBrewer::brewer.pal(9, 'RdYlGn')[c(7, 5, 1)]
 
@@ -162,163 +167,250 @@ print(p2, vp = v2)
 print(pinset, vp = v3)
 ```
 
-Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (\@ref(fig:calimap)).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30\% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38\% from 1973 to 2000 [@Sleeter11].
+Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (\@ref(fig:calimap)).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38% from 1973 to 2000 [@Sleeter11].
 
-Stream data from the \ac{nhd} [@USGS14] were used to identify reaches in California for modelling biological integrity. The \ac{nhd} is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the \ac{nhd} are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the \ac{nhd} were used as the discrete spatial unit for modelling biological integrity.  A reach is defined as a continuous piece of surface water with similar hydrologic characteristics [@USGS14].  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the \ac{nhd} to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
+Stream data from the National Hydrography Dataset (NHD) [@USGS14] were used to identify reaches in California for modelling biological integrity. The NHD is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the NHD are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the NHD were used as the discrete spatial unit for modelling biological integrity.  A reach is defined as a continuous piece of surface water with similar hydrologic characteristics [@USGS14].  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the NHD to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
 
-The \ac{csci} [@Ode16;@Mazor16] was used as a measure of biological condition in California streams.  Benthic macroinvertebrate data used to calculate \ac{csci} scores were collected at nearly 3400 sites (6270 with repeat visits) between 2000 and 2016.  Field data were collected during baseflow conditions typically between May and July following methods in @Ode07.  The \ac{csci} is a predictive index of stream health that compares the observed taxa and metrics at a site to those expected under reference conditions.  Expected conditions at a site are based on models that estimate the likely macroinvertebrate community in relation to factors that naturally influence biology, e.g., watershed size, elevation, climate, etc.  The \ac{csci} score at a site is based on an observed-to-expected ratio of taxa and a \ac{pmmi} composed of six individual metrics that describe the structure and function of the macroinvertebrate community.  The index score at a site can vary from 0 to 1.4, with higher values indicating an observed community with less deviation from reference conditions.  Because the index was developed to minimize the influence of natural gradients, the index scores have consistent meaning across the state [@Reynoldson97].  A threshold score based on a selected lower percentile of scores (e.g., 10\%) at all reference sites is used to define nominally low and high scoring sites.
+The California Stream Condition Index (CSCI) [@Ode16;@Mazor16] was used as a measure of biological condition in California streams.  Benthic macroinvertebrate data used to calculate CSCI scores were collected at nearly 3400 sites (6270 with repeat visits) between 2000 and 2016.  Field data were collected during baseflow conditions typically between May and July following methods in @Ode07.  The CSCI is a predictive index of stream health that compares the observed taxa and metrics at a site to those expected under reference conditions.  Expected conditions at a site are based on models that estimate the likely macroinvertebrate community in relation to factors that naturally influence biology, e.g., watershed size, elevation, climate, etc.  The CSCI score at a site is based on an observed-to-expected ratio of taxa and a predictive multimetric index composed of six individual metrics that describe the structure and function of the macroinvertebrate community.  The index score at a site can vary from 0 to 1.4, with higher values indicating an observed community with less deviation from reference conditions.  Because the index was developed to minimize the influence of natural gradients, the index scores have consistent meaning across the state [@Reynoldson97].  A threshold score based on a selected lower percentile of scores (e.g., 10%) at all reference sites is used to define nominally low and high scoring sites.
 
 ## Building and validating landscape models
 
-A prediction model of the \ac{csci} was developed to estimate likely ranges of scores associated with land use gradients.  Land use as urban and agricultural was quantified for the catchment of each stream reach in California using the StreamCat database [@Hill16]. \ac{csci} scores were modelled using only the estimates of urban and agricultural land use as the developed portion of the landscape within each stream reach. The model was incomplete by design to describe scores only in relation to large-scale constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  Deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
+A prediction model of the CSCI was developed to estimate likely ranges of scores associated with land use gradients.  Land use as urban and agricultural was quantified for the catchment of each stream reach in California using the StreamCat database [@Hill16]. CSCI scores were modelled using only the estimates of urban and agricultural land use as the developed portion of the landscape within each stream reach. The model was incomplete by design to describe scores only in relation to large-scale constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  Deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
 
-Models were developed using quantile regression forests to estimate ranges of likely \ac{csci} scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09].  Quantile regression forests were used to predict \ac{csci} scores in each stream reach from the 5\textsuperscript{th} to the 95\textsuperscript{th} percentile of expectations at five percent intervals (i.e., 5\textsuperscript{th}, 10\textsuperscript{th}, etc.). 
+Models were developed using quantile regression forests to estimate ranges of likely CSCI scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09].  Quantile regression forests were used to predict CSCI scores in each stream reach from the 5th to the 95th percentile of expectations at five percent intervals (i.e., 5th, 10th, etc.). 
 
-Landscape estimates for the catchments of all \ac{nhd} stream reaches in California were separated into calibration and validation data.  
+Landscape estimates for the catchments of all NHD stream reaches in California were separated into calibration and validation data.  
 
 ## San Gabriel River watershed case study
 
-Stream reach and bioassessment data from the \ac{sgr} watershed in southern California were used to develop reach classifications, site performance categories, and management priorities from the landscape models. A strong land use gradient occurs in the \ac{sgr} watershed. Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for reacreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements.
+Stream reach and bioassessment data from the San Gabriel River (SGR) watershed in southern California were used to develop reach classifications, site performance categories, and management priorities from the landscape models. A strong land use gradient occurs in the SGR watershed. Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for reacreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements.
 
 *Figure* SGR watershed 
 
-The \ac{sgr} watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the \ac{sgrrmp} includes stakeholders from these groups that cooperatively work to increase awareness of issues in the \ac{sgr} watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the \ac{sgrrmp} with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for partipation to include a variety of mangement interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal processes of decision-making. 
+The SGR watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the San Gabriel River Regional Monitoring Program (SGRRMP) includes stakeholders from these groups that cooperatively work to increase awareness of issues in the SGR watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the SGRRMP with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for partipation to include a variety of mangement interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal processes of decision-making. 
 
 ## Reach classification, site performance, and prioritization
 
-A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected \ac{csci} scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed \ac{csci} scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health. 
+A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected CSCI scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed CSCI scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health. 
 
-```{r ridges, fig.height = 6, fig.width = 9, fig.cap = 'test'}
+Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints (\@ref(fig:ridges)).  Classifications were developed using the range of CSCI expectations at a reach relative to a chosen threshold for the CSCI to define nominally low or high scores.  The reach classification was based solely on the intersection of the CSCI expectations at a reach with chosen CSCI threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of CSCI score expectations entirely below the thresholds were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that included the CSCI thresholds were considered possibly constrained or possibly unconstrained, where the distinction was based on location of the median expectation of a reach relative to the threshold.  
+
+```{r ridges, fig.height = 8, fig.width = 10, fig.cap = 'Application of landscape models to identify site expectations and bioassessment performance for sixteen example stream reaches.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each reach with a chosen CSCI threshold (c) defines the stream reach classification as likely unconstrained (lu), possibly unconstrained (pu), possibly constrained (pc), and likely constrained (lc).  The site performance from the observed bioassessment score is defined as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
 ##
 # plot data
 
 # plot data globals
-sel <- 10
+sel <- 16
+bnd <- 0.1
+pts <- 2000
+qts <- 0.05
+thrsh <- 0.79
+
+catcds <- data.frame(
+  int = c('111', '011', '001', '000'),
+  cls = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'),
+  clsabv = c('lu', 'pu', 'pc', 'lc')
+)
+
+prfcds <- data.frame(
+  int = c('00', '01', '11'), 
+  cls = c('over scoring', 'expected', 'under scoring')
+)
+
+prflev <- c(
+  'over scoring (lu)', 'expected (lu)', 'under scoring (lu)',
+  'over scoring (pu)', 'expected (pu)', 'under scoring (pu)',
+  'over scoring (pc)', 'expected (pc)', 'under scoring (pc)',
+  'over scoring (lc)', 'expected (lc)', 'under scoring (lc)')
+
+# color palette for CSCI scoring performance
+pal_prf <- colorFactor(
+  palette = c(
+    colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(90, 74, 58)],
+    colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(42, 26, 10)],
+    colorRampPalette(brewer.pal(9, 'Reds'))(100)[c(42, 26, 10)],
+    colorRampPalette(brewer.pal(9, 'Reds'))(100)[c(90, 74, 58)]
+  ),
+  na.color = 'yellow',
+  levels = prflev
+)
+
+scrs <- c(1.35, 1.15, 0.84, 0.7, 1.25, 0.95, 0.75, 0.55, 1.1, 0.85, 0.7, 0.35, 1, 0.75, 0.45, 0.15)
 
 # plot data
-set.seed(12345)
-rnd <- predict(rf_full, what = function(x) sample(x, 100, replace = T)) %>%
-  data.frame %>%
-  mutate(id = 1:nrow(.)) %>%
-  .[sample(1:nrow(.), sel),] %>%
-  gather('var', 'val', -id) %>%
-  group_by(id) %>%
-  mutate(medv = median(val)) %>%
-  ungroup %>%
-  arrange(medv) %>% 
+set.seed(4356)
+# set.seed(4324)
+rnd <- data.frame(
+  id = factor(rev(1:sel), levels = rev(1:sel)),
+  ave = rep(seq(0.5, 1.1, length = 4), each = 4),
+  sds = sample(c(0.13), sel, replace = T), 
+  scrs = rev(scrs)
+) %>%
+  group_by(id, scrs) %>% 
+  nest %>%
   mutate(
-    id = factor(id, levels = unique(id), labels = rev(1:sel)),
-    id = as.character(id)
-    ) 
-  
-# stream class labels, have to do manually
-exp <- data.frame(
-  id = as.character(1:sel), 
-  exp = c('lu', 'pu', 'pu', 'pu', 'pu', 'pu', 'pc', 'lc', 'lc', 'lc'), 
-  stringsAsFactors = F
-  ) %>% 
-  mutate(
-    exp = factor(exp, 
-                 levels = c('lu', 'pu', 'pc', 'lc'),
-                 labels = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'))
+    rnd = purrr::map(data, ~ rnorm(pts, .x$ave, .x$sds)), 
+    estall = purrr::map(rnd, function(x){
+      
+      est <- density(x, n = pts, bw = bnd)
+      out <- data.frame(
+        xout = est$x, 
+        hght = est$y
+      )
+      
+      return(out)
+      
+    }), 
+    estcut = purrr::pmap(list(rnd, estall), function(rnd, estall){
+      
+      qts <- quantile(rnd, c(qts, 1 - qts))
+      out <- estall %>% 
+        filter(xout >= qts[1] & xout <= qts[2])
+      
+      return(out)
+      
+    }), 
+    estcat = purrr::map(estcut, function(x){
+      
+      out <- c(range(x$xout), median(x$xout)) %>% 
+        sort %>% 
+        findInterval(., thrsh) %>% 
+        paste(collapse = '') %>% 
+        factor(levels = catcds$int, labels = catcds$clsabv) %>% 
+        as.character
+      
+      return(out)
+      
+      
+    }), 
+    prfcat = purrr::pmap(list(estcut, scrs), function(estcut, scrs){
+      
+      out <- range(estcut$xout) %>% 
+        findInterval(., scrs) %>% 
+        paste(collapse = '') %>% 
+        factor(levels = prfcds$int, labels = prfcds$cls) %>% 
+        as.character
+      
+      return(out)
+      
+    })
   )
 
-# site scrs
-scr <- matrix(runif(40, 0, 1.4), ncol = 4) %>%  
-  data.frame %>% 
-  mutate(id = as.character(1:nrow(.))) %>% 
-  gather('rep', 'scr', -id) %>% 
-  select(-rep)
+toplo1 <- rnd %>% 
+  select(id, estall) %>% 
+  unnest
 
+toplo2 <- rnd %>% 
+  select(id, estcut) %>% 
+  unnest
 
-rnd <- rnd %>% 
-  left_join(exp, by = 'id') %>%
-  left_join(scr, by = 'id') %>% 
-  mutate(id = factor(id, levels = rev(1:sel)))
+toplo3 <- rnd %>% 
+  select(id, estcut, estcat, prfcat) %>% 
+  unnest(estcat, prfcat) %>% 
+  unnest %>% 
+  mutate(
+    prfcat = paste0(prfcat, ' (', estcat, ')'), 
+    estcat = factor(estcat, levels = catcds$clsabv, labels = catcds$cls)
+  ) %>% 
+  rename(`Stream class` = estcat)
+
+toplo4 <- rnd %>% 
+  select(id, scrs, estcat, prfcat) %>% 
+  unnest %>% 
+  mutate(
+    prfcat = paste0(prfcat, ' (', estcat, ')'), 
+    prfcat = factor(prfcat, levels = prflev),
+    estcat = factor(estcat, levels = catcds$cls), 
+    hght = scrs
+  ) %>% 
+  rename(`Site performance` = prfcat)
 
 ##
 # plots
 
 # stream class colors
-exp_col <- RColorBrewer::brewer.pal(9, 'Paired')[c(6, 2, 5, 1)] %>% 
+exp_col <- RColorBrewer::brewer.pal(9, 'Paired')[c(2, 1, 5, 6)] %>% 
   alpha(., 0.8)  
 
 # plot globals
-min_ht <- 0.4
-ht <- 2
-bnd <- 0.11
+ht <- 0.99
 
 # base 
-pbase<- ggplot(rnd, aes(x = val, y = id)) + 
-  geom_density_ridges(bandwidth = 0.1, alpha = 0.3, colour = NA, fill = 'grey', scale = ht) +
+pbase<- ggplot(toplo1, aes(x = xout, y = id, height = hght)) + 
+  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'darkgrey', scale = ht) +
   scale_x_continuous(limits = c(0, 1.4)) + 
   theme_minimal(base_family = 'serif') + 
   theme(
-    legend.position = 'none', 
     axis.title.x = element_blank(), 
-    axis.title.y = element_blank()
-    )
+    axis.title.y = element_blank(), 
+    legend.position = 'top'
+  )
 
 p1 <- pbase +
-  geom_density_ridges_gradient(aes(fill = ..x..), bandwidth = bnd, rel_min_height = 0.001, colour = 'black', scale = ht) +
+  geom_density_ridges_gradient(aes(fill = ..x..), stat = 'identity', rel_min_height = 0.001, colour = 'black', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
+  guides(fill = guide_colourbar('CSCI', barheight = 0.5, barwidth = 5, title.position = 'top')) +
   ggtitle('(a) Range of expected CSCI\nscores for stream reaches')
 
-p2 <- pbase + 
-  geom_density_ridges_gradient(aes(fill = ..x..), bandwidth = bnd, rel_min_height = min_ht, colour = 'black', scale = ht) + 
-  geom_vline(xintercept = 0.79, linetype = 'dashed') + 
-  scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) + 
-  ggtitle('(b) Expected scores with\nthreshold and cutoff')
+p2 <- pbase +
+  geom_density_ridges_gradient(data = toplo2, aes(fill = ..x..), stat = 'identity', colour = 'black', scale = ht) +
+  scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
+  ggtitle('(b) Expected CSCI scores\nwithin certainty range') +
+  theme(legend.position = 'none')
 
-p3 <- pbase + 
-  geom_density_ridges(aes(fill = exp), bandwidth = 0.1, rel_min_height = min_ht, colour = 'black', scale = ht) +
-  geom_vline(xintercept = 0.79, linetype = 'dashed') + 
+p3 <- pbase +
+  geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed') +
   scale_fill_manual(values = exp_col) +
-  ggtitle('(c) Stream reach classifications')
+  guides(fill = guide_legend(title.position = 'top', nrow = 2)) +
+  ggtitle('(c) Stream reach classification\nby CSCI threshold')
 
-# p4 <- pbase + 
-#   geom_density_ridges(aes(fill = exp), bandwidth = 0.1, rel_min_height = min_ht, colour = 'black', scale = ht) +
-#   geom_point(aes(x = scr)) +
-#   geom_vline(xintercept = 0.79, linetype = 'dashed') + 
-#   scale_fill_manual(values = exp_col) +
-#   ggtitle('(c) Stream reach classifications')
+p4 <- pbase +
+  geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed') +
+  geom_point(data = toplo4, aes(x = scrs, group = id), size = 3) + 
+  geom_point(data = toplo4, aes(x = scrs, group = id, colour = `Site performance`), size = 2.5) + 
+  scale_fill_manual(values = exp_col, guide = F) +
+  scale_colour_manual('Site performance', values = pal_prf(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
+  guides(colour = guide_legend(title.position = 'top')) +
+  ggtitle('(d) Site performance by\nstream classification')
 
-grid.arrange(p1, p2, p3, left = 'Stream reach', bottom = 'Expected CSCI scores', ncol = 3)
+p1leg <- g_legend(p1)
+p1 <- p1 + theme(legend.position = 'none')
+
+p3leg <- g_legend(p3)
+p3 <- p3 + theme(legend.position = 'none')
+
+p4leg <- g_legend(p4)
+p4 <- p4 + theme(legend.position = 'none')
+
+grid.arrange(
+  arrangeGrob(p1leg, p3leg, p4leg, ncol = 3, widths = c(0.3, 0.75, 1)),
+  arrangeGrob(p1, p2, p3, p4, ncol = 4),
+  left = 'Stream reach', bottom = 'Expected CSCI scores', ncol = 1, heights = c(0.2, 1)
+)
 ```
 
-Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints (\@ref(fig:ridges)).  Classifications were developed using the range of \ac{csci} expectations at a reach relative to a chosen threshold for the \ac{csci} to define nominally low or high scores.  The reach classification was based solely on the intersection of the \ac{csci} expectations at a reach with chosen \ac{csci} threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of \ac{csci} score expectations entirely below the thresholds were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that included the \ac{csci} thresholds were considered possibly constrained or possibly unconstrained, where the distinction was based on location of the median expectation of a reach relative to the threshold.  
-
-\ac{csci} scores from biomonitoring data were used to define performance of a sample site relative to the stream reach classification. For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), the site performance was defined relative to the bounds of the expected \ac{csci} scores.  This provided a definition of site performance that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95\textsuperscript{th} percentile of expected scores) were considered "over-performing" and sites below the lower limit were "under-performing".  Sites with \ac{csci} scores within the range of expectations were as "expected".   
+CSCI scores from biomonitoring data were used to define performance of a sample site relative to the stream reach classification. For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), the site performance was defined relative to the bounds of the expected CSCI scores.  This provided a definition of site performance that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95th percentile of expected scores) were considered "over-performing" and sites below the lower limit were "under-performing".  Sites with CSCI scores within the range of expectations were as "expected".   
 
 *Figure* classification and performance
 
-Site performance categories were further split relative to location to the selected \ac{csci} threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the \ac{csci} threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the \ac{csci} threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the \ac{csci} threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (Table \@ref(tab:typetab)).
+Site performance categories were further split relative to location to the selected CSCI threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category of site performance for each reach classifcation was added to define a site as above or below the threshold.  For a likely unconstrained reach, underperforming sites below the minimum expected score were additionally defined as being above or below the CSCI threshold.  Similarly, overperforming sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the CSCI threshold.  For possibly constrained and possibly unconstrained reaches, sites that were performing as expected were addtionally defined as being below or above the CSCI threshold.  In total, sixteen site types were defined for the three reach classification and three site performance classifications (Table \@ref(tab:typetab)).
 
 ```{r typetab, tidy = F}
 # table content format
 totab <- typetab %>% 
   mutate(
     `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
-    `Observed score` = gsub('th', '$^{th}$', `Observed score`), 
-    `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('\\textbf{', `Reach expectation`, '}')), 
+    `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('**', `Reach expectation`, '**')), 
     Type = as.character(Type)
   ) %>% 
   select(-Sites)
 
 # table stuff
-cap.val <- 'Possible site types based on stream reach classification, site performance, and observed \\ac{csci} score. The observed score column describes where a \\ac{csci} score is observed relative to the lower and upper percentiles (e.g., 5\\textsuperscript{th} and 95\\textsuperscript{th}) of expected scores for a reach and the chosen \\ac{csci} threshold (e.g., 10\\textsuperscript{th} percentile of scores at reference sites or 0.79) for nominally low or high values.'
+cap.val <- 'Possible site types based on stream reach classification, site performance, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 5th and 95th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'
 
-# # table
-# cat(capture.output(
-#   latex(
-#   totab[, -1],
-#   rowname = totab$`Reach expectation`,
-#   rowlabel = 'Reach expectation', 
-#   file = '',
-#   caption = cap.val,
-#   caption.loc = 'top',
-#   label = 'tab:typetab'
-#   ))[-1], sep = '\n') 
+# table
 knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
@@ -330,11 +422,11 @@ Each site type was used to define a priority as a demonstration of how results f
 
 ## Sensitivity analyses
 
-Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model and the \ac{csci} threshold for defining nominally low or high scores.  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5\textsuperscript{th} and 95\textsuperscript{th} percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25\textsuperscript{th} to 75\textsuperscript{th} percentile) to assume less certainty in the model is provided.  The \ac{csci} threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10\textsuperscript{th} percentile of scores at all reference (non-impacted) sites that were used to calibrate the \ac{csci} index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the \ac{csci} threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
+Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model and the CSCI threshold for defining nominally low or high scores.  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5th and 95th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
 
 ## Unclassified reaches
 
-Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate \ac{csci} predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for 'typically' urban and agriculture reaches that relies on the range of expectations for reaches with similar land use by region.
+Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for 'typically' urban and agriculture reaches that relies on the range of expectations for reaches with similar land use by region.
 
 # Results
 
