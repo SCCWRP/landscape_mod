@@ -239,7 +239,6 @@ scrs <- c(1.35, 1.15, 0.84, 0.7, 1.25, 0.95, 0.75, 0.55, 1.1, 0.85, 0.7, 0.35, 1
 
 # plot data
 set.seed(4356)
-# set.seed(4324)
 rnd <- data.frame(
   id = factor(rev(1:sel), levels = rev(1:sel)),
   ave = rep(seq(0.5, 1.1, length = 4), each = 4),
@@ -337,7 +336,7 @@ ht <- 0.99
 
 # base 
 pbase<- ggplot(toplo1, aes(x = xout, y = id, height = hght)) + 
-  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'darkgrey', scale = ht) +
+  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'grey', scale = ht) +
   scale_x_continuous(limits = c(0, 1.4)) + 
   theme_minimal(base_family = 'serif') + 
   theme(
@@ -347,13 +346,13 @@ pbase<- ggplot(toplo1, aes(x = xout, y = id, height = hght)) +
   )
 
 p1 <- pbase +
-  geom_density_ridges_gradient(aes(fill = ..x..), stat = 'identity', rel_min_height = 0.001, colour = 'black', scale = ht) +
+  geom_density_ridges(stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'darkgrey', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
   guides(fill = guide_colourbar('CSCI', barheight = 0.5, barwidth = 5, title.position = 'top')) +
   ggtitle('(a) Range of expected CSCI\nscores for stream reaches')
 
 p2 <- pbase +
-  geom_density_ridges_gradient(data = toplo2, aes(fill = ..x..), stat = 'identity', colour = 'black', scale = ht) +
+  geom_density_ridges(data = toplo2, stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'darkgrey', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
   ggtitle('(b) Expected CSCI scores\nwithin certainty range') +
   theme(legend.position = 'none')
@@ -375,9 +374,6 @@ p4 <- pbase +
   guides(colour = guide_legend(title.position = 'top')) +
   ggtitle('(d) Site performance by\nstream classification')
 
-p1leg <- g_legend(p1)
-p1 <- p1 + theme(legend.position = 'none')
-
 p3leg <- g_legend(p3)
 p3 <- p3 + theme(legend.position = 'none')
 
@@ -385,9 +381,9 @@ p4leg <- g_legend(p4)
 p4 <- p4 + theme(legend.position = 'none')
 
 grid.arrange(
-  arrangeGrob(p1leg, p3leg, p4leg, ncol = 3, widths = c(0.3, 0.75, 1)),
+  arrangeGrob(p3leg, p4leg, ncol = 2, widths = c(0.75, 1)),
   arrangeGrob(p1, p2, p3, p4, ncol = 4),
-  left = 'Stream reach', bottom = 'Expected CSCI scores', ncol = 1, heights = c(0.2, 1)
+  left = 'Reach type', bottom = 'CSCI scores', ncol = 1, heights = c(0.2, 1)
 )
 ```
 
