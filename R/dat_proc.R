@@ -99,6 +99,11 @@ ludat <- gapland %>%
 save(ludat, file = 'data/ludat.RData', compress = 'xz')
 
 ######
+# priority table
+
+
+
+######
 # create data from Rafi
 # create csci comid data, rf core and full models for csci quantiles, quantile preds for all comid in CA
 # original file from Z:/MarcusBeck/Landscape models from rafi/modlu_120117.R

@@ -410,7 +410,13 @@ cap.val <- 'Possible site types based on stream reach classification, site perfo
 knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
-Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback. 
+Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback.  The final priorities were generalized into three categories to recommend actions in addition to baseline monitoring and maintenance. The final priorities also assumed that existing information available for each site was "true" following established practices to account for uncertainty or variation between assessments.  A consensus was reached for the following definitions of each action:
+
+* Investigate:  Additional monitoring or review of supplementary data (e.g., aerial imagery);
+* Protect: Additional scrutiny of proposed development and/or projects; 
+* Restore: Targeted action for causal assessment and/or restoration funds.
+
+Each site type was ranked as high, medium, or low priority for each action (Table \@ref(tab:pritab)).  No priority assigned to an action for a stream type was indication that baseline monitoring and maintenance was sufficient for a site type.
 
 *Figure* Site types template figure for prioritization
 
@@ -442,7 +448,20 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Figure* Summary of extent of reach classification, site performance, selected examples
 
-*Tables* Priority table(s) from stakeholder group
+```{r pritab}
+pritab <- tibble(
+  Type = paste0('**', seq(1:16), '**'),
+  Investigate = c(rep(c('H', '', 'H', 'H'), 2), rep(c('M', 'M', '', 'M'), 2)),
+  Protect = c(rep(c('H', 'M', 'M', ''), 2), rep(c('H', '', '', ''), 2)),
+  Restore = c(rep(c('', '', 'M', 'H'), 2), rep(c('', 'L', 'L', 'L'), 2))
+)
+
+# table stuff
+cap.val <- 'Priority actions defined by a stakeholder group for stream types in the SGR watershed.  Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  All stream types are assumed to have baseline monitoring and maintenance (e.g., ongoing practices) such that priority actions are additional recommendations.  See Table \\@ref(tab:typetab) for a description of types and the text for definitions of each action.'
+
+# table
+knitr::kable(pritab, booktabs = T, caption = cap.val)
+```
 
 ### Sensitivity analysis
 
