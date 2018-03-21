@@ -224,7 +224,7 @@ prflev <- c(
   'over scoring (lc)', 'expected (lc)', 'under scoring (lc)')
 
 # color palette for CSCI scoring performance
-pal_prf <- colorFactor(
+pal_prf2 <- colorFactor(
   palette = c(
     colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(90, 74, 58)],
     colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(42, 26, 10)],
@@ -370,7 +370,7 @@ p4 <- pbase +
   geom_point(data = toplo4, aes(x = scrs, group = id), size = 3) + 
   geom_point(data = toplo4, aes(x = scrs, group = id, colour = `Site performance`), size = 2.5) + 
   scale_fill_manual(values = exp_col, guide = F) +
-  scale_colour_manual('Site performance', values = pal_prf(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
+  scale_colour_manual('Site performance', values = pal_prf2(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
   guides(colour = guide_legend(title.position = 'top')) +
   ggtitle('(d) Site performance by\nstream classification')
 
@@ -410,15 +410,13 @@ cap.val <- 'Possible site types based on stream reach classification, site perfo
 knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
-Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference (Figure).  A brief description of the rationale for a site priority was also requested with the feedback.  The final priorities were generalized into three categories to recommend actions in addition to baseline monitoring and maintenance. The final priorities also assumed that existing information available for each site was "true" following established practices to account for uncertainty or variation between assessments.  A consensus was reached for the following definitions of each action:
+Each site type was used to define a priority as a demonstration of how results from the landscape model can help achieve different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group that represented interests in monitoring, regulation, restoration, and protection.  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest.  Stakeholders from each sector were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a blank template for reference.  A brief description of the rationale for a site priority was also requested with the feedback.  The final priorities were generalized into three categories to recommend actions in addition to baseline monitoring and maintenance. The final priorities also assumed that existing information available for each site was "true" following established practices to account for uncertainty or variation between assessments.  A consensus was reached for the following definitions of each action:
 
 * Investigate:  Additional monitoring or review of supplementary data (e.g., aerial imagery);
 * Protect: Additional scrutiny of proposed development and/or projects; 
 * Restore: Targeted action for causal assessment and/or restoration funds.
 
-Each site type was ranked as high, medium, or low priority for each action (Table \@ref(tab:pritab)).  No priority assigned to an action for a stream type was indication that baseline monitoring and maintenance was sufficient for a site type.
-
-*Figure* Site types template figure for prioritization
+Each site type was ranked as high, medium, or low priority for each action.  No priority assigned to an action for a stream type was indication that baseline monitoring and maintenance was sufficient for a site type.
 
 *Figure* App screenshot
 
@@ -448,20 +446,97 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Figure* Summary of extent of reach classification, site performance, selected examples
 
-```{r pritab}
+```{r pritem, fig.height = 7, fig.width = 11, fig.cap = 'Template provided to stakeholders for priorization of recommended actions for each stream type.  The stream types (Table \\@ref(tab:typetab)) relate to the stream class for the biological expectation (lu: likely unconstrained, pu: possibly unconstrained, pc: possibly constrained, lc: likely constrained), site performance from observed CSCI score (os: over scoring, e: expected, us: under scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the range of expected CSCI score for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+sts <- paste('Site', seq(1:16))
+
+# example data, csci scores
+scrs_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  csci = c(1.25, 0.98, 0.81, 0.68, 1.14, 0.87, 0.73, 0.58, 0.98, 0.83, 0.68, 0.5, 0.88, 0.76, 0.57, 0.39)
+)
+
+# example data, stream predictions
+exps_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  minv = rep(c(0.84, 0.68, 0.58, 0.43), each = 4),
+  maxv = rep(c(1.14, 0.98, 0.88, 0.73), each = 4),
+  stringsAsFactors = F
+) %>% 
+  mutate(medv = ((maxv - minv) / 2) + minv)
+
+# calculate class, performance, type, 
+plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.05) %>% 
+  rename(
+    `Stream\nclass` = `Stream class`
+  ) %>% 
+  mutate(
+    `Stream\nclass` = factor(`Stream\nclass`, levels = levels(`Stream\nclass`), labels = c('lu', 'pu', 'pc', 'lc')), 
+    `Relative\nperformance` = factor(`Relative\nperformance`, levels = levels(`Relative\nperformance`),
+labels = c('os (lu)', 'e (lu)', 'us (lu)', 'os (pu)', 'e (pu)', 'us (pu)', 'os (pc)', 'e (pc)', 'us (pc)', 'os (lc)', 'e (lc)', 'us (lc)'))
+  )
+
+# priorities
 pritab <- tibble(
-  Type = paste0('**', seq(1:16), '**'),
+  Type = seq(1:length(sts)),
   Investigate = c(rep(c('H', '', 'H', 'H'), 2), rep(c('M', 'M', '', 'M'), 2)),
   Protect = c(rep(c('H', 'M', 'M', ''), 2), rep(c('H', '', '', ''), 2)),
   Restore = c(rep(c('', '', 'M', 'H'), 2), rep(c('', 'L', 'L', 'L'), 2))
+  ) %>% 
+  gather('action', 'priority', -Type)
+
+mythm <- theme_minimal(base_family = 'serif', base_size = 14) +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    axis.line.x = element_line(), 
+    axis.line.y = element_line(), 
+    axis.ticks.y = element_line(), 
+    axis.text.x = element_blank(),
+    legend.position = 'top'
+  )
+
+p1 <- ggplot(plot_ex, aes(x = typelv)) + 
+  geom_errorbar(aes(ymin = minv, ymax = maxv, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.2) + 
+  geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.7) + 
+  geom_point(aes(y = medv, colour = `Stream\nclass`), size = 2, alpha = 0.9, shape = 15) +
+  geom_point(aes(y  = `CSCI score`, fill = `Relative\nperformance`), shape = 21, size = 6, alpha = 0.8) +
+  geom_hline(yintercept = 0.79, linetype = 'dashed') +
+  scale_colour_manual(values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
+                    guide = guide_legend(direction = 'vertical', title.position = 'left', ncol = 2)) +
+  scale_fill_manual(values = pal_prf(levels(plot_ex$`Relative\nperformance`)), 
+                    guide = guide_legend(ncol = 4, direction = 'vertical', title.position = 'left')) +
+  scale_x_discrete('Reach type', limits = rev(levels(plot_ex$typelv)), labels = rev(c(1:nrow(plot_ex)))) +
+  scale_y_continuous('CSCI score') +
+  mythm +
+  coord_flip() + 
+  ggtitle('')
+p1leg <- g_legend(p1)
+p1 <- p1 + mythm %+replace% theme(legend.position = 'none')
+
+p2 <- ggplot(pritab, aes(x = Type, y = 1)) +
+  geom_text(aes(label = priority), family = 'serif') + 
+  facet_wrap(~action) + 
+  coord_flip() + 
+  scale_x_reverse(breaks = c(1:length(sts)), labels = c(1:length(sts))) + 
+  theme(
+    panel.background = element_rect(fill = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(family = 'serif', size = 13),
+    axis.ticks.x = element_line(color = 'white'),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(family = 'serif', size = 12),
+    axis.title = element_text(colour = 'white')
+  )
+
+grid.arrange(
+  p1leg, 
+  arrangeGrob(p1, p2, ncol = 2, widths = c(1, 0.4)), 
+  heights = c(0.2, 1)
 )
-
-# table stuff
-cap.val <- 'Priority actions defined by a stakeholder group for stream types in the SGR watershed.  Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  All stream types are assumed to have baseline monitoring and maintenance (e.g., ongoing practices) such that priority actions are additional recommendations.  See Table \\@ref(tab:typetab) for a description of types and the text for definitions of each action.'
-
-# table
-knitr::kable(pritab, booktabs = T, caption = cap.val)
 ```
+
 
 ### Sensitivity analysis
 
