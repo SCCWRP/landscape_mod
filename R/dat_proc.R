@@ -125,16 +125,41 @@ gapland <- raster('Z:/MarcusBeck/GIS/gaplf2011lc_v30_CA/gaplf2011lc_v30_ca.tif')
 #   delim = '\t')
 
 # reclassify matrix, right closed
-rcmat <- c(-1, 554, 1, 554, 557, 2, 557, 579, 1, 579, 584, 3) %>%
+rcmat <- c(-1, 554, 1, 554, 557, 2, 557, 578, 3, 578, 584, 2) %>%
   matrix(., ncol = 3, byrow = T)
 
-# get cali shapefile in format for clip
-data(calishp)
+# master raster
+gapland <- raster('Z:/MarcusBeck/GIS/gaplf2011lc_v30_CA/gaplf2011lc_v30_ca.tif')
+
+
+# get shed shapefile in format for clip
+data(shed)
 toprj <- crs(gapland) %>% 
   as.character
-calishp <- calishp %>% 
-  st_transform(toprj)
+tocrp <- shed %>% 
+  st_transform(toprj) %>% 
+  st_buffer(dist = 100000)
 
+ludat <- tocrp %>% 
+  as('Spatial') %>% 
+  raster::crop(gapland, .) %>% 
+  reclassify(rcmat) %>% 
+  projectRaster(crs = prj)
+
+ludat@data@values <- ludat@data@values %>% 
+  pmax(., 1) %>% 
+  pmin(., 3) %>% 
+  round(0)
+
+tmp <- shed %>% 
+  st_buffer(dist = 0.05) %>% 
+  as('Spatial') %>% 
+  raster::crop(ludat, .) %>% 
+  aggregate(fact = 8, fun = modal) %>% 
+  rasterToPolygons(dissolve = T)
+
+sgrbs <- tmp
+save(sgrbs, file = 'data/sgrbs.RData', compress = 'xz')
 
 ######
 # create data from Rafi
