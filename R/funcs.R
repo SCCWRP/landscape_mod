@@ -11,7 +11,7 @@ pal_pri <- colorFactor(
 pal_exp <- colorFactor(
   palette = brewer.pal(9, 'Paired')[c(2, 1, 5, 6)],
   na.color = 'yellow',
-  levels = c('lu', 'pu', 'pc', 'lc'))
+  levels = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'))
 
 # color palette for CSCI scoring performance
 pal_prf <- colorFactor(
@@ -23,10 +23,10 @@ pal_prf <- colorFactor(
   ),
   na.color = 'yellow',
   levels = c(
-    'os (lu)', 'e (lu)', 'us (lu)',
-    'os (pu)', 'e (pu)', 'us (pu)',
-    'os (pc)', 'e (pc)', 'us (pc)',
-    'os (lc)', 'e (lc)', 'us (lc)')
+    'over scoring (lu)', 'expected (lu)', 'under scoring (lu)',
+    'over scoring (pu)', 'expected (pu)', 'under scoring (pu)',
+    'over scoring (pc)', 'expected (pc)', 'under scoring (pc)',
+    'over scoring (lc)', 'expected (lc)', 'under scoring (lc)')
 )
 
 # color palette for CSCI type

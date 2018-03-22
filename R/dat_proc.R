@@ -57,6 +57,20 @@ psalab <- psalab %>%
 save(psalab, file = 'data/psalab.RData', compress = 'xz')
 
 ##
+# SMC watershed 
+
+shd_pth <- 'S:/Spatial_Data/SMCBasefiles/Boundaries/SMCSheds/SMCSheds2009.shp'
+
+# watersheds
+shed <- readOGR(shd_pth) %>%
+  spTransform(CRS(prj)) %>%
+  st_as_sf %>% 
+  filter(SMC_Name %in% 'San Gabriel') %>% 
+  dplyr::select(SMC_Name)
+
+save(shed, file = '/data/shed.RData', compress = 'xz')
+
+##
 # land use data from gap
 # https://gapanalysis.usgs.gov/gaplandcover/data/download/
 
@@ -99,8 +113,27 @@ ludat <- gapland %>%
 save(ludat, file = 'data/ludat.RData', compress = 'xz')
 
 ######
-# priority table
+# SGR lu clip
 
+# master raster
+gapland <- raster('Z:/MarcusBeck/GIS/gaplf2011lc_v30_CA/gaplf2011lc_v30_ca.tif')
+
+# # gap key
+# # ag is 555 - 557, urban is 580 - 584
+# gapkey <- read_delim(
+#   'C:/Users/Marcus.SCCWRP2K/Desktop/gaplf2011lc_v30_CA/GAP_LANDFIRE_National_Terrestrial_Ecosystems_2011_Attributes.txt',
+#   delim = '\t')
+
+# reclassify matrix, right closed
+rcmat <- c(-1, 554, 1, 554, 557, 2, 557, 579, 1, 579, 584, 3) %>%
+  matrix(., ncol = 3, byrow = T)
+
+# get cali shapefile in format for clip
+data(calishp)
+toprj <- crs(gapland) %>% 
+  as.character
+calishp <- calishp %>% 
+  st_transform(toprj)
 
 
 ######
