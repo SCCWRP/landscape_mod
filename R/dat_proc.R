@@ -138,7 +138,7 @@ toprj <- crs(gapland) %>%
   as.character
 tocrp <- shed %>% 
   st_transform(toprj) %>% 
-  st_buffer(dist = 100000)
+  st_buffer(dist = 50000)
 
 ludat <- tocrp %>% 
   as('Spatial') %>% 
@@ -152,7 +152,7 @@ ludat@data@values <- ludat@data@values %>%
   round(0)
 
 tmp <- shed %>% 
-  st_buffer(dist = 0.05) %>% 
+  st_buffer(dist = 0.01) %>% 
   as('Spatial') %>% 
   raster::crop(ludat, .) %>% 
   aggregate(fact = 8, fun = modal) %>% 

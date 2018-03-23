@@ -48,6 +48,12 @@ pal_difr <- colorNumeric(
   na.color = 'yellow',
   domain = c(-0.6, 0.6))
 
+# pal lu
+pal_lu <- colorFactor(
+  palette = c('lightgrey', 'lightgreen', 'lightblue'),
+  domain = c('Developed', 'Open, mixed', 'Water')
+)
+
 ######
 # get legend from an existing ggplot object
 g_legend <- function(a.gplot){
