@@ -283,8 +283,8 @@ luleg <- g_legend(luleg)
   
 # base plot
 pbs <- ggplot() + 
-  geom_polygon(data = toplo, aes(x = long, y = lat, group = group), fill = pal_lu(toplo$`Land cover`), alpha = 0.5) + 
-  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', alpha = 0.8) +
+  geom_polygon(data = toplo, aes(x = long, y = lat, group = group), fill = pal_lu(toplo$`Land cover`), alpha = 0.8) + 
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', alpha = 0.7) +
   coord_map() +
   theme_bw(base_family = 'serif') + 
   scale_x_continuous(expand = c(0,0)) +
