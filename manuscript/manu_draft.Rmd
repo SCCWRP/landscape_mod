@@ -33,7 +33,7 @@ library(scales)
 library(quantregForest)
 library(leaflet)
 
-# functions
+# functions (incl. color palettes)
 source('../R/funcs.R')
 
 # extract bib entries from online
@@ -49,6 +49,7 @@ load(file = '../data/rf_full.RData')
 load(file = '../data/sgrbs.RData')
 load(file = '../data/shed.RData')
 load(file = '../data/spat.RData')
+load(file = '../data/scrs.RData')
 ```
 
 # Abstract 
@@ -117,6 +118,10 @@ toplo <- ludat %>%
   mutate(id = factor(id, levels = c(1, 2, 3), labels = c('Open, mixed', 'Agriculture', 'Urban'))) %>% 
   rename(`Land use` = id)
 
+# csci seq for color pal
+palseq <- range(csci_raw$CSCI, na.rm = T) 
+palseq <- seq(palseq[1], palseq[2], length = 5)
+
 p1 <- ggplot() + 
   geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land use`, group = group)) + 
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.1) +
@@ -146,7 +151,7 @@ p1 <- p1 +
            dist = 150, st.dist=.15, st.size = 3, height = 0.1, dd2km = T, model = 'WGS84')
 
 p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
-  scale_colour_gradientn(colours = c('#d7191c', '#abd9e9', '#2c7bb6')) +
+  scale_colour_gradientn(colours = pal(palseq)) +
   geom_point(size = 1.25) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
@@ -196,22 +201,40 @@ toplo <- sgrbs %>%
   mutate(id = factor(id, levels = c(2, 1, 3), labels = c('Developed', 'Open, mixed', 'Water'))) %>% 
   rename(`Land cover` = id)
 
+# hydrolines fortified
 spatdat <- spat %>% 
-  select(COMID, full0.50) %>% 
-  rownames_to_column('id')
+  dplyr::select(COMID, full0.50) %>% 
+  mutate(id = 1:nrow(.))
 st_geometry(spatdat) <- NULL
 spatfrt <- spat %>% 
   as('Spatial') %>% 
   fortify %>% 
-  left_join(spatdat, by = 'id')
+  left_join(spatdat, by = 'id') %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, by = 'COMID') %>% 
+  mutate(csci_diff = csci - full0.50)
 
+# wshed boundary fortified
 shedfrt <- shed %>% 
   as('Spatial') %>% 
   fortify 
 
-
+# land use colors
 lucol <- c('lightgrey', 'lightgreen', 'lightblue')
 
+# prd csci seq for color pal
+seqprd <- range(spatfrt$full0.50, na.rm = T) 
+seqprd <- seq(seqprd[1], seqprd[2], length = 5)
+
+# csci seq for color pal
+seqcsc <- range(spatfrt$csci, na.rm = T) 
+seqcsc <- seq(seqcsc[1], seqcsc[2], length = 5)
+
+# csci dif seq for color pal
+seqdif <- range(spatfrt$csci_diff, na.rm = T) 
+seqdif <- seq(seqdif[1], seqdif[2], length = 5)
+
+# base plot
 pbs <- ggplot() + 
   geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land cover`, group = group)) + 
   geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', alpha = 0.4) +
@@ -227,9 +250,15 @@ pbs <- ggplot() +
   ) + 
   guides(fill = guide_legend(ncol = 3)) 
 
+# hydrolines plot with CSCI pts
 p1 <- pbs + 
-  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = full0.50))
-p1
+  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = full0.50)) +  
+  scale_colour_gradientn('Median predicted\nCSCI', colours = pal(seqprd)) +
+  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, fill = csci_diff), pch = 21) +
+  scale_fill_gradientn('CSCI difference', colours = pal_difr(seqdif))
+
+#
+# p2
 ```
 
 

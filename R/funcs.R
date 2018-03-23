@@ -1,6 +1,12 @@
 ######
 # color palettes
 
+# color palette for csci scores
+pal <- colorNumeric(
+  palette = c('#d7191c', '#abd9e9', '#2c7bb6'),
+  na.color = 'yellow',
+  domain = c(0, 1.4))
+
 # color palette for stream expectations
 pal_pri <- colorFactor(
   palette = RColorBrewer::brewer.pal(9, 'Greys')[c(8, 5, 2)],
@@ -35,6 +41,12 @@ pal_typ <- colorFactor(
   na.color = 'yellow',
   domain = paste0('Type', sprintf('%02d', seq(1:16)))
 )
+
+# color palette for csci score differences
+pal_difr <- colorNumeric(
+  palette = c('black', 'purple', 'white', 'darkgreen', 'black'),
+  na.color = 'yellow',
+  domain = c(-0.6, 0.6))
 
 ######
 # get legend from an existing ggplot object
