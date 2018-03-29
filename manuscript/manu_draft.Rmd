@@ -32,6 +32,7 @@ library(ggridges)
 library(scales)
 library(quantregForest)
 library(leaflet)
+library(raster)
 
 # functions (incl. color palettes)
 source('../R/funcs.R')
@@ -46,7 +47,7 @@ load(file = '../data/ludat.RData')
 load(file = '../data/calipsa.RData')
 load(file = '../data/psalab.RData')
 load(file = '../data/rf_full.RData')
-load(file = '../data/sgrbs.RData')
+load(file = '../data/sgrlu.RData')
 load(file = '../data/shed.RData')
 load(file = '../data/spat.RData')
 load(file = '../data/scrs.RData')
@@ -79,7 +80,7 @@ Many streams are failing to achieve desired biological condition and require man
 
 ```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream CSCI scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, Ch: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
-lucol <- c('lightgreen', 'lightyellow', 'lightgrey')
+lucol <- c('khaki2', 'lightsalmon', 'lightgrey')
 
 # country base
 country <- map_data('state')
@@ -193,15 +194,16 @@ Landscape estimates for the catchments of all NHD stream reaches in California w
 
 Stream reach and bioassessment data from the San Gabriel River (SGR) watershed in southern California were used to develop reach classifications, site performance categories, and management priorities from the landscape models. A strong land use gradient occurs in the SGR watershed (Figure \@ref(fig:sgrshd)). Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for reacreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements.
 
-```{r sgrshd, fig.height = 5, fig.width = 7, fig.cap = 'San Gabriel River watershed in southern California with predicted median CSCI scores at each stream reach and differences of observed CSCI scores with the predictions. The watershed is undeveloped in the north and heavily urbanized in the south.  Gray stream reaches do not have model predictions because of insufficient data.'}
+```{r sgrshd, fig.height = 8, fig.width = 5.5, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream reach and observed CSCI scores are shown in (b). The watershed is undeveloped in the north and heavily urbanized in the south. Ecoregions in the inset are identified in Figure \\@ref(fig:calimap).'}
 
-# land use data fortified  
-toplo <- sgrbs %>% 
-  fortify %>% 
-  mutate(id = factor(id, levels = c(2, 1, 3), labels = c('Developed', 'Open, mixed', 'Water'))) %>% 
-  rename(`Land cover` = id)
+# land use raster data
+luplo <- sgrlu %>% 
+  rasterToPoints %>% 
+  data.frame %>% 
+  rename(`Land cover` = layer) %>% 
+  mutate(`Land cover` = factor(`Land cover`, levels = c(5, 4, 3, 2, 1), labels = c('Urban: hi', 'Urban: md', 'Urban: lo', 'Open: forest', 'Open: scrub'))) 
 
-# hydrolines fortified
+# hydrolines
 spatdat <- spat %>% 
   dplyr::select(COMID, full0.50) %>% 
   mutate(id = as.character(1:nrow(.)))
@@ -212,7 +214,8 @@ spatfrt <- spat %>%
   left_join(spatdat, by = 'id') %>% 
   mutate(COMID = as.character(COMID)) %>% 
   left_join(scrs, by = 'COMID') %>% 
-  mutate(csci_diff = csci - full0.50)
+  mutate(csci_diff = csci - full0.50) %>% 
+  filter(!is.na(full0.50))
 
 # wshed boundary fortified
 shedfrt <- shed %>% 
@@ -220,7 +223,7 @@ shedfrt <- shed %>%
   fortify 
 
 # land use colors
-lucol <- c('lightgrey', 'lightgreen', 'lightblue')
+lucol <- c('grey20', 'grey40', 'grey60', 'khaki3', 'khaki2')
 
 # psa data fortified
 psadat <- calipsa %>% 
@@ -244,7 +247,6 @@ palseq <- seq(palseq[1], palseq[2], length = 5)
 # pinset
 pinset <- ggplot() + 
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.2) +
-  # geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) + 
   geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'tomato1') +
   theme_minimal() + 
   theme(
@@ -255,21 +257,27 @@ pinset <- ggplot() +
     ) + 
   coord_map()
 
-# prd csci seq for color pal
-seqprd <- range(spatfrt$full0.50, na.rm = T) 
-seqprd <- seq(seqprd[1], seqprd[2], length = 5)
-
 # csci seq for color pal
 seqcsc <- range(spatfrt$csci, na.rm = T) 
 seqcsc <- seq(seqcsc[1], seqcsc[2], length = 5)
 
-# csci dif seq for color pal
-seqdif <- range(spatfrt$csci_diff, na.rm = T) 
-seqdif <- seq(seqdif[1], seqdif[2], length = 5)
+# color legend
+colleg <- ggplot() +
+  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, colour = csci)) +
+  theme_bw(base_family = 'serif') +
+  theme(
+    legend.position = 'top',
+    legend.justification = 'left',
+    legend.box.just = 'left',
+    legend.box = 'vertical'
+  ) +
+  scale_colour_gradientn('CSCI', colours = pal(seqcsc)) +
+  guides(colour = guide_colourbar('CSCI', barheight = 0.55, barwidth = 8, title.position = 'top'))
+colleg <- g_legend(colleg)
 
 # separate lu legend
-luleg <- ggplot() + 
-  geom_polygon(data = toplo, aes(x = long, y = lat, group = group, fill = `Land cover`)) +
+luleg <- ggplot(luplo) + 
+  geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
   theme_bw(base_family = 'serif') +
   theme(
     legend.position = 'top', 
@@ -278,47 +286,55 @@ luleg <- ggplot() +
     legend.box = 'vertical'
   ) +  
   scale_fill_manual('Land cover', values = lucol) +
-  guides(fill = guide_legend(ncol = 3, title.position = 'top'))
+  guides(fill = guide_legend(ncol = 2, title.position = 'top'))
 luleg <- g_legend(luleg)
   
-# base plot
-pbs <- ggplot() + 
-  geom_polygon(data = toplo, aes(x = long, y = lat, group = group), fill = pal_lu(toplo$`Land cover`), alpha = 0.8) + 
-  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', alpha = 0.7) +
-  coord_map() +
-  theme_bw(base_family = 'serif') + 
-  scale_x_continuous(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0)) +
+# land use plot
+p1 <- ggplot(luplo) + 
+  geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
+  theme_void(base_family = 'serif') +
+  scale_fill_manual('Land cover', values = lucol) +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = NA, colour = 'black', alpha = 0.7) +
+  coord_equal() +
+  theme_void(base_family = 'serif') +
   theme(
-    legend.position = 'top', 
-    legend.justification = 'left',
-    legend.box.just = 'left',
-    legend.box = 'vertical',
-    panel.background = element_rect(colour = 'black', fill = NA), 
+    legend.position = 'none', 
     axis.title = element_blank()
-  ) + 
-  guides(
-    fill = guide_legend(ncol = 4, title.position = 'top'),
-    colour = guide_legend(ncol = 4, title.position = 'top')
-    ) 
+    ) +
+  ggtitle('(a) Land cover in the San Gabriel watershed')
 
 # hydrolines plot with CSCI pts
-p1 <- pbs + 
-  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = full0.50)) +  
-  scale_colour_gradientn('Reach predicted CSCI', colours = pal(seqprd)) +
-  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, fill = csci_diff), pch = 21, size = 3, alpha = 0.9) +
-  scale_fill_gradientn('Observed CSCI difference with prediction', colours = pal_difr(seqdif)) + 
-  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, 
-    dist = 10, st.dist=.3, st.size = 3, height = 0.3, dd2km = T, model = 'WGS84')
-p1leg <- g_legend(p1) 
-p1 <- p1 + theme(legend.position = 'none')
+p2 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = full0.50, linetype = 'Reach predicted\nmedian CSCI')) +
+  scale_colour_gradientn(colours = pal(seqcsc)) +
+  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, fill = csci, shape = 'Observed CSCI'), size = 3, alpha = 0.9) +
+  scale_fill_gradientn('', colours = pal(seqcsc)) +
+  scale_linetype_manual('', values = 'solid') +
+  scale_shape_manual('', values = 21) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, dd2km = T, model = 'WGS84') +
+  guides(fill = F, colour = F) +
+  coord_equal() +
+  theme_void(base_family = 'serif') +
+  theme(
+    # legend.position = 'top',
+    legend.justification = 'left',
+    legend.box.just = 'left',
+    axis.title = element_blank()
+    ) + 
+  ggtitle('(b) Reach predictions and station scores for the CSCI')
+p2leg <- g_legend(p2) 
+p2 <- p2 + theme(legend.position = 'none')
 
+# png('figs/sgrshd.png', height = 8, width = 5.5, units = 'in', res = 300, family = 'serif')
 grid.arrange(
-  p1, 
-  arrangeGrob(luleg, p1leg, pinset, ncol = 1, heights = c(0.5, 1, 2)),
-  ncol = 2, widths= c(1, 0.6)
+  arrangeGrob(p1, 
+              arrangeGrob(pinset, luleg, ncol = 1, heights = c(1, 1)), ncol = 2, widths = c(1, 0.5)),
+  arrangeGrob(p2, 
+              arrangeGrob(colleg, p2leg, ncol = 1, heights = c(1,1)), ncol = 2, widths = c(1, 0.5)), 
+  ncol = 1
 )
-
+# dev.off()
 ```
 
 The SGR watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the San Gabriel River Regional Monitoring Program (SGRRMP) includes stakeholders from these groups that cooperatively work to increase awareness of issues in the SGR watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the SGRRMP with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for partipation to include a variety of mangement interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal processes of decision-making. 
@@ -430,15 +446,15 @@ rnd <- data.frame(
   )
 
 toplo1 <- rnd %>% 
-  select(id, estall) %>% 
+  dplyr::select(id, estall) %>% 
   unnest
 
 toplo2 <- rnd %>% 
-  select(id, estcut) %>% 
+  dplyr::select(id, estcut) %>% 
   unnest
 
 toplo3 <- rnd %>% 
-  select(id, estcut, estcat, prfcat) %>% 
+  dplyr::select(id, estcut, estcat, prfcat) %>% 
   unnest(estcat, prfcat) %>% 
   unnest %>% 
   mutate(
@@ -448,7 +464,7 @@ toplo3 <- rnd %>%
   rename(`Stream class` = estcat)
 
 toplo4 <- rnd %>% 
-  select(id, scrs, estcat, prfcat) %>% 
+  dplyr::select(id, scrs, estcat, prfcat) %>% 
   unnest %>% 
   mutate(
     prfcat = paste0(prfcat, ' (', estcat, ')'), 
@@ -533,7 +549,7 @@ totab <- typetab %>%
     `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('**', `Reach expectation`, '**')), 
     Type = as.character(Type)
   ) %>% 
-  select(-Sites)
+  dplyr::select(-Sites)
 
 # table stuff
 cap.val <- 'Possible site types based on stream reach classification, site performance, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 5th and 95th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'

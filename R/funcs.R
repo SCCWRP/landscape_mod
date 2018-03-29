@@ -50,8 +50,8 @@ pal_difr <- colorNumeric(
 
 # pal lu
 pal_lu <- colorFactor(
-  palette = c('lightgrey', 'lightgreen', 'lightblue'),
-  domain = c('Developed', 'Open, mixed', 'Water')
+  palette = c('grey20', 'grey40', 'grey60', 'khaki3', 'khaki2'),
+  domain = c('Urban: hi', 'Urban: md', 'Urban: lo', 'Open: forest', 'Open: scrub')
 )
 
 ######
