@@ -401,7 +401,7 @@ csci_comid <- csci
 ## 
 # save all
 
-save(csci_comid, file = 'C:/proj/manuscripts/landscape_mod/ata/csci_comid.RData', compress = 'xz')
+save(csci_comid, file = 'C:/proj/manuscripts/landscape_mod/data/csci_comid.RData', compress = 'xz')
 save(comid_prd, file = 'C:/proj/manuscripts/landscape_mod/data/comid_prd.RData', compress = 'xz')
 save(rf_core,file = "C:/proj/manuscripts/landscape_mod/data/rf_core.Rdata", compress = 'xz')
 save(rf_full,file = "C:/proj/manuscripts/landscape_mod/data/rf_full.Rdata", compress = 'xz')
