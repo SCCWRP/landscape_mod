@@ -78,9 +78,9 @@ Many streams are failing to achieve desired biological condition and require man
 
 ## Study area and data sources
 
-```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Land use (left) and distribution of stream CSCI scores (right) in California. Grey lines are ecoregions in California, CV: Central Valley, Ch: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Urban and agricultural land use (left) and distribution of observed stream CSCI scores (right) in California. Cover of urban and agricultural land use in stream catchments was used to develop landscape models for stream reach expectations of bioassessment scores.  Grey lines are ecoregions in California, CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
-lucol <- c('khaki2', 'lightsalmon', 'lightgrey')
+lucol <- c('lightsalmon', 'grey')
 
 # country base
 country <- map_data('state')
@@ -90,7 +90,7 @@ calista <- map_data('state', region = 'california')
 
 # psa data fortified
 psadat <- calipsa %>% 
-  as('Spatial') %>% 
+  as('Spatial') %>%
   as.data.frame %>% 
   rownames_to_column('id') %>% 
   dplyr::select(id, PSA6) %>% 
@@ -116,7 +116,8 @@ psalab <- psalab %>%
 toplo <- ludat %>% 
   as('Spatial') %>% 
   fortify %>% 
-  mutate(id = factor(id, levels = c(1, 2, 3), labels = c('Open, mixed', 'Agriculture', 'Urban'))) %>% 
+  filter(id %in% c(2, 3)) %>% 
+  mutate(id = factor(id, levels = c(2, 3), labels = c('Agriculture', 'Urban'))) %>% 
   rename(`Land use` = id)
 
 # csci seq for color pal
@@ -125,8 +126,8 @@ palseq <- seq(palseq[1], palseq[2], length = 5)
 
 p1 <- ggplot() + 
   geom_polygon(data = toplo, aes(x = long, y = lat, fill = `Land use`, group = group)) + 
-  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.1) +
-  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5))
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.7), size = 0.1) +
+  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.7))
 
 # text with outline magic
 theta <- seq(pi/8, 2*pi, length.out=16)
@@ -322,7 +323,7 @@ p2 <- ggplot() +
     legend.box.just = 'left',
     axis.title = element_blank()
     ) + 
-  ggtitle('(b) Reach predictions and station scores for the CSCI')
+  ggtitle('(b) Reach median predictions and observed scores for the CSCI')
 p2leg <- g_legend(p2) 
 p2 <- p2 + theme(legend.position = 'none')
 
@@ -367,34 +368,18 @@ prfcds <- data.frame(
   cls = c('over scoring', 'expected', 'under scoring')
 )
 
-prflev <- c(
-  'over scoring (lu)', 'expected (lu)', 'under scoring (lu)',
-  'over scoring (pu)', 'expected (pu)', 'under scoring (pu)',
-  'over scoring (pc)', 'expected (pc)', 'under scoring (pc)',
-  'over scoring (lc)', 'expected (lc)', 'under scoring (lc)')
+prflev <- c('over scoring', 'expected', 'under scoring')
 
-# color palette for CSCI scoring performance
-pal_prf2 <- colorFactor(
-  palette = c(
-    colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(90, 74, 58)],
-    colorRampPalette(brewer.pal(9, 'Blues'))(100)[c(42, 26, 10)],
-    colorRampPalette(brewer.pal(9, 'Reds'))(100)[c(42, 26, 10)],
-    colorRampPalette(brewer.pal(9, 'Reds'))(100)[c(90, 74, 58)]
-  ),
-  na.color = 'yellow',
-  levels = prflev
-)
-
-scrs <- c(1.35, 1.15, 0.84, 0.7, 1.25, 0.95, 0.75, 0.55, 1.1, 0.85, 0.7, 0.35, 1, 0.75, 0.45, 0.15)
+scrs <- c(1.35, 1.15, 0.84, 0.6, 1.25, 0.95, 0.75, 0.53, 1.1, 0.83, 0.53, 0.35, 1, 0.75, 0.45, 0.15)
 
 # plot data
-set.seed(4356)
+set.seed(433)
 rnd <- data.frame(
   id = factor(rev(1:sel), levels = rev(1:sel)),
   ave = rep(seq(0.5, 1.1, length = 4), each = 4),
   sds = sample(c(0.13), sel, replace = T), 
   scrs = rev(scrs)
-) %>%
+  ) %>%
   group_by(id, scrs) %>% 
   nest %>%
   mutate(
@@ -467,12 +452,14 @@ toplo4 <- rnd %>%
   dplyr::select(id, scrs, estcat, prfcat) %>% 
   unnest %>% 
   mutate(
-    prfcat = paste0(prfcat, ' (', estcat, ')'), 
     prfcat = factor(prfcat, levels = prflev),
-    estcat = factor(estcat, levels = catcds$cls), 
+    estcat = factor(estcat, levels = catcds$clsabv, labels = catcds$cls),
     hght = scrs
   ) %>% 
-  rename(`Site performance` = prfcat)
+  rename(
+    `Relative site score` = prfcat,
+    `Stream class` = estcat
+    )
 
 ##
 # plots
@@ -517,11 +504,11 @@ p3 <- pbase +
 p4 <- pbase +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
   geom_vline(xintercept = thrsh, linetype = 'dashed') +
-  geom_point(data = toplo4, aes(x = scrs, group = id), size = 3) + 
-  geom_point(data = toplo4, aes(x = scrs, group = id, colour = `Site performance`), size = 2.5) + 
+  geom_point(data = toplo4, aes(x = scrs, group = id, shape = `Relative site score`, fill = `Stream class`), size = 3) + 
   scale_fill_manual(values = exp_col, guide = F) +
   scale_colour_manual('Site performance', values = pal_prf2(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
-  guides(colour = guide_legend(title.position = 'top')) +
+  scale_shape_manual(values = c(24, 21, 25)) +  
+  guides(colour = guide_legend(title.position = 'top'), shape = guide_legend(title.position = 'top')) +
   ggtitle('(d) Site performance by\nstream classification')
 
 p3leg <- g_legend(p3)
@@ -596,7 +583,7 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Figure* Summary of extent of reach classification, site performance, selected examples
 
-```{r pritem, fig.height = 4.5, fig.width = 7, fig.cap = 'Template provided to stakeholders for priorization of recommended actions for each stream type.  The stream types (Table \\@ref(tab:typetab)) relate to the stream class for the biological expectation (lu: likely unconstrained, pu: possibly unconstrained, pc: possibly constrained, lc: likely constrained), site performance from observed CSCI score (os: over scoring, e: expected, us: under scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the range of expected CSCI score for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for priorization of recommended actions for each stream type.  The stream types (Table \\@ref(tab:typetab)) relate to the stream class for the biological expectation (lu: likely unconstrained, pu: possibly unconstrained, pc: possibly constrained, lc: likely constrained), site performance from observed CSCI score (os: over scoring, e: expected, us: under scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the range of expected CSCI score for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
 sts <- paste('Site', seq(1:16))
 
 # example data, csci scores
@@ -645,14 +632,16 @@ p1 <- ggplot(plot_ex, aes(x = typelv)) +
   geom_errorbar(aes(ymin = minv, ymax = maxv, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.2) + 
   geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.7) + 
   geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
-  geom_point(aes(y  = `CSCI score`, fill = `Stream\nclass`), shape = 21, size = 4, alpha = 0.8) +
+  geom_point(aes(y  = `CSCI score`, fill = `Stream\nclass`, shape = perf), size = 4, alpha = 0.8) +
   geom_hline(yintercept = 0.79, linetype = 'dashed') +
-  scale_colour_manual(values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
+  scale_colour_manual('Stream class', values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
                     guide = guide_legend(direction = 'vertical', title.position = 'left', ncol = 2)) +
   scale_fill_manual(values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
                     guide = F) +
+  scale_shape_manual('Relative site score', values = c(25, 21, 24)) +
   scale_x_discrete('Reach type', limits = rev(levels(plot_ex$typelv)), labels = rev(c(1:nrow(plot_ex)))) +
   scale_y_continuous('CSCI score') +
+  guides(colour = guide_legend(title.position = 'top', ncol = 2), shape = guide_legend(title.position = 'top')) + 
   mythm +
   coord_flip() + 
   ggtitle('')
@@ -682,7 +671,7 @@ p2 <- ggplot(pritab, aes(x = Type, y = 1)) +
 grid.arrange(
   p1leg, 
   arrangeGrob(p1, p2, ncol = 2, widths = c(1, 0.8)), 
-  heights = c(0.2, 1)
+  heights = c(0.25, 1)
 )
 ```
 

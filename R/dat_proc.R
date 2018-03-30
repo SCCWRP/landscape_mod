@@ -50,7 +50,7 @@ psalab <- psalab %>%
     Region = psalab$PSA6,
     Region = factor(Region, 
       levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
-      labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
+      labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC')
     )
   )
 
