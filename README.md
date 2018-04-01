@@ -11,6 +11,7 @@ All files created using `R/dat_proc.R` (sometimes not from local source)
 * `csci_raw.RData` data.frame of current csci scores by lat/lon
 * `csci_comid.RData` csci scores by comid
 * `ludat.RData` sf object of california land use by ag, urban, other
+* `nhdplo.RData` statewide median csci prediction, simplified and fortified for figures
 * `psalab.RData` data.frame and psa centroids, labels
 * `rf_core.RData` core quantile random forest model of csci scores
 * `rf_full.RData` full quantile random forest model of csci scores

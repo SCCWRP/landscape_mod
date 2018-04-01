@@ -52,6 +52,7 @@ load(file = '../data/shed.RData')
 load(file = '../data/spat.RData')
 load(file = '../data/scrs.RData')
 load(file = '../data/csci_comid.RData')
+load(file = '../data/nhdplo.RData')
 ```
 
 # Abstract 
@@ -576,13 +577,7 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 *Figure* Statewide map. 
 
-```{r eval = F}
-library(tidyverse)
-
-load(file = '../data/comid_prd.RData')
-load(file = '../data/csci_comid.RData')
-load(file = '../data/csci_raw.RData')
-
+```{r calires, eval = F}
 # state base
 calista <- map_data('state', region = 'california')
 
@@ -617,6 +612,10 @@ caldat <- caldat %>%
   filter(SiteSet %in% 'Cal') %>% 
   mutate(RegImpQ = factor(RegImpQ, levels = c('T1', 'T2', 'T3', 'T4'), labels = c('1^st', '2^nd', '3^rd', '4^th')))
 
+# all comid preds
+calmed <- nhdplo %>% 
+  na.omit
+
 # impervious quartile colors 
 impcol <- RColorBrewer::brewer.pal(9, 'Greys')[c(3, 5, 7, 9)]
 
@@ -625,15 +624,26 @@ palseq <- range(csci_raw$CSCI, na.rm = T)
 palseq <- seq(palseq[1], palseq[2], length = 5)
 
 p1 <- ggplot(caldat, aes(x = Longitude, y = Latitude, colour = RegImpQ)) +
-  scale_colour_manual("Imperviousness, quartiles by region", values = impcol, labels = parse(text = levels(caldat$RegImpQ))) + 
+  scale_colour_manual(values = impcol, labels = parse(text = levels(caldat$RegImpQ))) + 
   geom_point(size = 1.25, alpha = 0.8) +
-  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
-  geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
   coord_map() + 
+  guides(colour = guide_legend("Imperviousness, quartiles by region", title.position = 'top')) +
   theme_void(base_family = 'serif') + 
   theme(legend.position = 'top')
 
+p2 <- ggplot(calmed) +
+  geom_path(aes(x = long, y = lat, group = id, colour = full0.50), size = 0.20) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
+  coord_map() + 
+  scale_colour_gradientn(colours = pal(range(toplo$full0.50, na.rm = T))) +
+  guides(colour = guide_colourbar('Reach predicted median CSCI', barheight = 0.5, barwidth = 8, title.position = 'top')) +
+theme_void(base_family = 'serif') + 
+  theme(legend.position = 'top')
 
+png('figs/calires.png', height = 7, width = 8.5, units = 'in', res = 300, family = 'serif')
+grid.arrange(p1, p2, ncol = 2)
+dev.off()
 
 ```
 

@@ -57,6 +57,36 @@ psalab <- psalab %>%
 save(psalab, file = 'data/psalab.RData', compress = 'xz')
 
 ##
+# cali NHD simplify and save
+
+load(file = 'data/comid_prd.RData')
+
+# all cali hydro, really simplified
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+  spTransform(prj) %>% 
+  st_as_sf %>% 
+  st_simplify(dTolerance = 0.5, preserveTopology = T)
+
+# comid predictions to join with calinhd
+comid_prd <- comid_prd %>% 
+  dplyr::select(COMID, full0.50)
+
+# fortified calinhd, joind with comid pred
+nhdplo <- calinhd %>% 
+  filter(COMID %in% unique(comid_prd$COMID)) %>% 
+  dplyr::select(COMID) %>% 
+  as('Spatial')
+comidid <- nhdplo@data %>% 
+  dplyr::select(COMID) %>% 
+  rownames_to_column('id')
+nhdplo <- nhdplo %>% 
+  fortify %>% 
+  left_join(comidid, by = 'id') %>%  
+  inner_join(comid_prd, by = 'COMID')
+
+save(nhdplo, file = 'data/nhdplo.RData', compress = 'xz')
+
+##
 # SMC watershed 
 
 shd_pth <- 'S:/Spatial_Data/SMCBasefiles/Boundaries/SMCSheds/SMCSheds2009.shp'

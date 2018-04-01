@@ -424,7 +424,7 @@ getcls <- function(datin, thrsh = 0.79, tails = 0.05,  modls = c('core', 'full')
   dat <- datin
   st_geometry(dat) <- NULL
   dat <- dat %>% 
-    select(matches(paste0('^COMID$|^', modls, '0'))) %>% 
+    dplyr::select(matches(paste0('^COMID$|^', modls, '0'))) %>% 
     gather('var', 'val', -COMID) %>% 
     arrange(COMID, var) %>% 
     group_by(COMID) %>% 
@@ -507,7 +507,7 @@ getcls2 <- function(datin, thrsh = 0.79, tails = 0.05, modls = c('core', 'full')
   dat <- datin
   st_geometry(dat) <- NULL
   dat <- dat %>% 
-    select(matches(paste0('^COMID$|^', modls, '0'))) %>% 
+    dplyr::select(matches(paste0('^COMID$|^', modls, '0'))) %>% 
     gather('var', 'val', -COMID) %>% 
     arrange(COMID, var) %>% 
     group_by(COMID) %>% 
@@ -542,7 +542,7 @@ getcls2 <- function(datin, thrsh = 0.79, tails = 0.05, modls = c('core', 'full')
       })
       
     ) %>% 
-    select(-data) %>% 
+    dplyr::select(-data) %>% 
     unnest 
   
   # subset lbs by those in interval
@@ -577,7 +577,7 @@ site_exp <- function(datin, scrs, thrsh = 0.79, tails = 0.05, lbs = list('over s
   # site csci scores
   scrs <- scrs %>% 
     mutate(COMID = as.character(COMID)) %>% 
-    select(COMID, StationCode, csci, lat, long)
+    dplyr::select(COMID, StationCode, csci, lat, long)
   
   # filter comids with csci scores, classify, join with scores
   incl <- datin %>% 
@@ -587,7 +587,7 @@ site_exp <- function(datin, scrs, thrsh = 0.79, tails = 0.05, lbs = list('over s
     left_join(scrs, by = 'COMID') %>% 
     arrange(medv) %>% 
     mutate(StationCode = factor(StationCode, levels = unique(StationCode))) %>% 
-    select(-medv)
+    dplyr::select(-medv)
   
   # get CSCI performance (over/under)
   incl <- incl %>% 
@@ -643,7 +643,7 @@ get_pri_inp <- function(input, plot_ex, scr_exp_map){
   
   # get plot example site, types
   ex_jn <- plot_ex %>% 
-    select(Site, typelv)
+    dplyr::select(Site, typelv)
   
   # site classications
   scr_exp_map <- scr_exp_map %>%
@@ -676,9 +676,9 @@ get_pri_inp <- function(input, plot_ex, scr_exp_map){
     ) %>%
     left_join(ex_jn, by = 'Site') %>%
     mutate(typelv = as.character(typelv)) %>%
-    select(-Site) %>%
+    dplyr::select(-Site) %>%
     left_join(scr_exp_map, ., by = 'typelv') %>%
-    select(StationCode, COMID, csci, perf_mlt, typelv, lat, long, Priority) %>% 
+    dplyr::select(StationCode, COMID, csci, perf_mlt, typelv, lat, long, Priority) %>% 
     split(.$Priority) %>% 
     enframe('Priority')
   
