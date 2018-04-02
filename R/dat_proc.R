@@ -6,7 +6,10 @@ library(rgdal)
 library(sf)
 library(rmapshaper)
 library(proj4shortcut)
+library(leaflet)
+library(RColorBrewer)
 
+source('R/funcs.R')
 prj <- geo_wgs84
 
 ##
@@ -57,7 +60,7 @@ psalab <- psalab %>%
 save(psalab, file = 'data/psalab.RData', compress = 'xz')
 
 ##
-# cali NHD simplify and save
+# cali NHD simplify, fortify, and save
 
 load(file = 'data/comid_prd.RData')
 
@@ -85,6 +88,71 @@ nhdplo <- nhdplo %>%
   inner_join(comid_prd, by = 'COMID')
 
 save(nhdplo, file = 'data/nhdplo.RData', compress = 'xz')
+
+######
+# cali nhd stream classes, simplified, fortified, and saved
+
+data(comid_prd)
+
+# comid predictions to join with calinhd
+comid_prd <- comid_prd %>% 
+  dplyr::select(COMID, matches('^full|^COMID$'))
+
+# all cali hydro, really simplified
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+  spTransform(prj) %>% 
+  st_as_sf %>% 
+  st_simplify(dTolerance = 0.5, preserveTopology = T) %>% 
+  filter(COMID %in% unique(comid_prd$COMID)) %>% 
+  dplyr::select(COMID) %>%
+  inner_join(comid_prd, by = 'COMID')
+
+# get biological condition expectations
+cls <- getcls2(calinhd, thrsh = 0.79, tails = 0.05, modls = 'full')
+
+calicls <- calinhd %>% 
+  left_join(cls, by = 'COMID')
+
+caliclsid <- calicls %>% 
+  as('Spatial') %>% 
+  .@data %>% 
+  dplyr::select(COMID, strcls) %>% 
+  rownames_to_column('id') 
+caliclsplo <- calicls %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  left_join(caliclsid, by = 'id') 
+
+save(caliclsplo, file = 'data/caliclsplo.RData', compress = 'xz')
+
+######
+# all cali CSCI site expectations
+
+# all comid performance
+data(csci_comid)
+
+# all cali hydro, really simplified
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+  spTransform(prj) %>% 
+  st_as_sf %>% 
+  st_simplify(dTolerance = 0.5, preserveTopology = T) %>% 
+  filter(COMID %in% unique(comid_prd$COMID)) %>% 
+  dplyr::select(COMID) %>%
+  inner_join(comid_prd, by = 'COMID')
+
+# format csci data for site_exp function
+csci_comid <- csci_comid %>% 
+  dplyr::select(COMID, StationCode, CSCI, SampleDate, FieldReplicate, New_Lat, New_Long) %>% 
+  rename(
+    csci = CSCI, 
+    lat = New_Lat, 
+    long = New_Long
+  )
+
+# get site expectations
+caliexp <- site_exp(calinhd, csci_comid, thrsh = 0.79, tails = 0.05, modls = 'full')
+
+save(caliexp, file = 'data/caliexp.RData', compress = 'xz')
 
 ##
 # SMC watershed 

@@ -53,6 +53,8 @@ load(file = '../data/spat.RData')
 load(file = '../data/scrs.RData')
 load(file = '../data/csci_comid.RData')
 load(file = '../data/nhdplo.RData')
+load(file = '../data/caliclsplo.RData')
+load(file = '../data/caliexp.RData')
 ```
 
 # Abstract 
@@ -571,82 +573,162 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 ### State-wide patterns
 
+Figure \@ref(fig:calires).
+
 * Where does the model perform well, how does performance vary with validation and calibration datasets.
 
 * What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
 
-*Figure* Statewide map. 
-
-```{r calires, eval = F}
+```{r eval = F}
+######
 # state base
 calista <- map_data('state', region = 'california')
 
 # psa data fortified
-psadat <- calipsa %>% 
+psadat <- calipsa %>%
   as('Spatial') %>%
-  as.data.frame %>% 
-  rownames_to_column('id') %>% 
-  dplyr::select(id, PSA6) %>% 
-  rename(PSA = PSA6) %>% 
-  mutate(Region = factor(PSA, 
+  as.data.frame %>%
+  rownames_to_column('id') %>%
+  dplyr::select(id, PSA6) %>%
+  rename(PSA = PSA6) %>%
+  mutate(Region = factor(PSA,
                          levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
                          labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
   ))
-psafrt <- calipsa %>% 
-  dplyr::select(-PSA_REGION, -AREA, -PERIMETER, -PSA8) %>% 
-  as('Spatial') %>% 
-  fortify %>% 
+psafrt <- calipsa %>%
+  dplyr::select(-PSA_REGION, -AREA, -PERIMETER, -PSA8) %>%
+  as('Spatial') %>%
+  fortify %>%
   left_join(psadat, by = 'id')
 
 # station calibration data
-caldat <- csci_comid %>% 
+caldat <- csci_comid %>%
   dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, RegImpQ)
-locs <- csci_raw %>% 
-  dplyr::select(MasterID, Latitude, Longitude) %>% 
-  rename(StationCode = MasterID) %>% 
+locs <- csci_raw %>%
+  dplyr::select(MasterID, Latitude, Longitude) %>%
+  rename(StationCode = MasterID) %>%
   unique
-caldat <- caldat %>% 
-  left_join(locs, by = 'StationCode') %>% 
-  filter(SelectedSample != 'NotSelected') %>% 
-  filter(!is.na(Latitude)) %>% 
-  filter(SiteSet %in% 'Cal') %>% 
+caldat <- caldat %>%
+  left_join(locs, by = 'StationCode') %>%
+  filter(SelectedSample != 'NotSelected') %>%
+  filter(!is.na(Latitude)) %>%
+  filter(SiteSet %in% 'Cal') %>%
   mutate(RegImpQ = factor(RegImpQ, levels = c('T1', 'T2', 'T3', 'T4'), labels = c('1^st', '2^nd', '3^rd', '4^th')))
 
 # all comid preds
-calmed <- nhdplo %>% 
+calmed <- nhdplo %>%
   na.omit
 
-# impervious quartile colors 
+# impervious quartile colors
 impcol <- RColorBrewer::brewer.pal(9, 'Greys')[c(3, 5, 7, 9)]
 
 # csci seq for color pal
-palseq <- range(csci_raw$CSCI, na.rm = T) 
+palseq <- range(csci_raw$CSCI, na.rm = T)
 palseq <- seq(palseq[1], palseq[2], length = 5)
 
+# relative site scores
+relscr <- caliexp %>%
+  dplyr::select(lat, long, perf, strcls) %>%
+  filter(!is.na(perf))
+
+# calibration sites with impervious
 p1 <- ggplot(caldat, aes(x = Longitude, y = Latitude, colour = RegImpQ)) +
-  scale_colour_manual(values = impcol, labels = parse(text = levels(caldat$RegImpQ))) + 
+  scale_colour_manual(values = impcol, labels = parse(text = levels(caldat$RegImpQ))) +
   geom_point(size = 1.25, alpha = 0.8) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
-  coord_map() + 
-  guides(colour = guide_legend("Imperviousness, quartiles by region", title.position = 'top')) +
-  theme_void(base_family = 'serif') + 
-  theme(legend.position = 'top')
+  coord_map() +
+  guides(colour = guide_legend("Imperviousness quartiles by region\n", title.position = 'top')) +
+  theme_void(base_family = 'serif') +
+  theme(
+    legend.position = c(0.5, 1.06),
+    legend.direction = 'horizontal',
+    plot.margin = grid::unit(c(15, 0, 0, 0), units = 'pt')
+  )
 
+# median csci predictions
 p2 <- ggplot(calmed) +
-  geom_path(aes(x = long, y = lat, group = id, colour = full0.50), size = 0.20) +
+  geom_path(aes(x = long, y = lat, group = id, colour = full0.50), size = 0.30) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
+  coord_map() +
+  scale_colour_gradientn(colours = pal(range(calmed$full0.50, na.rm = T))) +
+  guides(colour = guide_colourbar('Reach predicted median CSCI\n', barheight = 0.5, barwidth = 8, title.position = 'top')) +
+  theme_void(base_family = 'serif') +
+  theme(
+    legend.position = c(0.5, 1.06),
+    legend.direction = 'horizontal',
+    plot.margin = grid::unit(c(15, 0, 0, 0), units = 'pt')
+  )
+
+# comid class
+p3 <- ggplot(caliclsplo) +
+  geom_path(aes(x = long, y = lat, group = id, colour = strcls), size = 0.30) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
+  coord_map() +
+  scale_colour_manual(values = pal_exp(levels(caliclsplo$strcls))) +
+  guides(colour = guide_legend('Reach classification', title.position = 'top', ncol = 2)) +
+  theme_void(base_family = 'serif') +
+  theme(
+    legend.position = c(0.5, 1.06),
+    legend.direction = 'horizontal',
+    plot.margin = grid::unit(c(15, 0, 0, 0), units = 'pt')
+    )
+
+# relative site scores
+undscr <- relscr %>% 
+  filter(perf %in% 'under scoring')
+p4<- ggplot(undscr) +
+  geom_point(aes(x = long, y = lat, fill = strcls, shape = perf)) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
   coord_map() + 
-  scale_colour_gradientn(colours = pal(range(toplo$full0.50, na.rm = T))) +
-  guides(colour = guide_colourbar('Reach predicted median CSCI', barheight = 0.5, barwidth = 8, title.position = 'top')) +
-theme_void(base_family = 'serif') + 
-  theme(legend.position = 'top')
+  scale_fill_manual(values = pal_exp(levels(caliexp$strcls)), guide = F) +
+  scale_shape_manual(values = c(25)) +
+  theme_void(base_family = 'serif', base_size = 14) + 
+  theme(
+    legend.position = c(0.5, 1.04), 
+    plot.margin = grid::unit(c(7, 0, 0, 0), units = 'pt'),
+    legend.title = element_blank()
+  )
+expscr <- relscr %>% 
+  filter(perf %in% 'expected')
+p5<- ggplot(expscr) +
+  geom_point(aes(x = long, y = lat, fill = strcls, shape = perf)) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
+  coord_map() + 
+  scale_fill_manual(values = pal_exp(levels(caliexp$strcls)), guide = F) +
+  scale_shape_manual(values = c(21)) +
+  theme_void(base_family = 'serif', base_size = 14) + 
+  theme(
+    legend.position = c(0.5, 1.04), 
+    plot.margin = grid::unit(c(7, 0, 0, 0), units = 'pt'), 
+    legend.title = element_blank()
+  )
+ovrscr <- relscr %>% 
+  filter(perf %in% 'over scoring')
+p6<- ggplot(ovrscr) +
+  geom_point(aes(x = long, y = lat, fill = strcls, shape = perf)) +
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
+  coord_map() + 
+  scale_fill_manual(values = pal_exp(levels(caliexp$strcls)), guide = F) +
+  scale_shape_manual(values = c(24)) +
+  theme_void(base_family = 'serif', base_size = 14) + 
+  theme(
+    legend.position = c(0.5, 1.04), 
+    plot.margin = grid::unit(c(7, 0, 0, 0), units = 'pt'),
+    legend.title = element_blank()
+  )
 
-png('figs/calires.png', height = 7, width = 8.5, units = 'in', res = 300, family = 'serif')
-grid.arrange(p1, p2, ncol = 2)
+png('figs/calires.png', height = 8.05, width = 8.5, units = 'in', res = 400, family = 'serif')
+grid.arrange(
+  arrangeGrob(p1, p2, p3, ncol = 3, top = textGrob('(a) Calibration sites, median CSCI predictions, and reach class\n\n', hjust = 0.98)),
+  arrangeGrob(p4, p5, p6, ncol = 3, top = textGrob('(b) Relative CSCI scores from reach classes\n', hjust = 1.4)),
+  ncol = 1, heights = c(1.11, 1)
+)
 dev.off()
 
 ```
-
+```{r calires, fig.cap = "Statewide application of landscape models showing (a) the calibration data stratified by ecoregion and imperviousness (top left), median predicted CSCI scores for each stream reach (top center), stream reach classifications (top right), and (b) relative site scores based on observed CSCI (Figure \\@ref(fig:calimap)) and reach class.  Relative scores are over-scoring, as expected, or under-scoring based on the observed score for the reach classification. Colors in (b) correspond to the stream reach classifications on the top right."}
+knitr::include_graphics('figs/calires.png')
+```
 
 ### Case study
 
