@@ -55,6 +55,7 @@ load(file = '../data/csci_comid.RData')
 load(file = '../data/nhdplo.RData')
 load(file = '../data/caliclsplo.RData')
 load(file = '../data/caliexp.RData')
+load(file = '../data/comid_prd.RData')
 ```
 
 # Abstract 
@@ -573,14 +574,106 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 ### State-wide patterns
 
-Figure \@ref(fig:calires).
+* Where does the model perform well, how does performance vary with validation and calibration datasets (Table \@ref(tab:perftab)).
 
-* Where does the model perform well, how does performance vary with validation and calibration datasets.
+```{r perftab}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, full0.50)
 
-* What is the consistency of patterns? For example, percent stream miles as xyz by PSA.
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  rename(
+    observed = CSCI,
+    predicted = full0.50
+  ) %>% 
+  dplyr::select(SiteSet, PSA6c, observed, predicted)
+
+# total dataset performance
+totdf <- dat %>% 
+  group_by(SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+    
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    ttst <- with(x, t.test(observed, predicted, na.rm = T))
+    tval <- ttst$statistic
+    pval <- p_ast(ttst$p.value)
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, tval, pval, corv, errv)
+    return(out)
+    
+  })) %>% 
+  unnest
+
+# PSA regional performance
+regdf <- dat %>% 
+  group_by(PSA6c, SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+    
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    ttst <- with(x, t.test(observed, predicted, na.rm = T))
+    tval <- ttst$statistic
+    pval <- p_ast(ttst$p.value)
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, tval, pval, corv, errv)
+    return(out)
+    
+  })) %>% 
+  unnest %>% 
+  rename(set = PSA6c) %>% 
+  dplyr::select(SiteSet, set, everything())
+
+# combine and prep for table
+allerr <- totdf %>% 
+  bind_rows(regdf) %>% 
+  dplyr::select(-pval) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
+  mutate(
+    sdobs = paste0('(', sdobs, ')'), 
+    sdprd = paste0('(', sdprd, ')'), 
+    set = factor(set, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN'))
+  ) %>% 
+  unite('Observed', aveobs, sdobs, sep = ' ') %>% 
+  unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
+  rename(
+    n = nval,
+    Correlation = corv, 
+    RMSE = errv, 
+    `t-stat` = tval, 
+    Location = set, 
+    Dataset = SiteSet
+  ) %>% 
+  arrange(Dataset, Location) %>% 
+  mutate(Dataset = ifelse(duplicated(Dataset), '', Dataset))
+
+# table stuff
+cap.val <- 'Performance of landscape models by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure \\@ref(fig:calires)) and individual regions of California (Figure \\@ref(fig:calimap) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted values of each dataset are shown.  Correlations, root mean squared errors, and t-statistics for comparisons of observed and predicted values are also shown to evaluate model perforance.  None of the t-statistics were significant at alpha of 0.05.'
+
+# table
+knitr::kable(allerr, booktabs = T, caption = cap.val)
+```
+
+* What is the consistency of patterns? For example, percent stream miles as xyz by PSA. Figure \@ref(fig:calires).
 
 ```{r eval = F}
-######
 # state base
 calista <- map_data('state', region = 'california')
 
