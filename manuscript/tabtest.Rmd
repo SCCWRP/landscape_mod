@@ -1,0 +1,108 @@
+---
+title: "Prioritizing management goals for stream biological integrity within the context of landscape constraints"
+output: 
+  bookdown::word_document2:
+  reference_docx: my_styles.docx
+bibliography: refs.bib
+author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Karin Wisenbaker (karin@aquaticbioassay.com), Joshua Westfall (jwestfall@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Chad Loflen (Chad.Loflen@waterboards.ca.gov), Martha Sutula (marthas@sccwrp.org), Eric D. Stein (erics@sccwrp.org)'
+urlcolor: blue
+link-citations: true
+---
+  
+```{r setup, echo = F, warning = F, message = F, results = 'hide'}
+# figure path, chunk options
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%',
+                      fig.process = function(x) {
+                        x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+                        if (file.rename(x, x2)) x2 else x
+                      })
+
+# libraries
+library(tidyverse)
+library(Hmisc)
+library(Jabbrev)
+library(gridExtra)
+library(sf)
+library(maptools)
+library(maps)
+library(grid)
+library(ggrepel)
+library(RColorBrewer)
+library(ggridges)
+library(scales)
+library(quantregForest)
+library(leaflet)
+library(raster)
+library(flextable)
+library(officer)
+
+
+# functions (incl. color palettes)
+source('../R/funcs.R')
+
+# extract bib entries from online
+# bib_scrp('manu_draft.Rmd', 'refs.bib')
+
+# data
+load(file = '../data/scrs.RData')
+load(file = '../data/csci_comid.RData')
+load(file = '../data/nhdplo.RData')
+load(file = '../data/caliclsplo.RData')
+load(file = '../data/calicls.RData')
+load(file = '../data/caliexp.RData')
+```
+
+Here's some text with reference to my table \@ref(tab:reltot).
+
+*Table \@ref(tab:reltot): \(\#tab:reltot) Here's the caption*
+```{r reltot}
+cscipsa <- csci_comid %>% 
+  dplyr::select(COMID, PSA6c) %>% 
+  unique %>% 
+  mutate(COMID = as.character(COMID))
+reltot <- caliexp %>% 
+  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
+  filter(!is.na(strcls)) %>% 
+  left_join(cscipsa, by = 'COMID') %>% 
+  rename(Region = PSA6c) %>% 
+  group_by(Region, perf) %>% 
+  summarise(
+    n = n(), 
+    csciave = mean(csci, na.rm = T), 
+    csciave = round(csciave, 2),
+    cscisd = sd(csci, na.rm = T), 
+    cscisd = round(cscisd, 2), 
+    cscisd = paste0('(', cscisd, ')')
+  ) %>% 
+  group_by(Region) %>% 
+  mutate(
+    perc = n / sum(n), 
+    perc = round(100 * perc, 0), 
+    perc = paste0('(', perc, ')')
+  ) %>% 
+  unite('csci', csciave, cscisd, sep = ' ') %>% 
+  unite('n_perc', n, perc, sep = ' ') %>% 
+  complete(Region, perf, fill = list('n_perc' = '0 (0)', csci = '-')) %>% 
+  gather('var', 'val', -Region, -perf) %>%
+  arrange(Region, perf) %>%
+  unite('colnm', perf, var, sep = '-') %>%
+  spread(colnm, val)
+
+brd <- fp_border(color="black")
+
+tab <- regulartable(reltot) %>% 
+  font(fontname = 'Times', part = 'all') %>% 
+  fontsize(size = 12, part = 'all') %>% 
+  border_remove %>%
+  set_header_labels(Region = 'Region', `expected-csci` = 'CSCI', `expected-n_perc` = 'n (%)', `over scoring-csci` = 'CSCI', `over scoring-n_perc` = 'n (%)', `under scoring-csci` = 'CSCI', `under scoring-n_perc` = 'n (%)') %>% 
+  add_header(Region = '', `expected-csci` = 'expected', `expected-n_perc` = 'expected', `over scoring-csci` = 'over scoring', `over scoring-n_perc` = 'over scoring', `under scoring-csci` = 'under scoring', `under scoring-n_perc` = 'under scoring') %>% 
+  merge_h(part = 'header') %>% 
+  hline(part = 'header', border = brd) %>% 
+  align(align = 'left', part = 'all') %>% 
+  autofit 
+tab
+```
+
+
+
+

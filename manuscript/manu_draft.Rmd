@@ -33,6 +33,8 @@ library(scales)
 library(quantregForest)
 library(leaflet)
 library(raster)
+library(flextable)
+library(officer)
 
 # functions (incl. color palettes)
 source('../R/funcs.R')
@@ -57,6 +59,7 @@ load(file = '../data/caliclsplo.RData')
 load(file = '../data/calicls.RData')
 load(file = '../data/caliexp.RData')
 load(file = '../data/comid_prd.RData')
+load(file = '../data/strclslen.RData')
 ```
 
 # Abstract 
@@ -673,7 +676,7 @@ cap.val <- 'Performance of landscape models by calibration and validation datase
 knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
-* What is the consistency of patterns? For example, percent stream miles as xyz by PSA. Figure \@ref(fig:calires).
+* Statewide patterns Figure \@ref(fig:calires).
 
 ```{r eval = F}
 # state base
@@ -823,6 +826,157 @@ dev.off()
 ```
 ```{r calires, fig.cap = "Statewide application of landscape models showing (a) the calibration data stratified by ecoregion and imperviousness (top left), median predicted CSCI scores for each stream reach (top center), stream reach classifications (top right), and (b) relative site scores based on observed CSCI (Figure \\@ref(fig:calimap)) and reach class.  Relative scores are over-scoring, as expected, or under-scoring based on the observed score for the reach classification. Colors in (b) correspond to the stream reach classifications on the top right."}
 knitr::include_graphics('figs/calires.png')
+```
+
+* Stream lengths by class, region, Table \@ref(tab:clstot)
+
+*Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and in major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in km with the percentage of the total length in a region in parentheses. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+```{r clstot}
+st_geometry(strclslen) <- NULL
+lentot <- strclslen %>% 
+  filter(!is.na(strcls)) %>% 
+  mutate(
+    Region = factor(PSA6, 
+                  levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+                  labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC')
+    )
+  ) %>% 
+  group_by(Region, strcls) %>% 
+  summarise(len = sum(lens)) %>% 
+  spread(strcls, len, fill = 0) %>% 
+  gather('strcls', 'len', -Region) %>% 
+  group_by(Region) %>% 
+  mutate(
+    perc = 100 * len / sum(len), 
+    perc = round(perc, 0),
+    perc = paste0('(', perc, ')'),
+    len = round(len, 0), 
+    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+  ) %>% 
+  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
+  arrange(Region, strcls) %>% 
+  spread(strcls, `Stream km (%)`)
+
+lentotall <- strclslen %>% 
+  filter(!is.na(strcls)) %>% 
+  group_by(strcls) %>% 
+  summarise(len = sum(lens)) %>%
+  ungroup %>% 
+  mutate(
+    perc = 100 * len / sum(len), 
+    perc = round(perc, 0),
+    perc = paste0('(', perc, ')'),
+    len = round(len, 0), 
+    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+  ) %>% 
+  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
+  arrange(strcls) %>% 
+  mutate(Region = 'Statewide') %>% 
+  spread(strcls, `Stream km (%)`)
+
+totab <- bind_rows(lentotall, lentot)
+
+# use flextable
+brd <- fp_border(color="black")
+
+tab <- regulartable(totab) %>% 
+  font(fontname = 'Times', part = 'all') %>% 
+  fontsize(size = 12, part = 'all') %>% 
+  border_remove %>%
+  set_header_labels(Region = 'Region', `likely constrained` = 'likely', `possibly constrained` = 'possibly', `possibly unconstrained` = 'possibly', `likely unconstrained` = 'likely') %>% 
+  add_header(Region = '', `likely constrained` = 'constrained', `possibly constrained` = 'constrained', `possibly unconstrained` = 'unconstrained', `likely unconstrained` = 'unconstrained') %>% 
+  merge_h(part = 'header', i = 1) %>% 
+  hline(part = 'header', border = brd) %>% 
+  align(align = 'left', part = 'all') %>% 
+  autofit 
+tab
+```
+
+* Site summary by relative score, region Table \@ref(tab:reltot)
+
+*Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over-scoring if the observed scores are above the range of expectations at a reach, expected if within the range, and under-scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+```{r reltot, eval = T}
+cscipsa <- csci_comid %>% 
+  dplyr::select(COMID, PSA6c) %>% 
+  unique %>% 
+  mutate(COMID = as.character(COMID))
+
+# format table of site counts by region
+reltot <- caliexp %>% 
+  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
+  filter(!is.na(strcls)) %>% 
+  left_join(cscipsa, by = 'COMID') %>% 
+  rename(Region = PSA6c) %>% 
+  group_by(Region, perf) %>% 
+  summarise(
+    n = n(), 
+    csciave = mean(csci, na.rm = T), 
+    csciave = round(csciave, 2),
+    cscisd = sd(csci, na.rm = T), 
+    cscisd = round(cscisd, 2), 
+    cscisd = paste0('(', cscisd, ')')
+  ) %>% 
+  group_by(Region) %>% 
+  mutate(
+    perc = n / sum(n), 
+    perc = round(100 * perc, 0), 
+    perc = paste0('(', perc, ')')
+  ) %>% 
+  unite('csci', csciave, cscisd, sep = ' ') %>% 
+  unite('n_perc', n, perc, sep = ' ') %>% 
+  complete(Region, perf, fill = list('n_perc' = '0 (0)', csci = '-')) %>% 
+  gather('var', 'val', -Region, -perf) %>%
+  arrange(Region, perf) %>%
+  unite('colnm', perf, var, sep = '-') %>%
+  spread(colnm, val) %>%
+  .[, c(1, 6, 7, 2, 3, 4, 5)]
+
+# whole state
+reltotall <- caliexp %>% 
+  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
+  filter(!is.na(strcls)) %>% 
+  left_join(cscipsa, by = 'COMID') %>% 
+  rename(Region = PSA6c) %>% 
+  group_by(perf) %>% 
+  summarise(
+    n = n(), 
+    csciave = mean(csci, na.rm = T), 
+    csciave = round(csciave, 2),
+    cscisd = sd(csci, na.rm = T), 
+    cscisd = round(cscisd, 2), 
+    cscisd = paste0('(', cscisd, ')')
+  ) %>% 
+  ungroup %>% 
+  mutate(
+    perc = n / sum(n), 
+    perc = round(100 * perc, 0), 
+    perc = paste0('(', perc, ')')
+  ) %>% 
+  unite('csci', csciave, cscisd, sep = ' ') %>% 
+  unite('n_perc', n, perc, sep = ' ') %>% 
+  gather('var', 'val', -perf) %>%
+  arrange(perf) %>%
+  unite('colnm', perf, var, sep = '-') %>%
+  mutate(Region = 'Statewide') %>% 
+  spread(colnm, val) %>%
+  .[, c(1, 6, 7, 2, 3, 4, 5)]
+
+totab <- bind_rows(reltotall, reltot)
+
+# use flextable
+brd <- fp_border(color="black")
+
+tab <- regulartable(totab) %>% 
+  font(fontname = 'Times', part = 'all') %>% 
+  fontsize(size = 12, part = 'all') %>% 
+  border_remove %>%
+  set_header_labels(Region = 'Region', `expected-csci` = 'CSCI', `expected-n_perc` = 'n (%)', `over scoring-csci` = 'CSCI', `over scoring-n_perc` = 'n (%)', `under scoring-csci` = 'CSCI', `under scoring-n_perc` = 'n (%)') %>% 
+  add_header(Region = '', `expected-csci` = 'expected', `expected-n_perc` = 'expected', `over scoring-csci` = 'over scoring', `over scoring-n_perc` = 'over scoring', `under scoring-csci` = 'under scoring', `under scoring-n_perc` = 'under scoring') %>% 
+  merge_h(part = 'header') %>% 
+  hline(part = 'header', border = brd) %>% 
+  align(align = 'left', part = 'all') %>% 
+  autofit 
+tab
 ```
 
 ### Case study
