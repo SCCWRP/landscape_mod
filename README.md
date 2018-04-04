@@ -6,7 +6,8 @@ Materials for landcape modelling manuscript
 
 All files created using `R/dat_proc.R` (sometimes not from local source)
 
-* `caliclsplo.RData` statwide stream classifications by nhd comid, simplified and foritified for figures
+* `calicls.RData` statewide stream classifcations by nh comid, sf object
+* `caliclsplo.RData` statewide stream classifications by nhd comid, simplified and foritified for figures
 * `caliexp.RData` all CSCI site expectations and comid stream classes for cali
 * `calipsa.RData` sf object of california PSA regions
 * `comid_prd.RData` predicted csci quantiles for all comid in california

@@ -123,6 +123,7 @@ caliclsplo <- calicls %>%
   fortify %>% 
   left_join(caliclsid, by = 'id') 
 
+save(calicls, file = 'data/calicls.RData', compress = 'xz')
 save(caliclsplo, file = 'data/caliclsplo.RData', compress = 'xz')
 
 ######
