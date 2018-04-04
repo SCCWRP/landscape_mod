@@ -676,6 +676,76 @@ cap.val <- 'Performance of landscape models by calibration and validation datase
 knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
+* Model performance as a function of land use
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthrpogenic land use (eg., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, full0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  rename(
+    observed = CSCI,
+    predicted = full0.50, 
+    imperv = PctImp2006Ws, 
+    ag = TotAg2011Ws,
+    urb = TotUrb2011Ws,
+    Region = PSA6c
+  ) %>% 
+  mutate(
+    modrsd = predicted - observed
+  ) %>%
+  gather('var', 'val', urb, ag) %>% 
+  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
+
+col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
+
+# residuals by land use
+p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
+  geom_point(size = 1, alpha = 0.7) +
+  theme_bw(base_family = 'serif', base_size = 14) +
+  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
+  geom_hline(yintercept = 0) + 
+  theme(
+    strip.background = element_blank(), 
+    strip.placement = 'outside', 
+    axis.title.x = element_blank(), 
+    legend.position = 'none'
+  ) + 
+  scale_y_continuous('CSCI predicted - observed', limits = c(-0.65, 0.65)) + 
+  scale_colour_manual(values = col)
+
+# land use by region
+meds <- dat %>% 
+  spread(var, val) %>% 
+  group_by(Region) %>% 
+  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
+  arrange(urbmed)
+
+toplo <- dat %>% 
+  mutate(Region = factor(Region, levels = meds$Region))
+p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = col) +
+  scale_y_log10('% land cover, log10',
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+grid.arrange(p2, p1, ncol = 1, heights = c(1, 0.9))
+```
+
+
 * Statewide patterns Figure \@ref(fig:calires).
 
 ```{r eval = F}
