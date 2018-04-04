@@ -21,4 +21,5 @@ All files created using `R/dat_proc.R` (sometimes not from local source)
 * `scrs.RData` data.frame of CSCI scores for sites in SGR, from SGRRMP .rproj file
 * `shed.RData` sf object of San Gabriel watershed
 * `spat.RData` sf object of nhd hydrolines with CSCI predictions for SGR, from SGRRMP .rproj file
+* `strclslen.RData` sf object of all cali stream classes with length and PSA
 * `typetab.RData` data.frame of table for site types

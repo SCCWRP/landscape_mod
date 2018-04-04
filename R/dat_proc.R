@@ -155,6 +155,25 @@ caliexp <- site_exp(calinhd, csci_comid, thrsh = 0.79, tails = 0.05, modls = 'fu
 
 save(caliexp, file = 'data/caliexp.RData', compress = 'xz')
 
+######
+# get stream length in each stream class by PSA
+
+load(file = 'data/calicls.RData')
+load(file = 'data/caliexp.RData')
+load(file = 'data/csci_comid.RData')
+
+strclslen <- calicls %>% 
+  dplyr::select(COMID, strcls) %>% 
+  st_intersection(calipsa)
+
+lens <- strclslen %>% 
+  as('Spatial') %>% 
+  sp::SpatialLinesLengths(longlat = T)
+
+strclslen <- strclslen %>% mutate(lens = lens) 
+
+save(strclslen, file = 'data/strclslen.RData', compress = 'xz')
+
 ##
 # SMC watershed 
 
