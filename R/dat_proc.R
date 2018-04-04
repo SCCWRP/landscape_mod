@@ -141,14 +141,16 @@ calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.
   dplyr::select(COMID) %>%
   inner_join(comid_prd, by = 'COMID')
 
-# format csci data for site_exp function
+# format csci data for site_exp function, takes averages of repeats at each site
 csci_comid <- csci_comid %>% 
   dplyr::select(COMID, StationCode, CSCI, SampleDate, FieldReplicate, New_Lat, New_Long) %>% 
-  rename(
-    csci = CSCI, 
-    lat = New_Lat, 
-    long = New_Long
-  )
+  group_by(COMID, StationCode) %>% 
+  summarise(
+    csci = mean(CSCI, na.rm = T), 
+    lat = mean(New_Lat, na.rm = T),
+    long = mean(New_Long, na.rm = T)
+  ) %>% 
+  ungroup
 
 # get site expectations
 caliexp <- site_exp(calinhd, csci_comid, thrsh = 0.79, tails = 0.05, modls = 'full')
