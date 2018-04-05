@@ -12,7 +12,28 @@ p_ast <- function(x){
 }
 
 ######
+# size palettes
+pal_siz <- function(levin){
+  
+  out <- tibble(
+    levels = c('High', 'Medium', 'Low', 'baseline'), 
+    sizes = c(4, 3, 2, 1)
+  ) %>% 
+    filter(levels %in% levin) %>% 
+    .$sizes
+  
+  return(out)
+  
+}
+
+######
 # color palettes
+
+# color palette for priorities
+pal_pri <- colorFactor(
+  palette = RColorBrewer::brewer.pal(9, 'Greys')[c(9, 6, 4, 1)],
+  na.color = 'yellow',
+  levels = c('High', 'Medium', 'Low', 'baseline'))
 
 # color palette for csci scores
 pal <- colorNumeric(
@@ -20,11 +41,11 @@ pal <- colorNumeric(
   na.color = 'yellow',
   domain = c(0, 1.4))
 
-# color palette for stream expectations
+# color palette for priorities
 pal_pri <- colorFactor(
-  palette = RColorBrewer::brewer.pal(9, 'Greys')[c(8, 5, 2)],
+  palette = RColorBrewer::brewer.pal(9, 'Greys')[c(9, 6, 4, 1)],
   na.color = 'yellow',
-  levels = c('Protect', 'Monitor', 'Restore'))
+  levels = c('High', 'Medium', 'Low', 'baseline'))
 
 # color palette for stream expectations
 pal_exp <- colorFactor(

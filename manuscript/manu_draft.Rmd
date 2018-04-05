@@ -677,7 +677,9 @@ knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
 * Model performance as a function of land use, figure \@ref(fig:perflu)
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthrpogenic land use (eg., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+
 # observed and predicted data
 obsdat <- csci_comid %>%
   dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
@@ -1050,7 +1052,7 @@ tab
 
 ### Case study
 
-* Extent, classification, prioritization
+* Classification, prioritization, Figures \@ref(fig:sgrresplo), \@ref(fig:sgrresmap) 
 
 ```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
 ##
@@ -1175,7 +1177,7 @@ grid.arrange(
 # dev.off()
 ```
 
-```{r sgrresmap, eval = F}
+```{r sgrresmap, fig.height = 7.5, fig.width = 8, fig.cap = "Relative site scores and recommended management actions for locations with CSCI scores in the San Gabriel River watershed. Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained. Recommended management actions are ranked by priority for actions to investigate, protect, and restore a site.  No recommended actions assumes baseline maintainence and monitoring is sufficient for a site. Recommended actions were defined by a local stakeholder group (see Figure \\@ref(fig:pritem))."}
 # requires spat, scrs
 
 thrsh <- 0.79; tails <- 0.05
@@ -1203,13 +1205,197 @@ sgrscrs <- spat %>%
   ungroup %>%
   left_join(cls, by = 'COMID')
 
-# process
-sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
-  dplyr::select(-lat, -long) %>% 
-  group_by(StationCode) %>% 
-  nest
+# priorities
+pritab <- tibble(
+  typelv = paste0('Type', stringr::str_pad(seq(1:16), pad = '0', width = 2)),
+  I = c(rep(c('H', '', 'H', 'H'), 2), rep(c('M', 'M', '', 'M'), 2)),
+  P = c(rep(c('H', 'M', 'M', ''), 2), rep(c('H', '', '', ''), 2)),
+  R = c(rep(c('', '', 'M', 'H'), 2), rep(c('', 'L', 'L', 'L'), 2))
+) %>% 
+  gather('action', 'priority', I, P, R) %>% 
+  mutate(priority = ifelse(priority == '', 'baseline', priority)) %>% 
+  spread(action, priority) %>% 
+  mutate(
+    I = factor(I, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline')),
+    P = factor(P, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline')),
+    R = factor(R, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline'))
+  )
 
-# use sgrcksm, sgrexp
+##
+# stuff to plot
+
+# relative site scores
+sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  dplyr::select(-data, -datcut) %>% 
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls)),
+    perf = factor(perf, levels = rev(levels(perf))),
+    typelv = as.character(typelv)
+    ) %>% 
+  filter(!is.na(perf))
+
+# priorities for sgr
+sgrpri <- sgrexp %>% 
+  left_join(pritab, by = 'typelv') %>% 
+  dplyr::select(StationCode, lat, long, typelv, I, P, R)
+
+# hydrolines
+spatdat <- spat %>% 
+  dplyr::select(COMID) %>% 
+  mutate(id = as.character(1:nrow(.)))
+st_geometry(spatdat) <- NULL
+spatfrt <- spat %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  left_join(spatdat, by = 'id') %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(cls, by = 'COMID') %>% 
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls))
+  ) %>% 
+  filter(!is.na(strcls))
+  
+# wshed boundary fortified
+shedfrt <- shed %>% 
+  as('Spatial') %>% 
+  fortify 
+
+
+thm <- theme_void(base_family = 'serif') +
+  theme(
+    legend.position = 'top',
+    # legend.justification = 'left',
+    legend.box.just = 'left',
+    axis.title = element_blank(), 
+    strip.background = element_blank()
+  )
+
+##
+# relative site scores
+
+# sgr all leg
+pleg <- ggplot(sgrexp) +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls)) +
+  geom_point(data = sgrexp, aes(x = long, y = lat, shape = perf, fill = strcls), size = 3, alpha = 0.7) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, dd2km = T, model = 'WGS84') +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls))) +
+  scale_fill_manual(values = pal_exp(levels(sgrexp$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('Relative site score', values = c(24, 21, 25), guide = F) +
+  guides(colour = guide_legend(title.position = 'left', ncol = 2)) +
+  coord_equal() +
+  thm
+clsleg <- g_legend(pleg)
+
+# under
+sgrexpund <- sgrexp %>% 
+  filter(perf == 'under scoring') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p1 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpund, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, dd2km = T, model = 'WGS84') +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpund$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(25)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+# expected
+sgrexpexp <- sgrexp %>% 
+  filter(perf == 'expected') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p2 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpexp, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpexp$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(21)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+# over
+sgrexpovr <- sgrexp %>% 
+  filter(perf == 'over scoring') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p3 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpovr, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpovr$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(24)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+##
+# site priorities
+
+# investigate
+p4 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = I, size = I), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Investigate', values = pal_pri(levels(forcats::fct_drop(sgrpri$I)))) +
+  scale_size_manual('Investigate', values = pal_siz(levels(forcats::fct_drop(sgrpri$I)))) +
+  coord_equal() +
+  thm + 
+  theme(
+    legend.position = c('none'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
+    ) + 
+  ggtitle('Investigate')
+
+# protect
+p5 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = P, size = P), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Protect', values = pal_pri(levels(forcats::fct_drop(sgrpri$P)))) +
+  scale_size_manual('Protect', values = pal_siz(levels(forcats::fct_drop(sgrpri$P)))) +
+  coord_equal() +
+  thm + 
+  theme(
+    legend.position = c('none'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
+  ) + 
+  ggtitle('Protect')
+
+# restore
+p6 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = R, size = R), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Priority', values = pal_pri(levels(forcats::fct_drop(sgrpri$R)))) +
+  scale_size_manual('Priority', values = pal_siz(levels(forcats::fct_drop(sgrpri$R)))) +
+  coord_equal() +
+  thm + 
+  theme(
+    legend.position = c('top'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
+  ) + 
+  ggtitle('Restore') +
+  guides(fill = guide_legend(title.position = 'left'), size = guide_legend(title.position = 'left'))
+prileg <- g_legend(p6)
+p6 <- p6 + theme(legend.position = 'none')
+
+# png('figs/sgrresmap.png', height = 7.5, width = 8, units = 'in', res = 400, family = 'serif')
+grid.arrange(
+  arrangeGrob(clsleg),
+  arrangeGrob(p1, p2, p3, ncol = 3),
+  arrangeGrob(prileg),
+  arrangeGrob(p4, p5, p6, ncol = 3),
+  ncol = 1, heights = c(0.2, 1, 0.1, 1)
+)
+# dev.off()
 ```
 
 * Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
