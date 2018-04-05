@@ -676,7 +676,7 @@ cap.val <- 'Performance of landscape models by calibration and validation datase
 knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
-* Model performance as a function of land use
+* Model performance as a function of land use, figure \@ref(fig:perflu)
 ```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthrpogenic land use (eg., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 # observed and predicted data
 obsdat <- csci_comid %>%
@@ -744,7 +744,6 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
 
 grid.arrange(p2, p1, ncol = 1, heights = c(1, 0.9))
 ```
-
 
 * Statewide patterns Figure \@ref(fig:calires).
 
@@ -1052,6 +1051,129 @@ tab
 ### Case study
 
 * Extent, classification, prioritization
+
+```{r sgrresplo, eval = F}
+##
+# ggplot of sgr site expecations, relative scores
+
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.05
+
+##
+# get biological condition expectations
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  mutate(COMID = as.character(COMID)) 
+
+# get csci difference
+sgrscrs <- spat %>% 
+  dplyr::select(COMID, full0.50) %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, ., by = 'COMID') %>% 
+  group_by(COMID, StationCode, lat, long) %>% 
+  summarise(
+    csci = mean(csci, na.rm = TRUE)
+  ) %>% 
+  ungroup %>%
+  left_join(cls, by = 'COMID')
+
+## get sgr expectation for ggplot
+# process
+incl <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  dplyr::select(-lat, -long) %>% 
+  group_by(StationCode) %>% 
+  nest
+
+# average scors by station
+out <- sgrscrs %>% 
+  dplyr::select(StationCode, lat, long) %>% 
+  group_by(StationCode) %>% 
+  nest %>% 
+  mutate(StationCode = factor(StationCode, levels = levels(incl$StationCode))) %>% 
+  left_join(incl, ., by = 'StationCode') %>% 
+  unnest
+
+# add additional perf column for multicolor by strcls (pal_prf)
+ggsgrexp <- get_perf_mlt(out)
+
+# CSCI scores and expectations
+toplo1 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, datcut, strcls, csci, perf, typelv, perf_mlt) %>%
+  unnest %>%
+  mutate(strcls = factor(strcls, levels = rev(levels(strcls)))) %>%
+  rename(
+    `Stream Class` = strcls,
+    `Relative\nscore` = perf_mlt,
+    Type = typelv
+    )
+
+# total expected range
+toplo2 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, data, strcls) %>%
+  unnest %>%
+  mutate(strcls = factor(strcls, levels = rev(levels(strcls)))) %>%
+  rename(`Stream Class` = strcls)
+
+# median expectation
+toplo3 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, datcut) %>%
+  unnest %>%
+  filter(grepl('0\\.50$', var))
+
+# plot
+p <- ggplot(toplo1, aes(y = StationCode, x = val)) +
+  geom_line(data = toplo2, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
+  geom_line(aes(colour = `Stream Class`), alpha = 0.6, size = 2) +
+  geom_point(data = toplo3, colour = 'white', size = 1, alpha = 1, shape = 15) +
+  theme_bw(base_family = 'serif', base_size = 18) +
+  theme(
+    axis.text.y = element_text(size = 10)
+  ) +
+  scale_x_continuous('CSCI') +
+  scale_y_discrete('Site') +
+  scale_colour_manual(values = pal_exp(levels(toplo1$`Stream Class`))) +
+  geom_point(aes(x = csci, fill = `Relative\nscore`), shape = 21, size = 4, alpha = 0.8) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) +
+  scale_fill_manual(values = pal_prf(levels(toplo1$`Relative\nscore`)), na.value = 'yellow')
+
+```
+
+```{r sgrresmap, eval = F}
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.05
+
+##
+# nhd sgr str class
+sgrcls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  left_join(spat, ., by = 'COMID') %>% 
+  dplyr::select(COMID, strcls)
+
+##
+# get biological condition expectations
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  mutate(COMID = as.character(COMID)) 
+
+# get csci difference
+sgrscrs <- spat %>% 
+  dplyr::select(COMID, full0.50) %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, ., by = 'COMID') %>% 
+  group_by(COMID, StationCode, lat, long) %>% 
+  summarise(
+    csci = mean(csci, na.rm = TRUE)
+  ) %>% 
+  ungroup %>%
+  left_join(cls, by = 'COMID')
+
+# process
+sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  dplyr::select(-lat, -long) %>% 
+  group_by(StationCode) %>% 
+  nest
+
+# use sgrcksm, sgrexp
+```
 
 * Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
 
