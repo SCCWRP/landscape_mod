@@ -1238,7 +1238,8 @@ exps_ex <- data.frame(
 plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.05) %>% 
   rename(
     `Stream\nclass` = `Stream class`
-  ) 
+  ) %>% 
+  mutate(`Stream\nclass` = factor(`Stream\nclass`, levels = rev(levels(`Stream\nclass`))))
 
 # priorities
 pritab <- tibble(
@@ -1267,7 +1268,7 @@ p1 <- ggplot(plot_ex, aes(x = typelv)) +
   geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
   geom_point(aes(y  = `CSCI score`, fill = `Stream\nclass`, shape = perf), size = 4, alpha = 0.8) +
   geom_hline(yintercept = 0.79, linetype = 'dashed') +
-  scale_colour_manual('Stream class', values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
                     guide = guide_legend(direction = 'vertical', title.position = 'left', ncol = 2)) +
   scale_fill_manual(values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
                     guide = F) +
