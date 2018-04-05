@@ -379,7 +379,7 @@ prfcds <- data.frame(
 
 prflev <- c('over scoring', 'expected', 'under scoring')
 
-scrs <- c(1.35, 1.15, 0.84, 0.6, 1.25, 0.95, 0.75, 0.53, 1.1, 0.83, 0.53, 0.35, 1, 0.75, 0.45, 0.15)
+scrshyp <- c(1.35, 1.15, 0.84, 0.6, 1.25, 0.95, 0.75, 0.53, 1.1, 0.83, 0.53, 0.35, 1, 0.75, 0.45, 0.15)
 
 # plot data
 set.seed(433)
@@ -387,9 +387,9 @@ rnd <- data.frame(
   id = factor(rev(1:sel), levels = rev(1:sel)),
   ave = rep(seq(0.5, 1.1, length = 4), each = 4),
   sds = sample(c(0.13), sel, replace = T), 
-  scrs = rev(scrs)
+  scrshyp = rev(scrshyp)
   ) %>%
-  group_by(id, scrs) %>% 
+  group_by(id, scrshyp) %>% 
   nest %>%
   mutate(
     rnd = purrr::map(data, ~ rnorm(pts, .x$ave, .x$sds)), 
@@ -426,10 +426,10 @@ rnd <- data.frame(
       
       
     }), 
-    prfcat = purrr::pmap(list(estcut, scrs), function(estcut, scrs){
+    prfcat = purrr::pmap(list(estcut, scrshyp), function(estcut, scrshyp){
       
       out <- range(estcut$xout) %>% 
-        findInterval(., scrs) %>% 
+        findInterval(., scrshyp) %>% 
         paste(collapse = '') %>% 
         factor(levels = prfcds$int, labels = prfcds$cls) %>% 
         as.character
@@ -458,12 +458,12 @@ toplo3 <- rnd %>%
   rename(`Stream class` = estcat)
 
 toplo4 <- rnd %>% 
-  dplyr::select(id, scrs, estcat, prfcat) %>% 
+  dplyr::select(id, scrshyp, estcat, prfcat) %>% 
   unnest %>% 
   mutate(
     prfcat = factor(prfcat, levels = prflev),
     estcat = factor(estcat, levels = catcds$clsabv, labels = catcds$cls),
-    hght = scrs
+    hght = scrshyp
   ) %>% 
   rename(
     `Relative site score` = prfcat,
@@ -513,7 +513,7 @@ p3 <- pbase +
 p4 <- pbase +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
   geom_vline(xintercept = thrsh, linetype = 'dashed') +
-  geom_point(data = toplo4, aes(x = scrs, group = id, shape = `Relative site score`, fill = `Stream class`), size = 3) + 
+  geom_point(data = toplo4, aes(x = scrshyp, group = id, shape = `Relative site score`, fill = `Stream class`), size = 3) + 
   scale_fill_manual(values = exp_col, guide = F) +
   scale_colour_manual('Site performance', values = pal_prf2(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
   scale_shape_manual(values = c(24, 21, 25)) +  
@@ -1052,7 +1052,7 @@ tab
 
 * Extent, classification, prioritization
 
-```{r sgrresplo, eval = F}
+```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
 ##
 # ggplot of sgr site expecations, relative scores
 
@@ -1094,13 +1094,18 @@ out <- sgrscrs %>%
   unnest
 
 # add additional perf column for multicolor by strcls (pal_prf)
-ggsgrexp <- get_perf_mlt(out)
+# remove NA csci
+ggsgrexp <- get_perf_mlt(out) %>% 
+  filter(!is.na(strcls))
 
 # CSCI scores and expectations
 toplo1 <- ggsgrexp %>%
   dplyr::select(COMID, StationCode, datcut, strcls, csci, perf, typelv, perf_mlt) %>%
   unnest %>%
-  mutate(strcls = factor(strcls, levels = rev(levels(strcls)))) %>%
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls)),
+    perf = factor(perf, levels = levels(perf))
+    ) %>%
   rename(
     `Stream Class` = strcls,
     `Relative\nscore` = perf_mlt,
@@ -1111,31 +1116,63 @@ toplo1 <- ggsgrexp %>%
 toplo2 <- ggsgrexp %>%
   dplyr::select(COMID, StationCode, data, strcls) %>%
   unnest %>%
-  mutate(strcls = factor(strcls, levels = rev(levels(strcls)))) %>%
+  mutate(strcls = factor(strcls, levels = levels(strcls))) %>%
   rename(`Stream Class` = strcls)
 
 # median expectation
 toplo3 <- ggsgrexp %>%
   dplyr::select(COMID, StationCode, datcut) %>%
   unnest %>%
-  filter(grepl('0\\.50$', var))
+  filter(grepl('0\\.50$', var)) 
 
-# plot
-p <- ggplot(toplo1, aes(y = StationCode, x = val)) +
+# plot, no context
+p1 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    axis.text.y = element_text(size = 6.5), 
+    axis.title.y = element_text(size = 13),
+    axis.title.x = element_blank(), 
+    title = element_text(size = 10)
+  ) +
+  scale_x_continuous('CSCI') +
+  scale_y_discrete('Stream reach') +
+  geom_point(aes(x = csci), shape = 16, size = 1.5, alpha = 0.8) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) + 
+  ggtitle('(a) CSCI scores with no context')
+
+# plot, context
+p2 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
   geom_line(data = toplo2, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
   geom_line(aes(colour = `Stream Class`), alpha = 0.6, size = 2) +
   geom_point(data = toplo3, colour = 'white', size = 1, alpha = 1, shape = 15) +
-  theme_bw(base_family = 'serif', base_size = 18) +
+  theme_bw(base_family = 'serif', base_size = 12) +
   theme(
-    axis.text.y = element_text(size = 10)
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(), 
+    axis.ticks.y = element_blank(), 
+    legend.position = 'top', 
+    title = element_text(size = 10)
   ) +
   scale_x_continuous('CSCI') +
   scale_y_discrete('Site') +
-  scale_colour_manual(values = pal_exp(levels(toplo1$`Stream Class`))) +
-  geom_point(aes(x = csci, fill = `Relative\nscore`), shape = 21, size = 4, alpha = 0.8) +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(toplo1$`Stream Class`))) +
+  geom_point(aes(x = csci, fill = `Stream Class`, shape = perf), size = 2.5, alpha = 0.8) +
   geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) +
-  scale_fill_manual(values = pal_prf(levels(toplo1$`Relative\nscore`)), na.value = 'yellow')
+  scale_shape_manual('Relative site score', values = c(25, 21, 24)) +
+  scale_fill_manual(values = pal_exp(levels(toplo1$`Stream Class`)), na.value = 'yellow', guide = F) +
+  guides(shape = guide_legend(title.position = 'top'), colour = guide_legend(title.position = 'top', ncol = 2)) +
+  ggtitle('(b) CSCI scores with context from landscape models')
+p2leg <- g_legend(p2)
+p2 <- p2 + theme(legend.position = 'none')
 
+# png('figs/sgrresplo.png', height = 7, width = 9, units = 'in', res = 300, family = 'serif')
+grid.arrange(
+  arrangeGrob(p2leg),
+  arrangeGrob(p1, p2, ncol = 2, bottom = 'CSCI', widths = c(1, 0.9)),
+  ncol = 1, heights = c(0.15, 1)
+)
+# dev.off()
 ```
 
 ```{r sgrresmap, eval = F}
