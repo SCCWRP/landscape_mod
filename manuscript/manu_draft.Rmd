@@ -60,6 +60,7 @@ load(file = '../data/calicls.RData')
 load(file = '../data/caliexp.RData')
 load(file = '../data/comid_prd.RData')
 load(file = '../data/strclslen.RData')
+load(file = '../data/cnstrfrst.RData')
 ```
 
 # Abstract 
@@ -568,6 +569,8 @@ knitr::include_graphics('figs/app.png')
 
 ## Sensitivity analyses
 
+Factors explaining variation between constrained and unconstrained stream reaches were evaluated for the major regions in California (Figure \@ref(fig:calimap)). Landscape and geological data in StreamCat at the riparian and watershed scale were used to model variation between reach classes using random forest models [@Breiman01]. For each region, 1000 regression trees were created and the mean reduction in accuracy was estimated for the exclusion of each variable across all models. This created an estimate of importance of each variable for describing differences betwen stream classes. Mean reduction in accuracy was estimated for variables in each model and separately for each stream class in each model.  Reach classes as possibly or likely constrained (or unconstrained) were combined to evaluate differences between only two classes.
+
 Stream reach classifications and site performance categories depend on the range of score expectations from the landscape model (or certainty, Figure  \@ref(fig:ridges)b) and the CSCI threshold for defining nominally low or high scores (Figure \@ref(fig:ridges)c).  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  First, the framework can accommodate degrees of certainty in the model by allowing variation in the range of scores that are used to define a stream reach classification.  The 5th and 95th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more stringent threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification and the number of sites in each priority type.     
 
 ## Unclassified reaches
@@ -678,7 +681,7 @@ knitr::kable(allerr, booktabs = T, caption = cap.val)
 
 * Model performance as a function of land use, figure \@ref(fig:perflu)
 
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
 # observed and predicted data
 obsdat <- csci_comid %>%
@@ -744,7 +747,7 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
     axis.title.x = element_blank()
   )
 
-grid.arrange(p2, p1, ncol = 1, heights = c(1, 0.9))
+grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
 ```
 
 * Statewide patterns Figure \@ref(fig:calires).
@@ -1398,10 +1401,6 @@ grid.arrange(
 # dev.off()
 ```
 
-* Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
-
-*Figure* Summary of extent of reach classification, site performance, selected examples
-
 ```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for priorization of recommended actions for each stream type.  The reach types (Table \\@ref(tab:typetab)) relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over scoring, expected, under scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the range of expected CSCI score for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
 sts <- paste('Site', seq(1:16))
 
@@ -1494,6 +1493,106 @@ grid.arrange(
   heights = c(0.25, 1)
 )
 ```
+
+### Drivers of biological constraints 
+
+* State level, Figure \@ref(fig:calicnstr)
+
+```{r calicnstr, fig.height = 7, fig.width = 7, fig.cap = 'Factors explaining variation between constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+
+# format for plotting, all data
+toplo <- cnstrfrst %>% 
+  mutate(mods = purrr::map(mods, function(x){
+    
+    out <- x %>%   
+      data.frame %>% 
+      rownames_to_column('var') %>% 
+      dplyr::select(-MeanDecreaseGini) %>% 
+      arrange(-MeanDecreaseAccuracy) %>% 
+      .[1:5, ] %>% 
+      mutate(var = factor(var, levels = var)) %>% 
+      gather('strcls', 'val', unconstrained, constrained)
+    
+    return(out)
+    
+    })
+  ) %>% 
+  unnest %>% 
+  rename(
+    Region = PSA6,
+    Importance = MeanDecreaseAccuracy
+    ) %>% 
+  mutate(Region = factor(Region, 
+         levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+         labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC'))
+  )
+
+# these have to be manually changed
+toplo <- toplo %>% 
+  mutate(var = factor(var, 
+                      levels = c('PctNonAgIntrodManagVegWsRp100', 'PctAlluvCoastWs', 'PctNonAgIntrodManagVegWs', 
+                                 'InorgNWetDep_2008Ws', 'SN_2008Ws', 'CBNFWs', 'AgKffactWs', 'FertWs', 'PctHay2011Ws',                 
+                                 'PctHay2011WsRp100', 'PctCrop2011Ws', 'PctImp2006Ws', 'PctImp2006WsRp100', 
+                                 'PctUrbMd2011Ws', 'HydrlCondWs' ), 
+                      labels = c('% riparian veg.', '% alluvial', '% veg.', 'inorg. N dep.', 'S and N dep.', 'bio. N fixation', 
+                                 'soil erod.', 'fertilizer', '% hay', '% riparian hay', '% crop', '% imp.', '% riparian imp.', 
+                                 '% urban.', 'hydraulic cond.'))
+         )
+
+cols <- brewer.pal(9, 'Paired')[c(6, 2)]
+
+ylims <- max(toplo$val)
+toplo1 <- toplo %>% 
+  unique %>% 
+  group_by(Region) %>% 
+  nest %>% 
+  arrange(Region) %>% 
+  mutate(plos = pmap(list(as.character(Region), data), function(Region, data){
+    
+    # format the data
+    x <- data %>% 
+      spread(strcls, val) %>% 
+      arrange(-constrained) %>% 
+      mutate(var = factor(var, levels = var)) %>% 
+      gather('strcls', 'val', unconstrained, constrained) %>% 
+      mutate(strcls = factor(strcls, levels = c('constrained', 'unconstrained')))
+    
+    # make the plot
+    p <- ggplot(x, aes(x = var, y = val)) + 
+      geom_bar(aes(fill = strcls), stat = 'identity', position = 'dodge', colour = 'black', alpha = 0.6) +
+      theme_bw(base_family = 'serif') +
+      theme(
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 7), 
+        axis.title.x = element_blank(), 
+        plot.title = element_text(hjust = 0.5), 
+        axis.title.y = element_blank(), 
+        legend.position = 'top'
+      )  + 
+      scale_fill_manual('Stream reach class', values = cols) +
+      scale_y_continuous(limits = c(0, ylims)) +
+      ggtitle(as.character(Region))
+    
+    return(p)
+    
+  }))
+
+p1 <- toplo1$plos[[1]] + theme(legend.position = 'none')
+p2 <- toplo1$plos[[2]] + theme(legend.position = 'none')
+p3 <- toplo1$plos[[3]] + theme(legend.position = 'none')
+p4 <- toplo1$plos[[4]] + theme(legend.position = 'none')
+p5 <- toplo1$plos[[5]] + theme(legend.position = 'none')
+p6 <- toplo1$plos[[6]]
+pleg <- g_legend(p6)
+p6 <- p6 + theme(legend.position = 'none')
+grid.arrange(
+  pleg,
+  arrangeGrob(p1, p2, p3, p4, p5, p6, ncol = 3, left = 'Importance'), 
+  ncol = 1, heights = c(0.1, 1)
+)
+```
+
+
+* Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
 
 ### Sensitivity analysis
 

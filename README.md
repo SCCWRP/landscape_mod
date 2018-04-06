@@ -10,6 +10,7 @@ All files created using `R/dat_proc.R` (sometimes not from local source)
 * `caliclsplo.RData` statewide stream classifications by nhd comid, simplified and foritified for figures
 * `caliexp.RData` all CSCI site expectations and comid stream classes for cali
 * `calipsa.RData` sf object of california PSA regions
+* `cnstrfrst.RData` results from random forest models of constraints in each region, importance only
 * `comid_prd.RData` predicted csci quantiles for all comid in california
 * `csci_raw.RData` data.frame of current csci scores by lat/lon
 * `csci_comid.RData` csci scores by comid

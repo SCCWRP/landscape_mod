@@ -177,6 +177,52 @@ strclslen <- strclslen %>% mutate(lens = lens)
 save(strclslen, file = 'data/strclslen.RData', compress = 'xz')
 
 ##
+# rf model importance for constraints in each region
+
+load(file = 'data/caliclsplo.RData')
+load(file = 'data/strclslen.RData')
+
+# streamcat data
+strmcat <- rbind(read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
+                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
+                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
+comid.nats <- read.csv("ALL_COMID_Nats.csv", stringsAsFactors = F)
+strmcat <- plyr::join(strmcat, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
+
+# PSA by all comid
+psaall <- strclslen %>% 
+  filter(!is.na(strcls)) %>% 
+  dplyr::select(COMID, PSA6)
+st_geometry(psaall) <- NULL
+
+allenv <- caliclsplo %>% 
+  dplyr::select(COMID, strcls) %>% 
+  unique %>% 
+  left_join(strmcat, by = 'COMID') %>% 
+  left_join(psaall, by = 'COMID') %>% 
+  filter(!is.na(PSA6)) %>% 
+  mutate(strcls = gsub('^possibly\\s|^likely\\s', '', strcls))
+
+
+# remove wshed vars, focus on watershed only, remove COMID from model
+cnstrfrst <- allenv[, !grepl('Cat|^COMID$', names(allenv))] %>% 
+  group_by(PSA6) %>% 
+  nest %>% 
+  mutate(mods = purrr::map(data, function(x){
+    
+    tmp <- randomForest(as.factor(strcls) ~ .,
+                        data = x, 
+                        importance = TRUE, 
+                        ntree = 1000, na.action = na.omit)
+    
+    tmp$importance
+    
+  })) %>% 
+  dplyr::select(-data)
+
+save(cnstrfrst, file = 'data/cnstrfrst.RData', compress = 'xz')
+
+##
 # SMC watershed 
 
 shd_pth <- 'S:/Spatial_Data/SMCBasefiles/Boundaries/SMCSheds/SMCSheds2009.shp'
