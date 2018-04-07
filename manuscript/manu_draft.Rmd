@@ -1599,7 +1599,7 @@ grid.arrange(
 
 * Statewide results - reach classification statewide, Figure \@ref(fig:sensplo)
 
-```{r sensplo, fig.height = 9, fig.width = 8, fig.cap = 'Scenarios used for sensitivity analysis (top) and changes in stream reach classes by region (bottom) for each scenario.  Nine scenarios were testing that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain) and potential CSCI threshold (conservative to relaxed).  The top plot shows examples for each scenario with four hypothetical reaches and the bottom shows the percentage of stream classifications for each region (including statewide) with each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r sensplo, fig.height = 9, fig.width = 8, fig.cap = 'Scenarios used for sensitivity analysis (top) and changes in stream reach classes by region (bottom) for each scenario.  Nine scenarios were testing that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain) and potential CSCI threshold (relaxed to conservative).  The top plot shows examples for each scenario with four hypothetical reaches and the bottom shows the percentage of stream classifications for each region (including statewide) with each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
 grd_chk <- list(
@@ -1717,7 +1717,7 @@ senscls <- sensres %>%
   dplyr::select(-name) %>% 
   unnest %>% 
   mutate(
-    thrsh = factor(thrsh, levels = c('0.63', '0.79', '0.89'), labels = c('0.63 (conservative)', '0.79', '0.89 (relaxed)')),
+    thrsh = factor(thrsh, levels = c('0.63', '0.79', '0.89'), labels = c('0.63 (relaxed)', '0.79', '0.89 (conservative)')),
     tails = factor(tails, levels = c('0.05', '0.25', '0.45'), labels = c('0.05 (more certain)', '0.25', '0.45 (less certain)'))
   )
 
@@ -1754,9 +1754,9 @@ grid.arrange(
               textGrob('Example stream reaches', gp = gpar(cex = 0.85), rot = 90, vjust = 0), 
               arrangeGrob(
                 arrangeGrob(textGrob('0.05 (more certain)', gp = grobsz), textGrob('0.25', gp = grobsz), textGrob('0.45 (less certain)', gp = grobsz), textGrob(''), ncol = 4, widths = c(1, 1, 1, 0.1)), 
-                arrangeGrob(p1, p4, p7, textGrob('0.63 (conservative)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
+                arrangeGrob(p1, p4, p7, textGrob('0.63 (relaxed)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
                 arrangeGrob(p2, p5, p8, textGrob('0.79', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
-                arrangeGrob(p3, p6, p9, textGrob('0.89 (relaxed)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)),
+                arrangeGrob(p3, p6, p9, textGrob('0.89 (conservative)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)),
                 ncol = 1, heights = c(0.2, 1, 1, 1), bottom = textGrob('CSCI', gp = grobsz)
               ), 
               ncol = 2, widths = c(0.055, 1)
