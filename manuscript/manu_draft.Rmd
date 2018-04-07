@@ -61,6 +61,7 @@ load(file = '../data/caliexp.RData')
 load(file = '../data/comid_prd.RData')
 load(file = '../data/strclslen.RData')
 load(file = '../data/cnstrfrst.RData')
+load(file = '../data/sensres.RData')
 ```
 
 # Abstract 
@@ -1596,7 +1597,185 @@ grid.arrange(
 
 ### Sensitivity analysis
 
-* Statewide results - reach classification, site performance
+* Statewide results - reach classification statewide, Figure \@ref(fig:sensplo)
+
+```{r sensplo, fig.height = 9, fig.width = 8, fig.cap = 'Scenarios used for sensitivity analysis (top) and changes in stream reach classes by region (bottom) for each scenario.  Nine scenarios were testing that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain) and potential CSCI threshold (conservative to relaxed).  The top plot shows examples for each scenario with four hypothetical reaches and the bottom shows the percentage of stream classifications for each region (including statewide) with each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+
+# search grid
+grd_chk <- list(
+  thrsh = c(0.63, 0.79, 0.89), 
+  tails = c(0.05, 0.25, 0.45)
+) %>% 
+  cross_df
+
+data(sensres)
+
+sts <- paste('Site', seq(1:4))
+
+# example data, csci scores
+scrs_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  csci = c(0.99, 0.83, 0.73, 0.58)
+)
+
+# example data, stream predictions
+exps_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  minv = rep(c(0.84, 0.68, 0.58, 0.43), each = 1),
+  maxv = rep(c(1.14, 0.98, 0.88, 0.73), each = 1),
+  stringsAsFactors = F
+) %>% 
+  mutate(medv = ((maxv - minv) / 2) + minv)
+
+colfck <- tibble(
+  cols = brewer.pal(9, 'Paired')[c(2, 1, 5, 6)],
+  strcls = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained')
+)
+
+# create sensitivity plot examples
+for(i in 1:nrow(grd_chk)){
+  
+  thrsh <- grd_chk[[i, 'thrsh']]
+  tails <- grd_chk[[i, 'tails']]
+  
+  
+  # calculate class, performance, type, 
+  plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = thrsh, tails = tails) %>% 
+    rename(
+      strcls = `Stream class`
+    ) %>% 
+    mutate(
+      strcls = as.character(strcls),
+      Site = gsub('Site\\s', '', Site)
+    ) %>% 
+    left_join(colfck, by = 'strcls')
+  
+  p <- ggplot(plot_ex, aes(x = Site)) + 
+    geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt), colour = as.character(plot_ex$cols), width = 0, size = 2, alpha = 0.7) + 
+    geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
+    geom_hline(yintercept = thrsh, linetype = 'dashed') +
+    scale_x_discrete('Reach type', limits = rev(plot_ex$Site)) +
+    theme_minimal(base_family = 'serif', base_size = 12) +
+    theme(
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(), 
+      panel.border = element_rect(size = 0.5, color = 'black', fill = NA), 
+      axis.title = element_blank(), 
+      legend.position = 'none', 
+      plot.margin = grid::unit(c(1, 1, 1, 1), units = 'pt')
+    )
+  
+  if(i %in% c(1, 2)){
+    p <- p +
+      theme(
+        axis.ticks.y = element_line(),
+        axis.text.y = element_text(), 
+        axis.text.x = element_blank()
+      ) +
+      coord_flip() 
+  }
+  if(i %in% c(3)){
+    p <- p +
+      scale_y_continuous('CSCI score', breaks = c(0.63, 0.79, 0.89)) +
+      theme(
+        axis.ticks = element_line(), 
+        axis.text = element_text()
+      ) +
+      coord_flip() 
+  }
+  if(i %in% c(4, 7, 5, 8)){
+    
+    p <- p +
+      theme(
+        axis.ticks = element_blank(), 
+        axis.text = element_blank()
+      ) +
+      coord_flip() 
+  }
+  
+  if(i %in% c(6, 9)){
+    
+    p <- p +
+      scale_y_continuous('CSCI score', breaks = c(0.63, 0.79, 0.89)) +
+      theme(
+        axis.ticks.y = element_blank(), 
+        axis.ticks.x = element_line(),
+        axis.text.y = element_blank()
+      ) +
+      coord_flip() 
+  }
+  
+  assign(paste0('p', i), p)
+  
+}
+
+# stream class sensitivity
+senscls <- sensres %>% 
+  purrr::map(~ .x[[1]]) %>% 
+  enframe %>% 
+  bind_cols(grd_chk, .) %>% 
+  dplyr::select(-name) %>% 
+  unnest %>% 
+  mutate(
+    thrsh = factor(thrsh, levels = c('0.63', '0.79', '0.89'), labels = c('0.63 (conservative)', '0.79', '0.89 (relaxed)')),
+    tails = factor(tails, levels = c('0.05', '0.25', '0.45'), labels = c('0.05 (more certain)', '0.25', '0.45 (less certain)'))
+  )
+
+# results plot
+pres <- ggplot(senscls, aes(x = Region, y = perc, fill = strcls)) + 
+  geom_bar(stat = 'identity', colour = scales::alpha('black', 0.5), width = 1) +
+  facet_grid(thrsh ~ tails) + 
+  scale_fill_manual('Stream reach class', values = pal_exp(levels(senscls$strcls))) +
+  theme_bw(base_family = 'serif') +     
+  scale_y_continuous('% stream length', expand = c(0, 0)) + 
+  scale_x_discrete(expand = c(0, 0)) + 
+  theme(
+    strip.background = element_blank(), 
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 8),
+    legend.position = 'top'
+  ) + 
+  guides(fill = guide_legend(title.position = 'left'))
+
+pleg <- g_legend(pres)
+pres <- pres + theme(legend.position = 'none')
+
+
+grobsz <- gpar(cex = 0.7)
+grid.arrange(
+  arrangeGrob(
+    pleg,
+    arrangeGrob(
+      arrangeGrob(textGrob('Certainty in CSCI predictions', gp = grobsz), textGrob(''), ncol = 2, widths = c(1, 0.05)),
+      arrangeGrob(
+        arrangeGrob(
+          arrangeGrob(
+            arrangeGrob(
+              textGrob('Example stream reaches', gp = gpar(cex = 0.85), rot = 90, vjust = 0), 
+              arrangeGrob(
+                arrangeGrob(textGrob('0.05 (more certain)', gp = grobsz), textGrob('0.25', gp = grobsz), textGrob('0.45 (less certain)', gp = grobsz), textGrob(''), ncol = 4, widths = c(1, 1, 1, 0.1)), 
+                arrangeGrob(p1, p4, p7, textGrob('0.63 (conservative)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
+                arrangeGrob(p2, p5, p8, textGrob('0.79', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
+                arrangeGrob(p3, p6, p9, textGrob('0.89 (relaxed)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)),
+                ncol = 1, heights = c(0.2, 1, 1, 1), bottom = textGrob('CSCI', gp = grobsz)
+              ), 
+              ncol = 2, widths = c(0.055, 1)
+            )
+          ), 
+          pres, 
+          ncol = 1
+        ),
+        textGrob('Example CSCI threshold', rot = 270, gp = grobsz), 
+        widths = c(1, 0.05), ncol = 2
+      ), 
+      heights = c(0.05, 1)
+    ), 
+  ncol = 1, heights = c(0.07, 1)
+  )
+)
+
+```
+
 
 * SGR application - where do priorities change related to which variables the model is most sensitive to? Do overall patterns remain? Maybe not do this.
 

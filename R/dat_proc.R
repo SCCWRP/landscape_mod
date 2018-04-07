@@ -375,7 +375,7 @@ cscipsa <- csci_comid %>%
 grd_chk <- list(
   thrsh = c(0.63, 0.79, 0.89), 
   tails = c(0.05, 0.25, 0.45)
-) %>% 
+  ) %>% 
   cross_df
 
 # setup parallel backend
