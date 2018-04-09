@@ -11,7 +11,7 @@ link-citations: true
 
 ```{r setup, echo = F, warning = F, message = F, results = 'hide'}
 # figure path, chunk options
-knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%',
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%',
   fig.process = function(x) {
   x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
   if (file.rename(x, x2)) x2 else x
@@ -62,6 +62,7 @@ load(file = '../data/comid_prd.RData')
 load(file = '../data/strclslen.RData')
 load(file = '../data/cnstrfrst.RData')
 load(file = '../data/sensres.RData')
+load(file = '../data/typscrs.RData')
 ```
 
 # Abstract 
@@ -1592,9 +1593,6 @@ grid.arrange(
 )
 ```
 
-
-* Relationships with environmental variables for constrained/unconstrained locations. Maybe apply to hardened/non-hardened reaches in constrained locations. 
-
 ### Sensitivity analysis
 
 * Statewide results - reach classification statewide, Figure \@ref(fig:sensplo)
@@ -1776,20 +1774,29 @@ grid.arrange(
 
 ```
 
-
-* SGR application - where do priorities change related to which variables the model is most sensitive to? Do overall patterns remain? Maybe not do this.
-
-*Table* Sensitivity results
-
 ### Unclassified reaches
 
-* Extent of typical ag, typical urban statewide
+* Framework for assigning unclassified reach to a class - kmeans by ag/urban using eight clusters, clusters with maximum ag, maximum urb, and minimum sum of centers for both were identified. 
 
-* Framework for assigning unclassified reach to a class
+* Statewide patterns, Table \@ref(tab:typscrs)
 
-* Statewide patterns, SGR patterns
+```{r typscrs}
+totab <- typscrs %>% 
+  mutate(
+    grps = factor(grps, levels = c('urb', 'ag', 'oth'), labels = c('Urban', 'Ag', 'Other')),
+    Region = ifelse(duplicated(Region), '', Region)
+    ) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
+  unite('5th - 95th (More certain)', lo05, hi95, sep = ' - ') %>% 
+  unite('25th - 75th', lo25, hi75, sep = ' - ') %>% 
+  unite('45th - 55th (Less certain)', lo45, hi55, sep = ' - ')
 
-*Table* Summary by location
+# table stuff
+cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, agricultural, or other land uses by major regions in California and statewide. Ranges can be used to identify approximate expectations for stream reaches with insufficient data required for application of the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'
+
+# table
+knitr::kable(totab, booktabs = T, caption = cap.val)
+```
 
 # Discussion
 

@@ -178,6 +178,171 @@ strclslen <- strclslen %>% mutate(lens = lens)
 
 save(strclslen, file = 'data/strclslen.RData', compress = 'xz')
 
+######
+# expected range of scores for urban, ag, other by region
+data(calicls)
+data(strclslen)
+
+# streamcat data
+strmcat <- rbind(read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
+                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
+                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
+comid.nats <- read.csv("Z:/MarcusBeck/Landscape models from rafi/ALL_COMID_Nats.csv", stringsAsFactors = F)
+strmcat <- plyr::join(strmcat, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
+
+strmcat$TotUrb2011Ws<-  rowSums(strmcat[,c("PctUrbOp2011Ws","PctUrbLo2011Ws","PctUrbMd2011Ws","PctUrbHi2011Ws")])
+strmcat$TotUrb2011Cat<-  rowSums(strmcat[,c("PctUrbOp2011Cat","PctUrbLo2011Cat","PctUrbMd2011Cat","PctUrbHi2011Cat")])
+strmcat$TotUrb2011WsRp100<-  rowSums(strmcat[,c("PctUrbOp2011WsRp100","PctUrbLo2011WsRp100","PctUrbMd2011WsRp100","PctUrbHi2011WsRp100")])
+strmcat$TotUrb2011CatRp100<-  rowSums(strmcat[,c("PctUrbOp2011CatRp100","PctUrbLo2011CatRp100","PctUrbMd2011CatRp100","PctUrbHi2011CatRp100")])
+
+strmcat$TotAg2011Ws<-  rowSums(strmcat[,c("PctHay2011Ws","PctCrop2011Ws")])
+strmcat$TotAg2011Cat<-  rowSums(strmcat[,c("PctHay2011Cat","PctCrop2011Cat")])
+strmcat$TotAg2011WsRp100<-  rowSums(strmcat[,c("PctHay2011WsRp100","PctCrop2011WsRp100")])
+strmcat$TotAg2011CatRp100<-  rowSums(strmcat[,c("PctHay2011CatRp100","PctCrop2011CatRp100")])
+
+strmcat <- strmcat %>% 
+  dplyr::select(COMID, TotUrb2011Ws, TotAg2011Ws)
+
+# PSA by all comid
+psaall <- strclslen %>% 
+  dplyr::select(COMID, PSA6)
+st_geometry(psaall) <- NULL
+
+# data to summarize
+scrdist <- calicls
+st_geometry(scrdist) <- NULL
+scrdist <- scrdist %>% 
+  dplyr::select(-strcls, -strcls_int) %>% 
+  left_join(strmcat, by = 'COMID') %>% 
+  left_join(psaall, by = 'COMID') %>% 
+  filter(!is.na(PSA6)) %>% 
+  rename(Region = PSA6)
+
+# get range of scores for average urban, ag, open locations, by region
+scrdistreg <- scrdist %>% 
+  group_by(Region) %>% 
+  nest %>% 
+  mutate(grps = purrr::map(data, function(x){
+    
+    # get kmeans, centers
+    tomod <- x %>% 
+      mutate(
+        Urb = log10(1 + TotUrb2011Ws), 
+        Ag = log10(1 + TotAg2011Ws)
+      ) %>% 
+      dplyr::select(Urb, Ag) 
+    ngrps <- 8
+    kmod <- kmeans(tomod, centers = ngrps, nstart = 10, iter.max = 100, algorithm = 'MacQueen')
+    grps <- kmod$cluster
+    cent <- kmod$centers %>% 
+      data.frame
+    
+    # find the typical ag, urb group
+    urb <- which.max(cent[, 'Urb'])
+    ag <- which.max(cent[, 'Ag'])
+    oth <- which.min(rowSums(cent))
+    
+    grplabs <- list(
+      urb = urb,
+      ag = ag,
+      oth = oth
+    )
+    
+    ests <- x %>% 
+      mutate(
+        grps = grps
+      ) %>% 
+      filter(grps %in% unlist(grplabs)) %>% 
+      mutate(
+        grps = factor(grps, levels = unlist(grplabs), labels = names(grplabs))
+      ) %>% 
+      group_by(grps) %>% 
+      summarise(
+        lo05 = mean(full0.05, na.rm = T), 
+        hi95 = mean(full0.95, na.rm = T),
+        lo25 = mean(full0.25, na.rm = T), 
+        hi75 = mean(full0.75, na.rm = T), 
+        lo45 = mean(full0.45, na.rm = T),
+        hi55 = mean(full0.55, na.rm = T)
+      )
+    
+    return(ests)
+    
+  })) %>% 
+  dplyr::select(-data) %>% 
+  unnest %>% 
+  mutate(
+    Region = factor(Region, 
+         levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+         labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC')),
+    Region = as.character(Region), 
+    grps = as.character(grps)
+  )
+
+# typical statewide
+scrdistall <- scrdist %>% 
+  mutate(Region = 'Statewide') %>% 
+  group_by(Region) %>% 
+  nest %>% 
+  mutate(grps = purrr::map(data, function(x){
+    
+    # get kmeans, centers
+    tomod <- x %>% 
+      mutate(
+        Urb = log10(1 + TotUrb2011Ws), 
+        Ag = log10(1 + TotAg2011Ws)
+      ) %>% 
+      dplyr::select(Urb, Ag) 
+    ngrps <- 8
+    kmod <- kmeans(tomod, centers = ngrps, nstart = 10, iter.max = 100, algorithm="MacQueen")
+    grps <- kmod$cluster
+    cent <- kmod$centers %>% 
+      data.frame
+    
+    # find the typical ag, urb group
+    urb <- which.max(cent[, 'Urb'])
+    ag <- which.max(cent[, 'Ag'])
+    oth <- which.min(rowSums(cent))
+    
+    grplabs <- list(
+      urb = urb,
+      ag = ag,
+      oth = oth
+    )
+    
+    ests <- x %>% 
+      mutate(
+        grps = grps
+      ) %>% 
+      filter(grps %in% unlist(grplabs)) %>% 
+      mutate(
+        grps = factor(grps, levels = unlist(grplabs), labels = names(grplabs))
+      ) %>% 
+      group_by(grps) %>% 
+      summarise(
+        lo05 = mean(full0.05, na.rm = T), 
+        hi95 = mean(full0.95, na.rm = T),
+        lo25 = mean(full0.25, na.rm = T), 
+        hi75 = mean(full0.75, na.rm = T), 
+        lo45 = mean(full0.45, na.rm = T),
+        hi55 = mean(full0.55, na.rm = T)
+      )
+    
+    return(ests)
+    
+  })) %>% 
+  dplyr::select(-data) %>% 
+  unnest %>% 
+  mutate(
+    Region = as.character(Region),
+    grps = as.character(grps)
+    )
+
+
+typscrs <- bind_rows(scrdistall, scrdistreg)
+
+save(typscrs, file = 'data/typscrs.RData', compress = 'xz')
+
 ##
 # rf model importance for constraints in each region
 
@@ -188,7 +353,7 @@ load(file = 'data/strclslen.RData')
 strmcat <- rbind(read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
                  read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
                  read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
-comid.nats <- read.csv("ALL_COMID_Nats.csv", stringsAsFactors = F)
+comid.nats <- read.csv("Z:/MarcusBeck/Landscape models from rafi/ALL_COMID_Nats.csv", stringsAsFactors = F)
 strmcat <- plyr::join(strmcat, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
 
 # PSA by all comid
