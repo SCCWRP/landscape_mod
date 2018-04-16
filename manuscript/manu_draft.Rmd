@@ -201,7 +201,7 @@ A prediction model of the CSCI was developed to estimate likely ranges of scores
 
 Models were developed using quantile regression forests to estimate ranges of likely CSCI scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09].  Quantile regression forests were used to predict CSCI scores in each stream reach from the 5th to the 95th percentile of expectations at five percent intervals (i.e., 5th, 10th, etc.). 
 
-Calibration data for the landscape models were based on a random selection of 75% of monitoring stations with observed CSCI scores.  The random selection was stratified by ecoregion (Figure \@ref(fig:calimap)) and relative amounts of impervious surfaces in each catchment based on percentile distributions.  The stratification method was chosen to ensure sufficient representation of landscape gradients in each ecoregion.  The remaining sites were used for model validation.  
+Calibration data for the landscape models were based on a random selection of 75% of monitoring stations with observed CSCI scores.  The random selection was stratified by ecoregion (Figure \@ref(fig:calimap)) and relative amounts of impervious surfaces in each catchment based on percentile distributions.  The stratification method was chosen to ensure sufficient representation of landscape gradients in each ecoregion.  The remaining sites were used for model validation.  Model performance was assessed for the statewide dataset and within each major region.  Differences between observed CSCI scores and median predictions were evaluated using correlation analysis and root mean squared errors (RMSE).  Regression analysis between predicted and observed scores was used to assess potential bias based on intercept and slope values differing from 0 and 1, respectively.
 
 ## San Gabriel River watershed case study
 
@@ -581,9 +581,9 @@ Finally, some stream reaches were unclassifed following application of the lands
 
 # Results
 
-### State-wide patterns
+## State-wide patterns
 
-* Where does the model perform well, how does performance vary with validation and calibration datasets (Table \@ref(tab:perftab)).
+The landscape model was used to predict an expected range of CSCI scores for `r nrow(comid_prd)` stream reaches in California.  The bioassessment dataset used to develop the model included `r sum(csci_comid$SelectedSample %in% 'Selected')` unique field observations assigned to stream reaches in the NHDPlus dataset.  By region, the most bioassessment samples were observed in the South Coast (n = 839), followed by the the Chapparal (n = 684) and Sierra Nevada regions (n = 548).  Model performance statewide and by region indicated generally good agreement between observed CSCI scores and the median prediction for the associated stream reach (Table \@ref(tab:perftab)).  Correlation between observed and predicted values for the entire calibration dataset was $\rho =$ 0.84 and RMSE = 0.14.  The intercept and slope for a regression between observed and predicted values were 0.24 and 0.72, suggesting a slight negative bias of predcitions at lower scores and slight positive bias at higher scores.  The statewide calibration data showed similar results, with slightly smaller correlation ($\rho =$ 0.72) and larger RMSE (0.18) estimates.  
 
 ```{r perftab}
 # observed and predicted data
@@ -681,7 +681,7 @@ cap.val <- 'Performance of landscape models by calibration and validation datase
 knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
-* Model performance as a function of land use, figure \@ref(fig:perflu)
+Model performance differed by region. Performance for the Chapparal and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration and validation datasets.  Model predictions for the Central Valley, Desert Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.75 with observed values in the calibration dataset and 0.55 in the validation dataset.  Model performance was poor for the Sierra Nevada region where the lowest correlation between predicted and observed values was observed. Regression estimates for the validation data in this region showed an intercept and slope of approximately 1 and 0.  Overall, model performance was strongly associated with land use gradients in each region (Figure \@ref(fig:perflu)).  The landscape model peformed well in regions with a mix of urban, agricultural, and open land, such as the South Coast region where strong gradients from open to urban lands occur in many watersheds (top left, Figure \@ref(fig:calires).  Conversely, the model did not perform well in regions where developed landscapes were less common, such as the Sierra Nevada region.  Figure \@ref(fig:perflu) demonstrate a decrease in the model residuals as a function of increasing urban or agricultural land.    
 
 ```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
@@ -752,7 +752,7 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
 grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
 ```
 
-* Statewide patterns Figure \@ref(fig:calires).
+Statewide patterns in stream constraints were apparent from the results of the landscape models consistent with land use (Figure \@ref(fig:calires)).  Stream reaches were more often constrained for biotic integrity in regions with more watershed development, either as urban or agricultural land.  For example, likely constrained reaches are apparent from the statewide map in coastal reaches of the South Coast where heavy urbanization occurs and in the Central Valley where agriculure is the dominant land use.  Stream reaches were more likely to be unconstrained in regions with less developemtn occurred, with areas in the North Coast and the Sierra Nevada region visible on the map (top right, Figure \@ref(fig:calires)).  A majority of reaches statewide were classified as possibly constrained (23% of all stream length) or possibly unconstrained (67%), whereas a minority were likely constrained (3%) or likely unconstrained (7%) (Table \@ref(tab:reltot)).  By region, the most reaches classified as likely unconstrained reaches were in the North Coast (20%) and Sierra Nevada regions (19%) and the most reaches as likely constrained were observed in the Central Valley (25%) and South Coast (9%) regions.  Relative CSCI scores compared to reach expectations were as expected for 92% of the sampled locations statewide, with an equal amount of sites under or over scoring (bottom Figure \@ref(fig:calires), Table \@ref(tab:reltot)).  Similar patterns were observed within regions, although a slightly larger percentage of sites in the Central Valley were under scoring compared to the other regions.  
 
 ```{r eval = F}
 # state base
@@ -904,8 +904,6 @@ dev.off()
 knitr::include_graphics('figs/calires.png')
 ```
 
-* Stream lengths by class, region, Table \@ref(tab:clstot)
-
 *Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and in major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in km with the percentage of the total length in a region in parentheses. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
 ```{r clstot}
 st_geometry(strclslen) <- NULL
@@ -967,8 +965,6 @@ tab <- regulartable(totab) %>%
   autofit 
 tab
 ```
-
-* Site summary by relative score, region Table \@ref(tab:reltot)
 
 *Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over-scoring if the observed scores are above the range of expectations at a reach, expected if within the range, and under-scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
 ```{r reltot, eval = T}
@@ -1055,7 +1051,7 @@ tab <- regulartable(totab) %>%
 tab
 ```
 
-### Case study
+## Case study
 
 * Classification, prioritization, Figures \@ref(fig:sgrresplo), \@ref(fig:sgrresmap) 
 
@@ -1496,7 +1492,7 @@ grid.arrange(
 )
 ```
 
-### Drivers of biological constraints 
+## Drivers of biological constraints 
 
 * State level, Figure \@ref(fig:calicnstr)
 
@@ -1593,7 +1589,7 @@ grid.arrange(
 )
 ```
 
-### Sensitivity analysis
+## Sensitivity analysis
 
 * Statewide results - reach classification statewide, Figure \@ref(fig:sensplo)
 
@@ -1774,7 +1770,7 @@ grid.arrange(
 
 ```
 
-### Unclassified reaches
+## Unclassified reaches
 
 * Framework for assigning unclassified reach to a class - kmeans by ag/urban using eight clusters, clusters with maximum ag, maximum urb, and minimum sum of centers for both were identified. 
 

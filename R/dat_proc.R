@@ -67,7 +67,7 @@ save(psalab, file = 'data/psalab.RData', compress = 'xz')
 load(file = 'data/comid_prd.RData')
 
 # all cali hydro, really simplified
-calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/All_Ca_NHDPlus.shp') %>% 
   spTransform(prj) %>% 
   st_as_sf %>% 
   st_simplify(dTolerance = 0.5, preserveTopology = T)
@@ -101,7 +101,7 @@ comid_prd <- comid_prd %>%
   dplyr::select(COMID, matches('^full|^COMID$'))
 
 # all cali hydro, really simplified
-calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/All_Ca_NHDPlus.shp') %>% 
   spTransform(prj) %>% 
   st_as_sf %>% 
   st_simplify(dTolerance = 0.5, preserveTopology = T) %>% 
@@ -135,7 +135,7 @@ save(caliclsplo, file = 'data/caliclsplo.RData', compress = 'xz')
 data(csci_comid)
 
 # all cali hydro, really simplified
-calinhd <- readOGR('S:/Spatial_Data/NHDPlus/NHDPLusCalifornia/NHDPlusCalifornia.shp') %>% 
+calinhd <- readOGR('S:/Spatial_Data/NHDPlus/All_Ca_NHDPlus.shp') %>% 
   spTransform(prj) %>% 
   st_as_sf %>% 
   st_simplify(dTolerance = 0.5, preserveTopology = T) %>% 
@@ -879,15 +879,21 @@ newdatcr <- all.comid %>%
   na.omit
 
 # out of bag predictions for calibration dataset
+# estimates for same comid must be averaged with oob estimates
 predcore_oob <- predict(rf_core, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
   as.data.frame %>% 
-  mutate(COMID = csci.rf.dat$COMID)
+  mutate(COMID = csci.rf.dat$COMID) %>% 
+  gather('var', 'val', -COMID) %>% 
+  group_by(COMID, var) %>% 
+  summarize(val = mean(val)) %>% 
+  spread(var, val) %>% 
+  .[, c(2:20, 1)]
 predcore_all <- predict(rf_core, newdata = newdatcr[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
   as.data.frame %>% 
   mutate(COMID = newdatcr$COMID)
 
 # join calibration oob with statewide
-predcore <- rbind(predcore_oob, predcore_all)
+predcore <- bind_rows(predcore_oob, predcore_all)
 names(predcore) <- c(paste0("core",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
 
 ##
@@ -902,18 +908,24 @@ newdatfl <- all.comid %>%
 # out of bag predictions for calibration dataset
 predfull_oob <- predict(rf_full, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
   as.data.frame %>% 
-  mutate(COMID = rf_full.dat$COMID)
+  mutate(COMID = rf_full.dat$COMID) %>% 
+  gather('var', 'val', -COMID) %>% 
+  group_by(COMID, var) %>% 
+  summarize(val = mean(val)) %>% 
+  spread(var, val) %>% 
+  .[, c(2:20, 1)]
 predfull_all <- predict(rf_core, newdata = newdatfl[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
   as.data.frame %>% 
   mutate(COMID = newdatfl$COMID)
 
 # join calibration oob with statewide
-predfull <- rbind(predfull_oob, predfull_all)
+predfull <- bind_rows(predfull_oob, predfull_all)
 names(predfull) <- c(paste0("full",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
 
 pred_all <- predcore %>% 
   left_join(predfull, by = 'COMID') %>% 
-  left_join(all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))], by = 'COMID')
+  left_join(all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))], by = 'COMID') %>% 
+  as.data.frame
               
 pred_all$DevData<-
   ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Cal")],"Cal",
