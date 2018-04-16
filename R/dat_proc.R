@@ -538,7 +538,7 @@ cscipsa <- csci_comid %>%
 
 # search grid
 grd_chk <- list(
-  thrsh = c(0.63, 0.79, 0.89), 
+  thrsh = c(0.63, 0.79, 0.92), 
   tails = c(0.05, 0.25, 0.45)
   ) %>% 
   cross_df
@@ -847,7 +847,7 @@ csci.rf.dat<-csci[which(csci$SiteSet=="Cal" & csci$SelectedSample=="Selected"),]
 
 library(quantregForest)
 
-rf_full.dat<-na.omit(csci.rf.dat[,c("SampleID", "CSCI",full.vars)])
+rf_full.dat<-na.omit(csci.rf.dat[,c("SampleID", "COMID", "CSCI",full.vars)])
 
 
 
@@ -864,43 +864,61 @@ rf_core<-quantregForest(y=csci.rf.dat$CSCI,
 
 
 revisited.sites<-  unique(csci$StationCode[which(csci$SelectedSample=="NotSelected")])
-
 csci$Revisited<-csci$StationCode %in% revisited.sites
 
+######
+# get model predictions, have to separate calibration oob from statewide
+  
+##
+# core model
 
+# prediction data w/o calibration dataset
+newdatcr <- all.comid %>% 
+  filter(!COMID %in% csci.rf.dat$COMID) %>% 
+  select_(.dots = c('COMID', core.candidates)) %>% 
+  na.omit
 
-# all.comid2<-na.omit(all.comid[,stressors.hiq])
+# out of bag predictions for calibration dataset
+predcore_oob <- predict(rf_core, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
+  as.data.frame %>% 
+  mutate(COMID = csci.rf.dat$COMID)
+predcore_all <- predict(rf_core, newdata = newdatcr[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
+  as.data.frame %>% 
+  mutate(COMID = newdatcr$COMID)
 
-start.time <- Sys.time()
-comid.pred.core<-predict(rf_core, newdata=as.matrix(na.omit(all.comid[, core.candidates])), what=seq(from=0.05, to=.95, by=.05), na.rm=T)
-end.time <- Sys.time()
-time.taken <- end.time - start.time
-time.taken
+# join calibration oob with statewide
+predcore <- rbind(predcore_oob, predcore_all)
+names(predcore) <- c(paste0("core",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
 
-comid.pred.core.df<-as.data.frame(comid.pred.core)
-names(comid.pred.core.df)<-paste0("core",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2))
-comid.pred.core.df$COMID<-  na.omit(all.comid[,c("COMID",core.candidates)])$COMID
-head(comid.pred.core.df)
+##
+# full model
 
+# prediction data w/o calibration dataset
+newdatfl <- all.comid %>% 
+  select_(.dots = c('COMID', core.candidates.mines.dams.atm.veg, nat.cands)) %>% 
+  na.omit %>% 
+  filter(!COMID %in% rf_full.dat$COMID) 
 
-# junk<-((all.comid[, c(core.candidates.mines.dams.atm.veg, nat.cands)]))
-# head(junk)
+# out of bag predictions for calibration dataset
+predfull_oob <- predict(rf_full, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
+  as.data.frame %>% 
+  mutate(COMID = rf_full.dat$COMID)
+predfull_all <- predict(rf_core, newdata = newdatfl[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
+  as.data.frame %>% 
+  mutate(COMID = newdatfl$COMID)
 
-comid.pred.full<-predict(rf_full, newdata=as.matrix(na.omit(all.comid[, c(core.candidates.mines.dams.atm.veg, nat.cands)])), what=seq(from=0.05, to=.95, by=.05), na.rm=T)
-comid.pred.full.df<-as.data.frame(comid.pred.full)
-names(comid.pred.full.df)<-paste0("full",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2))
-comid.pred.full.df$COMID<-  na.omit(all.comid[,c("COMID",core.candidates.mines.dams.atm.veg, nat.cands)])$COMID
-head(comid.pred.full.df)
+# join calibration oob with statewide
+predfull <- rbind(predfull_oob, predfull_all)
+names(predfull) <- c(paste0("full",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
 
-comid.pred.modeled<-join(comid.pred.core.df[,c(20,1:19)], comid.pred.full.df)
-summary(comid.pred.modeled)
-
-comid.pred.modeled<-join(comid.pred.modeled, all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))])
-
-comid.pred.modeled$DevData<-
-  ifelse(comid.pred.modeled$COMID %in% csci$COMID[which(csci$SiteSet=="Cal")],"Cal",
-         ifelse(comid.pred.modeled$COMID %in% csci$COMID[which(csci$SiteSet=="Val")],"Val","No"))
-comid_prd <- comid.pred.modeled
+pred_all <- predcore %>% 
+  left_join(predfull, by = 'COMID') %>% 
+  left_join(all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))], by = 'COMID')
+              
+pred_all$DevData<-
+  ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Cal")],"Cal",
+         ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Val")],"Val","No"))
+comid_prd <- pred_all
 
 # csci data for comparison with stream comid
 csci_comid <- csci
