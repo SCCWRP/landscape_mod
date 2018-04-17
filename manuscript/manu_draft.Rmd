@@ -1053,9 +1053,7 @@ tab
 
 ## Case study
 
-* Classification, prioritization, Figures \@ref(fig:sgrresplo), \@ref(fig:sgrresmap) 
-
-```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
+```{r}
 ##
 # ggplot of sgr site expecations, relative scores
 
@@ -1079,6 +1077,22 @@ sgrscrs <- spat %>%
   ) %>% 
   ungroup %>%
   left_join(cls, by = 'COMID')
+
+```
+
+Application of the landscape model to the San Gabriel River watershed and engagement with a stakeholder group demonstrated how the results can be used to locally prioritize actions for different stream reaches.  About 750 reaches in the SGR were identified and classified from NHDPlus, of which 10% were visited for bioassessment sampling.  CSCI scores ranged from `r round(min(sgrscrs$csci), 2)` to `r round(max(sgrscrs$csci), 2)` consistent with heavy urban development in the lower watershed and open land use at higher elevation in the upper watershed (Figure \@ref(fig:sgrresplo)).  Application of the landscape model results to the CSCI scores provided a context of expectations consistent with the strong land use gradient in the watershed.  Stream reaches in the upper watershed were a mix of likely and possibly unconstrained, whereas almost all stream reaches in the lower watersehd were classified as likely constrained.  Several reaches in the lower watershed had ranges that were left-skewed toward very low CSCI scores consistent with extreme landscape pressures.
+
+Most of the sampling stations in the SGR watershed were within the expected ranges of CSCI scores for the defined stream classes (top row, Figure \@ref(fig:sgrresmap)).  Using a hypothetical CSCI threshold of 0.79 and a relatively certain range of expected scores from the 5th to the 95th percentile of the model predictions, only three sites were under scoring (two likely unconstrained and one likely constrained) and two sites were over scoring (both likely constrained).  One of the under scoring sites was below the hypothetical CSCI threshold. None of the remaining sites in both possibly and likely classes were above or below the chosen CSCI threshold for the given class. 
+
+The three priority management actions (investigate, protect, restore) identified by the stakeholder group were ranked from low, medium, to high for each potential reach type (Figure \@ref(fig:pritem)). High priority recommendations were generally given to over and under scoring sites in likely unconstrained reaches or those below the hypothetical threshold with possibly unconstrained classification.  Low priority actions were most often recommended for possibly and likely constrained sites, or no action was recommended where it was assumed baseline monitoring and maintenance was sufficient. Recommended actions to investigate were more common for both over scoring and under scoring sites, protect was more common at over scoring sites, and restore was more common at under scoring sites.  A clear distinction between low and high priority actions was observed on the watershed map (bottom, Figure \@ref(fig:sgrresmap)). Sites in the lower watershed were low priority if an action was recommended, whereas the four high priority sites were in the upper watershed.  Several sites that were scoring as expected for likely and possibly unconstrained reaches in the upper watershed were recommended as medium priority for protection.
+
+```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
+##
+# ggplot of sgr site expecations, relative scores
+
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.05
 
 ## get sgr expectation for ggplot
 # process
