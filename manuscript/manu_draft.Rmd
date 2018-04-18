@@ -569,7 +569,7 @@ Each site type was ranked as high, medium, or low priority for each action.  No 
 knitr::include_graphics('figs/app.png')
 ```
 
-## Sensitivity analyses
+## Factors explaining constraints and sensitivity analysis
 
 Factors explaining variation between constrained and unconstrained stream reaches were evaluated for the major regions in California (Figure \@ref(fig:calimap)). Landscape and geological data in StreamCat at the riparian and watershed scale were used to model variation between reach classes using random forest models [@Breiman01]. For each region, 1000 regression trees were created and the mean reduction in accuracy was estimated for the exclusion of each variable across all models. This created an estimate of importance of each variable for describing differences between constrained and unconstrained stream classes. Mean reduction in accuracy was estimated for all variables in each model to identify the top five important variables in each region.  Reach classes as possibly or likely constrained (or unconstrained) were combined to evaluate the complete dataset.  Although the landscape models were developed from land use data derived from StreamCat, relatively coarse measures of land use were used (i.e., combined estimates of low to high intensity urban or agricultural land use).  The StreamCat dataset includes additional information at the riparian to watershed scale that could provide greater insight into specific factors within each region that potentially constrain stream integrity.  
 
@@ -577,7 +577,7 @@ Stream reach classifications and site performance categories depend on the range
 
 ## Unclassified reaches
 
-Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for 'typically' urban and agriculture reaches that relies on the range of expectations for reaches with similar land use by region.
+Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches that relies on the range of expectations for reaches with similar land use by region.  The approximate range of scores for reaches dominated by either urban, agricultural, and other (neither of the two) was identified by using kmeans clustering of percentage land use for each reach.  Typically urban and agricultural reaches were identified based on the largest centroid average of the clusters for each land use type, whereas the other category was based on the minimum sum of the centroid values for the two.  The expected ranges for each land use type in each region were based on averages of ranges across all reaches in the identified clusters. 
 
 # Results
 
@@ -1422,9 +1422,9 @@ grid.arrange(
 )
 ```
 
-## Drivers of biological constraints 
+## Drivers of biological constraints and sensitivity analysis
 
-Importance measures from random forest models identified key variables that explained the differences between constrained and unconstrained reaches between each region \@ref(fig:calicnstr).  Relative magnitudes of the importance measures between regions confirmed the estimates of model performance, such that regions where the model performed well (e.g., South Coast, Central Valley) had higher importance measures than those where the model did not perform well (e.g., North Coast, Sierra Nevada).  The top five most important variables were similar between regions although some specific differences were observed.  The amount of biological nitrogen fixation in watershed soils was ranked the most important variable for the Central Valley, Desert Modoc, and North Coast region and second most important for the Chapparal and Sierra Nevada regions.  This variable was not in the top five for the South Coast region, which was exclusively described by imperviousness and urbanization. Soil erodibility was the most important variable in teh Chaparral and Sierra Nevada regions.  Other important variables that were shared between regions (excluding the south Coast) were fertilizer applications and the amount of crops and hay at the riparian and watershed scale.
+Importance measures from random forest models identified key variables that explained the differences between constrained and unconstrained reaches between each region \@ref(fig:calicnstr).  Relative magnitudes of the importance measures between regions confirmed the estimates of model performance, such that regions where the model performed well (e.g., South Coast, Central Valley) had higher importance measures than those where the model did not perform well (e.g., North Coast, Sierra Nevada).  The top five most important variables were similar between regions although some specific differences were observed.  The amount of biological nitrogen fixation in watershed soils was ranked the most important variable for the Central Valley, Desert Modoc, and North Coast region and second most important for the Chapparal and Sierra Nevada regions.  This variable was not in the top five for the South Coast region, which was exclusively described by imperviousness and urbanization. Soil erodibility was the most important variable in the Chaparral and Sierra Nevada regions.  Other important variables that were shared between regions (excluding the south Coast) were fertilizer applications and the amount of crops and hay at the riparian and watershed scale.
 
 ```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors explaining variation between constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
@@ -1505,119 +1505,16 @@ grid.arrange(
 )
 ```
 
-## Sensitivity analysis
+The effects of changing certainty in the CSCI predictions and an example CSCI threshold were evaluated for nine scenarios to identify the change in stream reach classifcations (Figure \@ref(fig:sensplo)).  Changes were evaluated as the percentage of stream length statewide and within major regions for each reach classification and scenario. In general, decreasing the certainty of predictions from the landscape model by choosing a more narrow range of scores (5th to 95th, 25th to 75th, 45th to 55th) increased the number of streams from the possible to likely category in both constrained and unconstrained reaches.  Similarly, changing the CSCI threshodl from relaxed to more conservative (0.63, 0.79, 0.92) increased the number of streams classified as possibly or likely constrained and decreased the number of streams as possibly or likely unconstrained.  Changes by region with the different scenarios were also observed.  For example, over 80% of reaches in the Central Valley were classified as likely constrained using a conservative CSCI threshold with low certainty of predictions, whereas less than 1% of reaches were in this category using a relaxed CSCI threshold with high certainty.  Opposite trends were observed in regions with reduced land use  pressures.  For example, almost all stream reaches in the North Coast and Sierra Nevada regions were classified as likely unconstrained using a relaxed CSCI threshold and low certainty of predictions.
 
-* Statewide results - reach classification statewide, Figure \@ref(fig:sensplo)
-
-```{r sensplo, fig.height = 9, fig.width = 8, fig.cap = 'Scenarios used for sensitivity analysis (top) and changes in stream reach classes by region (bottom) for each scenario.  Nine scenarios were testing that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain) and potential CSCI threshold (relaxed to conservative).  The top plot shows examples for each scenario with four hypothetical reaches and the bottom shows the percentage of stream classifications for each region (including statewide) with each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r sensplo, fig.height = 6, fig.width = 7, fig.cap = 'Changes in stream reach classes by region for different scenarios used to define biological constraints.  Nine scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain as identified by the tail cutoff for the expected range) and potential CSCI threshold (relaxed to conservative).  The percentage of total stream length length in reach region (including statewide) for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
 grd_chk <- list(
-  thrsh = c(0.63, 0.79, 0.89), 
+  thrsh = c(0.63, 0.79, 0.92), 
   tails = c(0.05, 0.25, 0.45)
 ) %>% 
   cross_df
-
-data(sensres)
-
-sts <- paste('Site', seq(1:4))
-
-# example data, csci scores
-scrs_ex <- data.frame(
-  Site = factor(sts, levels = sts),
-  csci = c(0.99, 0.83, 0.73, 0.58)
-)
-
-# example data, stream predictions
-exps_ex <- data.frame(
-  Site = factor(sts, levels = sts),
-  minv = rep(c(0.84, 0.68, 0.58, 0.43), each = 1),
-  maxv = rep(c(1.14, 0.98, 0.88, 0.73), each = 1),
-  stringsAsFactors = F
-) %>% 
-  mutate(medv = ((maxv - minv) / 2) + minv)
-
-colfck <- tibble(
-  cols = brewer.pal(9, 'Paired')[c(2, 1, 5, 6)],
-  strcls = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained')
-)
-
-# create sensitivity plot examples
-for(i in 1:nrow(grd_chk)){
-  
-  thrsh <- grd_chk[[i, 'thrsh']]
-  tails <- grd_chk[[i, 'tails']]
-  
-  
-  # calculate class, performance, type, 
-  plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = thrsh, tails = tails) %>% 
-    rename(
-      strcls = `Stream class`
-    ) %>% 
-    mutate(
-      strcls = as.character(strcls),
-      Site = gsub('Site\\s', '', Site)
-    ) %>% 
-    left_join(colfck, by = 'strcls')
-  
-  p <- ggplot(plot_ex, aes(x = Site)) + 
-    geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt), colour = as.character(plot_ex$cols), width = 0, size = 2, alpha = 0.7) + 
-    geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
-    geom_hline(yintercept = thrsh, linetype = 'dashed') +
-    scale_x_discrete('Reach type', limits = rev(plot_ex$Site)) +
-    theme_minimal(base_family = 'serif', base_size = 12) +
-    theme(
-      panel.grid.major = element_blank(), 
-      panel.grid.minor = element_blank(), 
-      panel.border = element_rect(size = 0.5, color = 'black', fill = NA), 
-      axis.title = element_blank(), 
-      legend.position = 'none', 
-      plot.margin = grid::unit(c(1, 1, 1, 1), units = 'pt')
-    )
-  
-  if(i %in% c(1, 2)){
-    p <- p +
-      theme(
-        axis.ticks.y = element_line(),
-        axis.text.y = element_text(), 
-        axis.text.x = element_blank()
-      ) +
-      coord_flip() 
-  }
-  if(i %in% c(3)){
-    p <- p +
-      scale_y_continuous('CSCI score', breaks = c(0.63, 0.79, 0.89)) +
-      theme(
-        axis.ticks = element_line(), 
-        axis.text = element_text()
-      ) +
-      coord_flip() 
-  }
-  if(i %in% c(4, 7, 5, 8)){
-    
-    p <- p +
-      theme(
-        axis.ticks = element_blank(), 
-        axis.text = element_blank()
-      ) +
-      coord_flip() 
-  }
-  
-  if(i %in% c(6, 9)){
-    
-    p <- p +
-      scale_y_continuous('CSCI score', breaks = c(0.63, 0.79, 0.89)) +
-      theme(
-        axis.ticks.y = element_blank(), 
-        axis.ticks.x = element_line(),
-        axis.text.y = element_blank()
-      ) +
-      coord_flip() 
-  }
-  
-  assign(paste0('p', i), p)
-  
-}
 
 # stream class sensitivity
 senscls <- sensres %>% 
@@ -1627,14 +1524,15 @@ senscls <- sensres %>%
   dplyr::select(-name) %>% 
   unnest %>% 
   mutate(
-    thrsh = factor(thrsh, levels = c('0.63', '0.79', '0.89'), labels = c('0.63 (relaxed)', '0.79', '0.89 (conservative)')),
-    tails = factor(tails, levels = c('0.05', '0.25', '0.45'), labels = c('0.05 (more certain)', '0.25', '0.45 (less certain)'))
-  )
-
+    thrsh = as.character(thrsh),
+    tails = as.character(tails), 
+    Region = gsub('^statewide$', 'Statewide', Region)
+    ) 
+  
 # results plot
-pres <- ggplot(senscls, aes(x = Region, y = perc, fill = strcls)) + 
+pres <- ggplot(senscls, aes(x = thrsh, y = perc, fill = strcls)) + 
   geom_bar(stat = 'identity', colour = scales::alpha('black', 0.5), width = 1) +
-  facet_grid(thrsh ~ tails) + 
+  facet_grid(tails~Region) + 
   scale_fill_manual('Stream reach class', values = pal_exp(levels(senscls$strcls))) +
   theme_bw(base_family = 'serif') +     
   scale_y_continuous('% stream length', expand = c(0, 0)) + 
@@ -1656,31 +1554,15 @@ grid.arrange(
   arrangeGrob(
     pleg,
     arrangeGrob(
-      arrangeGrob(textGrob('Certainty in CSCI predictions', gp = grobsz), textGrob(''), ncol = 2, widths = c(1, 0.05)),
       arrangeGrob(
-        arrangeGrob(
-          arrangeGrob(
-            arrangeGrob(
-              textGrob('Example stream reaches', gp = gpar(cex = 0.85), rot = 90, vjust = 0), 
-              arrangeGrob(
-                arrangeGrob(textGrob('0.05 (more certain)', gp = grobsz), textGrob('0.25', gp = grobsz), textGrob('0.45 (less certain)', gp = grobsz), textGrob(''), ncol = 4, widths = c(1, 1, 1, 0.1)), 
-                arrangeGrob(p1, p4, p7, textGrob('0.63 (relaxed)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
-                arrangeGrob(p2, p5, p8, textGrob('0.79', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)), 
-                arrangeGrob(p3, p6, p9, textGrob('0.89 (conservative)', rot = 270, gp = grobsz), ncol = 4, widths = c(1, 1, 1, 0.1)),
-                ncol = 1, heights = c(0.2, 1, 1, 1), bottom = textGrob('CSCI', gp = grobsz)
-              ), 
-              ncol = 2, widths = c(0.055, 1)
-            )
-          ), 
-          pres, 
-          ncol = 1
-        ),
-        textGrob('Example CSCI threshold', rot = 270, gp = grobsz), 
-        widths = c(1, 0.05), ncol = 2
+        pres, 
+        textGrob('Example CSCI threshold (relaxed to conservative)', gp = grobsz), 
+        heights= c(1, 0.05), ncol = 1
       ), 
-      heights = c(0.05, 1)
+      arrangeGrob(textGrob('Certainty in CSCI predictions (more to less)', gp = grobsz, rot = 270), textGrob(''), ncol = 1, heights = c(1, 0.05)),
+      ncol = 2, widths = c(1, 0.05)
     ), 
-  ncol = 1, heights = c(0.07, 1)
+    ncol = 1, heights = c(0.07, 1)
   )
 )
 
@@ -1688,9 +1570,7 @@ grid.arrange(
 
 ## Unclassified reaches
 
-* Framework for assigning unclassified reach to a class - kmeans by ag/urban using eight clusters, clusters with maximum ag, maximum urb, and minimum sum of centers for both were identified. 
-
-* Statewide patterns, Table \@ref(tab:typscrs)
+Ranges of expected CSCI scores for typical reaches in urban, agricultural, and neither (other) of the settings are shown in table \@ref(tab:typscrs). These typical values are shown for more to less certainty in the range of predictions.  Unclassified reaches with insufficient data in StreamCat to use the landscape models can be qualitatively defined by the dominant watershed land use as urban, agricultural, or other, and then matched to the appropriate values in the table.  Between regions, the variation in expected scores also provides context for landscape pressures that differ by location.  For example, the expected range of scores in regions with heavy urban development (e.g., South Coast) are much lower than streams that are neither urban nor agricultural.  The North Coast region in contrast has an expected range of scores in urban streams that is similar to streams that are neither urban nor agricultural.  Interestingly, the range of scores in urban and agricultural streams were similar in the Central Valley where agriculture is the dominant land use.  
 
 ```{r typscrs}
 totab <- typscrs %>% 
