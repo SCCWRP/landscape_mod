@@ -40,7 +40,7 @@ library(officer)
 source('../R/funcs.R')
 
 # extract bib entries from online
-# bib_scrp('manu_draft.Rmd', 'refs.bib')
+bib_scrp('manu_draft.Rmd', 'refs.bib')
 
  # data
 load(file = '../data/typetab.RData')
@@ -577,7 +577,7 @@ Stream reach classifications and site performance categories depend on the range
 
 ## Unclassified reaches
 
-Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches that relies on the range of expectations for reaches with similar land use by region.  The approximate range of scores for reaches dominated by either urban, agricultural, and other (neither of the two) was identified by using kmeans clustering of percentage land use for each reach.  Typically urban and agricultural reaches were identified based on the largest centroid average of the clusters for each land use type, whereas the other category was based on the minimum sum of the centroid values for the two.  The expected ranges for each land use type in each region were based on averages of ranges across all reaches in the identified clusters. 
+Finally, some stream reaches were unclassifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred when insufficient data in the StreamCat database were available to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  A preliminary approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches that relies on the range of expectations for reaches with similar land use by region.  The approximate range of scores for reaches dominated by either urban, agricultural, and other (neither of the two) was identified by using kmeans clustering of percentage land use for each reach [@MacQueen67].  Typically urban and agricultural reaches were identified based on the largest centroid average of the clusters for each land use type, whereas the other category was based on the minimum sum of the centroid values for the two.  The expected ranges for each land use type in each region were based on averages of ranges across all reaches in the identified clusters. 
 
 # Results
 
