@@ -74,7 +74,7 @@ raw <- paste('Version', raw)
 
 # Abstract 
 
-Many streams are failing to achieve desired biological condition and require management decisions to restore designated uses.  Some management goals may be impractical with limited resources, particularly in streams where large-scale changes on the landscape (e.g., urbanization) impose constraints on the upper limit of biological integrity.  A statewide landscape model was developed that sets reasonable expectations for observed conditions within landscape constraints to prioritize management actions. The model provides a context for what is likely to be achieved at a given site independent of an actual bioassessment score.  With this approach, sites can be ranked as over- or under-scoring relative to an expectation that is typical for the observed level of landscape alteration. We developed a visualization tool to compare observed bioassessment scores with modelled expectations to rapidly identify reaches that were scoring better or worse than expected. Using this tool, a group of regulators, dischargers, stormwater agencies, and environmental advocates from the San Gabriel River watershed (Los Angeles County, California) identified regions in the watershed with consistent patterns in bioassessment scores relative to expectations. Based on these patterns, they prioritized different management actions for each region. Sites in both developed and undeveloped areas that scored below expectations were prioritized for restoration; in contrast, restoration was not a priority at developed sites where scores were low but within expected ranges. Sites scoring better than expected were prioritized for enhanced protection, as well as additional monitoring. Interactive tools that connect landscape models with observed data can help set management goals appropriate for stakeholder needs and likely constraints on biological integrity.  These tools can easily be applied to other locations where biological data are used to assess environmental condition.
+Many streams are failing to achieve desired biological condition and require management decisions to restore designated uses.  Some management goals may be impractical with limited resources, particularly in streams where large-scale changes on the landscape (e.g., urbanization) impose constraints on the upper limit of biological integrity.  A statewide landscape model was developed that sets reasonable expectations for observed conditions within landscape constraints to prioritize management actions. The model provides a context for what is likely to be achieved at a given site independent of an actual bioassessment score.  With this approach, sites can be ranked as over- or under-scoring relative to an expectation that is typical for the observed level of landscape alteration. We developed a visualization tool, the Stream Classification and Priority Explorer (SCAPE), to compare observed bioassessment scores with modelled expectations to rapidly identify reaches that were scoring better or worse than expected. Using this tool, a group of regulators, dischargers, stormwater agencies, and environmental advocates from the San Gabriel River watershed (Los Angeles County, California) identified regions in the watershed with consistent patterns in bioassessment scores relative to expectations. Based on these patterns, they prioritized different management actions for each region. Sites in both developed and undeveloped areas that scored below expectations were prioritized for restoration; in contrast, restoration was not a priority at developed sites where scores were low but within expected ranges. Sites scoring better than expected were prioritized for enhanced protection, as well as additional monitoring. Interactive tools that connect landscape models with observed data can help set management goals appropriate for stakeholder needs and likely constraints on biological integrity.  These tools can easily be applied to other locations where biological data are used to assess environmental condition.
 
 # Introduction
 
@@ -96,6 +96,146 @@ Many streams are failing to achieve desired biological condition and require man
 # Methods
 
 ## Study area and data sources
+
+Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (Figure \@ref(fig:calimap)).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38% from 1973 to 2000 [@Sleeter11].
+
+Stream data from the National Hydrography Dataset (NHD) [@USGS14] were used to identify reaches in California for modelling biological integrity. The NHD is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the NHD are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the NHD were used as the discrete spatial unit for modelling biological integrity.  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the NHD to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
+
+The California Stream Condition Index (CSCI) [@Ode16;@Mazor16] was used as a measure of biological condition in California streams.  Benthic macroinvertebrate data used to calculate CSCI scores were collected at nearly 3400 sites (6270 with repeat visits) between 2000 and 2016.  Field data were collected during baseflow conditions typically between May and July following methods in @Ode07.  The CSCI is a predictive index of stream health that compares the observed taxa and metrics at a site to those expected under reference conditions.  Expected conditions at a site are based on models that estimate the likely macroinvertebrate community in relation to factors that naturally influence biology, e.g., watershed size, elevation, climate, etc.  The CSCI score at a site is based on an observed-to-expected ratio of taxa and a predictive multimetric index composed of six metrics that describe the structure and function of the macroinvertebrate community.  The index score at a site can vary from 0 to 1.4, with higher values indicating an observed community with less deviation from reference conditions.  Because the index was developed to minimize the influence of natural gradients, the index scores have consistent meaning across the state [@Reynoldson97].  A threshold score based on a selected lower percentile of scores (e.g., 10%) at all reference sites is used to define nominally low and high scoring sites.
+
+## Building and validating landscape models
+
+A prediction model of the CSCI was developed to estimate likely ranges of scores associated with land use gradients.  Land use as urban and agricultural was quantified for the catchment of each stream reach in California using the StreamCat database [@Hill16]. CSCI scores were modelled using only the estimates of urban and agricultural land use as the developed portion of the landscape within each stream reach. The model was incomplete by design to describe scores only in relation to large-scale constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  Deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
+
+Models were developed using quantile regression forests to estimate ranges of likely CSCI scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09].  Quantile regression forests were used to predict CSCI scores in each stream reach from the 5th to the 95th percentile of expectations at five percent intervals (i.e., 5th, 10th, etc.). 
+
+Calibration data for the landscape models were based on a random selection of 75% of monitoring stations with observed CSCI scores.  The random selection was stratified by ecoregion (Figure \@ref(fig:calimap)) and relative amounts of impervious surfaces in each catchment based on percentile distributions.  The stratification method was chosen to ensure sufficient representation of landscape gradients in each ecoregion.  The remaining sites were used for model validation.  Model performance was assessed for the statewide dataset and within each major region.  Differences between observed CSCI scores and median predictions were evaluated using correlation analysis and root mean squared errors (RMSE).  Regression analysis between predicted and observed scores was used to assess potential bias based on intercept and slope values differing from 0 and 1, respectively.
+
+## San Gabriel River watershed case study
+
+Stream reach and bioassessment data from the San Gabriel River (SGR) watershed in southern California were used to develop reach classifications, site performance categories, and management priorities from the landscape models. A strong land use gradient occurs in the SGR watershed (Figure \@ref(fig:sgrshd)). Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for reacreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements.
+
+The SGR watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the San Gabriel River Regional Monitoring Program (SGRRMP) includes stakeholders from these groups that cooperatively work to increase awareness of issues in the SGR watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the SGRRMP with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for participation to include diverse management interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal decision-making processes. 
+
+## Reach classification, site performance, and prioritization
+
+A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected CSCI scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed CSCI scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health.  The entire process is shown in Figure \@ref(fig:ridges) and Table \@ref(tab:typetab) and is described in detail below.
+
+Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints.  Classifications were developed using the range of CSCI expectations at a reach (Figure \@ref(fig:ridges)a,b) relative to a chosen threshold for the CSCI to define nominally low or high scores (Figure \@ref(fig:ridges)c).  The reach classification was based solely on the intersection of CSCI expectations at a reach with the chosen CSCI threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of CSCI score expectations entirely below the threshold were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that overlapped the CSCI threshold were considered possibly constrained or possibly unconstrained, where distinction between the two was based on location of the median expectation of a reach relative to the threshold.  
+
+CSCI scores from biomonitoring data were used to define relative sites scores at a sample site given the stream reach classification (Figure \@ref(fig:ridges)d). For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), relative site scores were defined based on location to the range of expected CSCI scores.  This provided a definition that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95th percentile of expected scores) were considered over scoring and sites below the lower limit were under scoring.  Sites with CSCI scores within the range of expectations were as expected.   
+
+Categories for relative sites scores were further split if they were above or below the selected CSCI threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category for sites within each reach classification was added to define a site as above or below the threshold.  For a likely unconstrained reach, under scoring sites below the minimum expected score were additionally defined as being above or below the CSCI threshold.  Similarly, over scoring sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the CSCI threshold.  For possibly constrained and possibly unconstrained reaches, sites that were as expected were additionally defined as being below or above the CSCI threshold.  In total, sixteen site types were defined for the reach classifications (Table \@ref(tab:typetab)).
+
+Each site type was used to define a priority as a demonstration of how results from the landscape model can inform different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group.  The interactive and online Stream Classification and Priority Explorer (SCAPE) tool was created for the stakeholder group to facilitate the recommendation of management actions for each site type (Figure \@ref(fig:app)).  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest (e.g., monitoring, regulation, etc.).  Stakeholders were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a graphical template of Table \@ref(tab:typetab) for reference.  A brief description of the rationale for a site priority was also requested with the feedback.  The final priorities were generalized into three categories to recommend actions in addition to baseline monitoring and maintenance. The final priorities also assumed that existing information available for each site was "true" following established practices to account for uncertainty or variation between assessments.  A consensus was reached for the following definitions of each action:
+
+* Investigate:  Additional monitoring or review of supplementary data (e.g., field visits, review aerial imagery);
+* Protect: Additional scrutiny of proposed development and/or projects; 
+* Restore: Targeted action for causal assessment and/or restoration funds.
+
+Each site type was ranked as high, medium, or low priority for each action.  No priority assigned to an action for a stream type was indication that baseline monitoring and maintenance was sufficient for a site type.
+
+## Factors explaining constraints and sensitivity analysis
+
+Factors explaining variation between constrained and unconstrained stream reaches were evaluated for the major regions in California (Figure \@ref(fig:calimap)). Landscape and geological data in StreamCat at the riparian and watershed scale were used to model variation between reach classes using random forest models [@Breiman01]. For each region, 1000 regression trees were created and the mean reduction in accuracy was estimated for the exclusion of each variable across all models. This created an estimate of importance of each variable for describing differences between constrained and unconstrained stream classes. Mean reduction in accuracy was estimated for all variables in each model to identify the top five important variables in each region.  Reach classes as possibly or likely constrained (or unconstrained) were combined to evaluate the complete dataset.  Although the landscape models were developed from land use data derived from StreamCat, relatively coarse measures of land use were used (i.e., combined estimates of low to high intensity urban or agricultural land use).  The StreamCat dataset includes additional information at the riparian to watershed scale that could provide greater insight into specific factors within each region that potentially constrain stream integrity.  
+
+Stream reach classifications and site performance categories depend on the range of score expectations (or certainty) from the landscape model (Figure  \@ref(fig:ridges)b) and the CSCI threshold for defining nominally low or high scores (Figure \@ref(fig:ridges)c).  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  The 5th and 95th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more conservative threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification.     
+
+## Unclassified reaches
+
+Finally, some stream reaches were not classifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred if StreamCat data were unavailable to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  An approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches that relies on the range of expectations for reaches with similar land use by region.  The approximate range of scores for reaches dominated by either urban, agricultural, and neither of the two (other) was identified by using kmeans clustering of percentage land use for each reach [@MacQueen67].  Typically urban and agricultural reaches were identified based on the largest centroid average of the clusters for each land use type, whereas the other category was based on the minimum sum of the centroid values for urban and agricultural land use.  The expected ranges for each land use type in each region were based on averages of ranges across all reaches in the identified clusters. 
+
+# Results
+
+## State-wide patterns
+
+The landscape model was used to predict an expected range of CSCI scores for `r nrow(comid_prd)` stream reaches in California.  The bioassessment dataset used to develop the model included `r sum(csci_comid$SelectedSample %in% 'Selected')` unique field observations assigned to stream reaches in the NHDPlus dataset.  By region, the most bioassessment samples were observed in the South Coast (n = 839), followed by the the Chapparal (n = 684) and Sierra Nevada regions (n = 548).  Model performance statewide and by region indicated generally good agreement between observed CSCI scores and the median prediction for the associated stream reach (Table \@ref(tab:perftab)).  Agreement between observed and predicted values for the entire calibration dataset was $\rho =$ 0.84 and RMSE = 0.14.  The intercept and slope for a regression between observed and predicted values were 0.24 and 0.72, suggesting a slight negative bias of predictions at lower scores and slight positive bias at higher scores.  The statewide calibration data showed similar results, with slightly smaller correlation ($\rho =$ 0.72) and larger RMSE (0.18) estimates.  
+
+Model performance differed by region. Performance for the Chapparal and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration and validation datasets.  Model predictions for the Central Valley, Desert Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.75 with observed values in the calibration dataset and 0.55 in the validation dataset.  Model performance was poor for the Sierra Nevada region where the lowest correlation between predicted and observed values was observed. Regression estimates for the validation data in this region showed an intercept and slope of approximately 1 and 0.  Overall, model performance was strongly associated with land use gradients in each region (Figure \@ref(fig:perflu)).  The landscape model peformed well in regions with a mix of urban, agricultural, and open land, such as the South Coast, where strong gradients occur in many watersheds.  Conversely, the model did not perform well in regions where developed landscapes were less common, such as the Sierra Nevada region.   
+
+Statewide patterns in stream constraints were apparent from the results of the landscape models consistent with land use (Figure \@ref(fig:calires)).  Stream reaches were more often constrained for biotic integrity in regions with more watershed development, either as urban or agricultural land.  For example, likely constrained reaches were apparent from the statewide map in coastal reaches of the South Coast where heavy urbanization occurs and in the Central Valley where agriculure is the dominant land use.  Stream reaches were more likely to be unconstrained in regions with less development, with areas in the North Coast and the Sierra Nevada region visible on the map (right, Figure \@ref(fig:calires)).  A majority of reaches statewide were classified as possibly constrained (23% of all stream length) or possibly unconstrained (67%), whereas a minority were likely constrained (3%) or likely unconstrained (7%) (Table \@ref(tab:reltot)).  By region, the most reaches classified as likely unconstrained reaches were in the North Coast (20%) and Sierra Nevada regions (19%) and the most reaches as likely constrained were observed in the Central Valley (25%) and South Coast (9%) regions.  Relative CSCI scores compared to reach expectations were as expected for 92% of the sampled locations statewide, whereas a much smaller percentage of sites were equally under or over scoring (Table \@ref(tab:reltot)).  Similar patterns were observed within regions, although a slightly larger percentage of sites in the Central Valley were under scoring compared to the other regions.  
+
+## Case study
+
+```{r}
+##
+# ggplot of sgr site expecations, relative scores
+
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.05
+
+##
+# get biological condition expectations
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+  mutate(COMID = as.character(COMID)) 
+
+# get csci difference
+sgrscrs <- spat %>% 
+  dplyr::select(COMID, full0.50) %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, ., by = 'COMID') %>% 
+  group_by(COMID, StationCode, lat, long) %>% 
+  summarise(
+    csci = mean(csci, na.rm = TRUE)
+  ) %>% 
+  ungroup %>%
+  left_join(cls, by = 'COMID')
+
+```
+
+Application of the landscape model to the San Gabriel River watershed and engagement with a stakeholder group demonstrated how the results can be used to locally prioritize actions for different stream reaches.  About 750 reaches in the SGR were identified and classified from NHDPlus, of which 10% were visited for bioassessment sampling.  CSCI scores ranged from `r round(min(sgrscrs$csci), 2)` to `r round(max(sgrscrs$csci), 2)` consistent with heavy urban development in the lower watershed and open land use at higher elevation in the upper watershed (Figure \@ref(fig:sgrresplo)).  Application of the landscape model results to the CSCI scores provided a context of expectations consistent with the strong land use gradient in the watershed.  Stream reaches in the upper watershed were a mix of likely and possibly unconstrained, whereas almost all stream reaches in the lower watershed were classified as likely constrained.  Several reaches in the lower watershed had ranges that were left-skewed toward very low CSCI scores consistent with extreme landscape pressures.
+
+Most of the sampling stations in the SGR watershed were within the expected ranges of CSCI scores for the defined stream classes (top, Figure \@ref(fig:sgrresmap)).  Using a hypothetical CSCI threshold of 0.79 and a relatively certain range of expected scores from the 5th to the 95th percentile of the model predictions, only three sites were under scoring (two likely unconstrained and one likely constrained) and two sites were over scoring (both likely constrained).  One of the under scoring sites was below the hypothetical CSCI threshold. None of the remaining sites in both possibly and likely classes were above or below the chosen CSCI threshold for the given class. 
+
+The three priority management actions identified by the stakeholder group (investigate, protect, restore) were ranked from low, medium, to high for each potential reach type (Figure \@ref(fig:pritem)). High priority recommendations were generally given to over and under scoring sites in likely unconstrained reaches or those below the hypothetical threshold with possibly unconstrained classification.  Low priority actions were most often recommended for possibly and likely constrained sites, or no action was recommended where it was assumed baseline monitoring and maintenance was sufficient. Recommended actions to investigate were more common for both over scoring and under scoring sites, protect was more common at over scoring sites, and restore was more common at under scoring sites.  A clear distinction between low and high priority actions was observed on the watershed map (bottom, Figure \@ref(fig:sgrresmap)). Sites in the lower watershed were low priority if an action was recommended, whereas the four high priority sites were in the upper watershed.  Several sites that were scoring as expected for likely and possibly unconstrained reaches in the upper watershed were recommended as medium priority for protection.
+
+## Drivers of biological constraints and sensitivity analysis
+
+Importance measures from random forest models identified key variables that explained the differences between constrained and unconstrained reaches between each region (Figure \@ref(fig:calicnstr)).  Relative magnitudes of the importance measures between regions confirmed the estimates of model performance, such that regions where the model performed well (e.g., South Coast, Central Valley) had higher importance measures than those where the model did not perform well (e.g., North Coast, Sierra Nevada).  The top five most important variables were similar between regions although some specific differences were observed.  The amount of biological nitrogen fixation in watershed soils was ranked the most important variable for the Central Valley, Desert Modoc, and North Coast region and second most important for the Chapparal and Sierra Nevada regions.  This variable was not in the top five for the South Coast region, which was exclusively described by imperviousness and urbanization. Soil erodibility was the most important variable in the Chaparral and Sierra Nevada regions.  Other important variables that were shared between regions (excluding the South Coast) were fertilizer applications and the amount of crops and hay at the riparian and watershed scale.
+
+The effects of changing certainty in the CSCI predictions and a hypothetical CSCI threshold were evaluated for nine scenarios to identify the change in stream reach classifications (Figure \@ref(fig:sensplo)).  Changes were evaluated as the percentage of stream length statewide and within major regions for each reach classification. Decreasing the certainty of predictions from the landscape model by choosing a narrower range of scores (5th to 95th, 25th to 75th, 45th to 55th) increased the number of streams from the possible to likely category in both constrained and unconstrained reaches.  Similarly, changing the CSCI threshold from relaxed to more conservative (0.63, 0.79, 0.92) increased the number of streams classified as possibly or likely constrained and decreased the number of streams as possibly or likely unconstrained.  Changes by region with the different scenarios were also observed.  For example, over 80% of reaches in the Central Valley were classified as likely constrained using a conservative CSCI threshold with low certainty of predictions, whereas less than 1% of reaches were in this category using a relaxed CSCI threshold with high certainty.  Opposite trends were observed in regions with reduced land use  pressures.  For example, almost all stream reaches in the North Coast and Sierra Nevada regions were classified as likely unconstrained using a relaxed CSCI threshold and low certainty of predictions.
+
+## Unclassified reaches
+
+Ranges of expected CSCI scores for typical reaches in urban, agricultural, and neither of the two (other) are shown in table \@ref(tab:typscrs). These typical values are shown for more to less certainty in the range of predictions.  Unclassified reaches can be defined by the dominant watershed land use as urban, agricultural, or other, and then matched to the appropriate values in the table.  Between regions, the variation in expected scores also provides context for landscape pressures that differ by location.  For example, the expected range of scores in regions with heavy urban development (e.g., South Coast) are much lower than streams that are neither urban nor agricultural.  The North Coast region in contrast has an expected range of scores in urban streams that is similar to streams that are neither urban nor agricultural.  Interestingly, the range of scores in urban and agricultural streams were similar in the Central Valley where agriculture is the dominant land use.  
+
+# Discussion
+
+* What is the value of identifying constrained channels?
+     * Identification of constrained channels allows us to determine how best to spend limited resources and to focus on reaches where we have a decent chance of improving the biological condition.
+     * Use of more data to develop context of assessment
+     * Targeted management for desired outcomes
+     * Informing decisions about future monitoring (i.e., prioritize future monitoring locations)
+     * Listing implications, perhaps with a subheader, "Implications for determining biological impairments". We should enlist Chad to help with this—after presenting him with LACSD’s proposal.
+
+* What is useful about our approach compared to alternatives?
+     * Field-based methods to identify constrained channels vs. landscape modelling
+     * Related directly to biological condition and regulatory standards
+     * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
+
+* What contributed to our success in defining priorities? 
+     * Stakeholder involvement guided process, contributed to achieving goals
+     * An interactive/iterative approach was used - we provided tools to facilitate (web apps) and we did not assume priorities
+
+* Caveats of our aproach
+     * This analysis doesn’t truly tell us if a site can be fixed or if the conditions are truly constrained (key message, need to mention in intro)
+     * What do priorities really mean? Depends on your interests, needs, values, etc.
+     * Constrained may not always mean constrained - CSCI vs other biological indicators
+     * Site-specific approaches are warranted in certain cases
+     * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
+
+* Future work
+     * Ability to link with other assessment tools besides CSCI
+     * Link with engineered channels study
+     * Priorities statewide
+     * Application to larger regions possible (national-scale), or how it can be applied in other areas
+     
+# Supplement
+
+The SCAPE model application website: [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/)
+
+# Figures
 
 ```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Urban and agricultural land use (left) and distribution of observed stream CSCI scores (right) in California. Cover of urban and agricultural land use in stream catchments was used to develop landscape models for stream reach expectations of bioassessment scores.  Grey lines are ecoregions in California, CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
@@ -196,25 +336,7 @@ print(p2, vp = v2)
 print(pinset, vp = v3)
 ```
 
-Landscape models were developed for California using land use data, stream hydrography, and biological assessments.  California covers 424,000 km$^2$ of land from latitudes 33 to 42$^\circ$N that includes extreme variation in altitude and climate (Figure \@ref(fig:calimap)).  Temperate rainforests occur in the north, deserts in the northeast and southeast, and Mediterranean climates in coastal regions.  California's stream network is approximately 280,000 km in length and covers all of the major climate zones in the state. A high degree of endemism and biodiversity occurs in these streams including nearly 4000 species of vascular plants, macroinvertebrates, and vertebrates that depend on fresh water during their life history [@Howard09;@Howard15].  Approximately 30% of streams in California are perennial with the remaining as intermittent or ephemeral for portions of the year.  Much of California is publicly owned and is used heavily for recreation.  A large portion of the central region of the state is agricultural (i.e., Central Valley), whereas dense areas of urban development are in the southwest (i.e., Los Angeles and San Diego) and central (San Francisco Bay area) coast areas.  Developed lands increased in California by 38% from 1973 to 2000 [@Sleeter11].
-
-Stream data from the National Hydrography Dataset (NHD) [@USGS14] were used to identify reaches in California for modelling biological integrity. The NHD is a surface water framework that maps drainage networks and associated features (e.g., streams, lakes, canals, etc.) in the United States.  Stream flow lines in the NHD are developed from flow accumulation models that estimate location of a stream given slope and elevation changes from existing elevation datasets.  As such, flow lines in California represent both perennial, intermittent, and ephemeral streams that have wide variation in observed flow throughout the year. Stream reaches designated in the NHD were used as the discrete spatial unit for modelling biological integrity.  Hydrography data were combined with landscape metrics available from the StreamCat Dataset [@Hill16] to estimate land use at the catchment (nearby landscape flowing directly into a stream) and the entire upstream watershed for each reach.  The StreamCat Dataset was developed specifically for the NHD to leverage the topology of stream connections to estimate cumulative landscape metrics of all reaches.
-
-The California Stream Condition Index (CSCI) [@Ode16;@Mazor16] was used as a measure of biological condition in California streams.  Benthic macroinvertebrate data used to calculate CSCI scores were collected at nearly 3400 sites (6270 with repeat visits) between 2000 and 2016.  Field data were collected during baseflow conditions typically between May and July following methods in @Ode07.  The CSCI is a predictive index of stream health that compares the observed taxa and metrics at a site to those expected under reference conditions.  Expected conditions at a site are based on models that estimate the likely macroinvertebrate community in relation to factors that naturally influence biology, e.g., watershed size, elevation, climate, etc.  The CSCI score at a site is based on an observed-to-expected ratio of taxa and a predictive multimetric index composed of six metrics that describe the structure and function of the macroinvertebrate community.  The index score at a site can vary from 0 to 1.4, with higher values indicating an observed community with less deviation from reference conditions.  Because the index was developed to minimize the influence of natural gradients, the index scores have consistent meaning across the state [@Reynoldson97].  A threshold score based on a selected lower percentile of scores (e.g., 10%) at all reference sites is used to define nominally low and high scoring sites.
-
-## Building and validating landscape models
-
-A prediction model of the CSCI was developed to estimate likely ranges of scores associated with land use gradients.  Land use as urban and agricultural was quantified for the catchment of each stream reach in California using the StreamCat database [@Hill16]. CSCI scores were modelled using only the estimates of urban and agricultural land use as the developed portion of the landscape within each stream reach. The model was incomplete by design to describe scores only in relation to large-scale constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  Deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
-
-Models were developed using quantile regression forests to estimate ranges of likely CSCI scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09].  Quantile regression forests were used to predict CSCI scores in each stream reach from the 5th to the 95th percentile of expectations at five percent intervals (i.e., 5th, 10th, etc.). 
-
-Calibration data for the landscape models were based on a random selection of 75% of monitoring stations with observed CSCI scores.  The random selection was stratified by ecoregion (Figure \@ref(fig:calimap)) and relative amounts of impervious surfaces in each catchment based on percentile distributions.  The stratification method was chosen to ensure sufficient representation of landscape gradients in each ecoregion.  The remaining sites were used for model validation.  Model performance was assessed for the statewide dataset and within each major region.  Differences between observed CSCI scores and median predictions were evaluated using correlation analysis and root mean squared errors (RMSE).  Regression analysis between predicted and observed scores was used to assess potential bias based on intercept and slope values differing from 0 and 1, respectively.
-
-## San Gabriel River watershed case study
-
-Stream reach and bioassessment data from the San Gabriel River (SGR) watershed in southern California were used to develop reach classifications, site performance categories, and management priorities from the landscape models. A strong land use gradient occurs in the SGR watershed (Figure \@ref(fig:sgrshd)). Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for reacreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements.
-
-```{r sgrshd, fig.height = 8, fig.width = 5.5, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream reach and observed CSCI scores are shown in (b). The watershed is undeveloped in the north and heavily urbanized in the south.'}
+```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream reach and observed CSCI scores are shown in (b). The watershed is undeveloped in the north and heavily urbanized in the south.'}
 
 # land use raster data
 luplo <- sgrlu %>% 
@@ -339,7 +461,7 @@ p2 <- ggplot() +
   theme(
     # legend.position = 'top',
     legend.justification = 'left',
-    legend.box.just = 'left',
+    # legend.box.just = 'left'#,
     axis.title = element_blank()
     ) + 
   ggtitle('(b) Reach median predictions and observed scores for the CSCI')
@@ -356,14 +478,6 @@ grid.arrange(
 )
 # dev.off()
 ```
-
-The SGR watershed contains a diverse group of stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations. Collectively, the San Gabriel River Regional Monitoring Program (SGRRMP) includes stakeholders from these groups that cooperatively work to increase awareness of issues in the SGR watershed and work to improve coordination of compliance and ambient monitoring efforts.  The stakeholder workgroup included individuals from the SGRRMP with interests in water supply, improvements to water quality, habitat protection or creation, and storm water permitting. Individuals were selected for participation to include diverse management interests and based on willingness to adopt tools developed from the landscape models. The stakeholder workgroup met monthly over a six-month period to discuss model applications and to refine the interpretation of results.  Stakeholder involement was critical for developing an assessment framework that met the needs of all engaged parties and ensured that final products were more likely to be incorporated into formal decision-making processes. 
-
-## Reach classification, site performance, and prioritization
-
-A framework for identifying site priorities for management actions was developed using a three-step process.  First, estimates of the range of expected CSCI scores at each stream reach in relation to land use were used to define reach classifications.  Second, the relationship between observed CSCI scores and the reach classifications were then used to assign a relative performance value for each monitoring site. Third, site performance categories in relation to reach classification and bioassessment targets were used to define management priorities.  This framework was developed through close interaction with the regional stakeholder group to demonstrate how the landscape model can be used as a management tool given that priorities will vary by interests and location.  As such, the results are provided as a guide to facilitate decision-making rather than a prescription of targeted actions to manage stream health.  The entire process is shown in Figure \@ref(fig:ridges) and Table \@ref(tab:typetab) and is described in detail below.
-
-Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints.  Classifications were developed using the range of CSCI expectations at a reach (Figure \@ref(fig:ridges)a,b) relative to a chosen threshold for the CSCI to define nominally low or high scores (Figure \@ref(fig:ridges)c).  The reach classification was based solely on the intersection of CSCI expectations at a reach with the chosen CSCI threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of CSCI score expectations entirely below the threshold were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that overlapped the CSCI threshold were considered possibly constrained or possibly unconstrained, where distinction between the two was based on location of the median expectation of a reach relative to the threshold.  
 
 ```{r ridges, fig.height = 8, fig.width = 10, fig.cap = 'Application of landscape models to identify site expectations and bioassessment performance for sixteen example stream reaches.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each reach with a chosen CSCI threshold (c) defines the stream reach classification as likely unconstrained (lu), possibly unconstrained (pu), possibly constrained (pc), and likely constrained (lc).  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
 ##
@@ -543,153 +657,9 @@ grid.arrange(
 )
 ```
 
-CSCI scores from biomonitoring data were used to define relative sites scores at a sample site given the stream reach classification (Figure \@ref(fig:ridges)d). For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), relative site scores were defined based on location to the range of expected CSCI scores.  This provided a definition that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95th percentile of expected scores) were considered over scoring and sites below the lower limit were under scoring.  Sites with CSCI scores within the range of expectations were as expected.   
-
-Categories for relative sites scores were further split if they were above or below the selected CSCI threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category for sites within each reach classification was added to define a site as above or below the threshold.  For a likely unconstrained reach, under scoring sites below the minimum expected score were additionally defined as being above or below the CSCI threshold.  Similarly, over scoring sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the CSCI threshold.  For possibly constrained and possibly unconstrained reaches, sites that were as expected were additionally defined as being below or above the CSCI threshold.  In total, sixteen site types were defined for the reach classifications (Table \@ref(tab:typetab)).
-
-```{r typetab, tidy = F}
-# table content format
-totab <- typetab %>% 
-  mutate(
-    `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
-    `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('**', `Reach expectation`, '**')), 
-    Type = as.character(Type)
-  ) %>% 
-  rename(`Relative site score` = `Site performance`) %>% 
-  dplyr::select(-Sites)
-
-# table stuff
-cap.val <- 'Possible site types based on stream reach classification, relative site score, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 5th and 95th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'
-
-# table
-knitr::kable(totab, booktabs = T, caption = cap.val)
-```
-
-Each site type was used to define a priority as a demonstration of how results from the landscape model can inform different stream management objectives.  This final process relied exclusively on feedback from the stakeholder group.  An interactive online application was created for the stakeholder group to facilitate the recommendation of management actions for each site type (Figure \@ref(fig:app)).  Priorities for each site type were defined accordingly with the expectation that site types will have different meanings for prioritization given the interest (e.g., monitoring, regulation, etc.).  Stakeholders were tasked with identifying their relevant priorities by ranking each site type from high to low priority using a graphical template of Table \@ref(tab:typetab) for reference.  A brief description of the rationale for a site priority was also requested with the feedback.  The final priorities were generalized into three categories to recommend actions in addition to baseline monitoring and maintenance. The final priorities also assumed that existing information available for each site was "true" following established practices to account for uncertainty or variation between assessments.  A consensus was reached for the following definitions of each action:
-
-* Investigate:  Additional monitoring or review of supplementary data (e.g., field visits, review aerial imagery);
-* Protect: Additional scrutiny of proposed development and/or projects; 
-* Restore: Targeted action for causal assessment and/or restoration funds.
-
-Each site type was ranked as high, medium, or low priority for each action.  No priority assigned to an action for a stream type was indication that baseline monitoring and maintenance was sufficient for a site type.
-
-```{r app, fig.cap='Screenshot of the online application used by the stakeholder group to interact with and use results from the landscape models.  The application allowed users to visualize results of reach classications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
+```{r app, fig.cap='Screenshot of the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape models.  The application allowed users to visualize results of reach classications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
 knitr::include_graphics('figs/app.png')
 ```
-
-## Factors explaining constraints and sensitivity analysis
-
-Factors explaining variation between constrained and unconstrained stream reaches were evaluated for the major regions in California (Figure \@ref(fig:calimap)). Landscape and geological data in StreamCat at the riparian and watershed scale were used to model variation between reach classes using random forest models [@Breiman01]. For each region, 1000 regression trees were created and the mean reduction in accuracy was estimated for the exclusion of each variable across all models. This created an estimate of importance of each variable for describing differences between constrained and unconstrained stream classes. Mean reduction in accuracy was estimated for all variables in each model to identify the top five important variables in each region.  Reach classes as possibly or likely constrained (or unconstrained) were combined to evaluate the complete dataset.  Although the landscape models were developed from land use data derived from StreamCat, relatively coarse measures of land use were used (i.e., combined estimates of low to high intensity urban or agricultural land use).  The StreamCat dataset includes additional information at the riparian to watershed scale that could provide greater insight into specific factors within each region that potentially constrain stream integrity.  
-
-Stream reach classifications and site performance categories depend on the range of score expectations (or certainty) from the landscape model (Figure  \@ref(fig:ridges)b) and the CSCI threshold for defining nominally low or high scores (Figure \@ref(fig:ridges)c).  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  The 5th and 95th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more conservative threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification.     
-
-## Unclassified reaches
-
-Finally, some stream reaches were not classifed following application of the landscape model to the statewide hydrography dataset.  Unclassified reaches occurred if StreamCat data were unavailable to estimate CSCI predictions or if a stream catchment basin could not be defined for a particular reach.  The latter was more common, particularly in developed areas where engineered channels or agricultural ditches were hydrologically removed from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  An approach for assigning biological expectations to unclassified reaches is demonstrated for "typically" urban and agricultural reaches that relies on the range of expectations for reaches with similar land use by region.  The approximate range of scores for reaches dominated by either urban, agricultural, and neither of the two (other) was identified by using kmeans clustering of percentage land use for each reach [@MacQueen67].  Typically urban and agricultural reaches were identified based on the largest centroid average of the clusters for each land use type, whereas the other category was based on the minimum sum of the centroid values for urban and agricultural land use.  The expected ranges for each land use type in each region were based on averages of ranges across all reaches in the identified clusters. 
-
-# Results
-
-## State-wide patterns
-
-The landscape model was used to predict an expected range of CSCI scores for `r nrow(comid_prd)` stream reaches in California.  The bioassessment dataset used to develop the model included `r sum(csci_comid$SelectedSample %in% 'Selected')` unique field observations assigned to stream reaches in the NHDPlus dataset.  By region, the most bioassessment samples were observed in the South Coast (n = 839), followed by the the Chapparal (n = 684) and Sierra Nevada regions (n = 548).  Model performance statewide and by region indicated generally good agreement between observed CSCI scores and the median prediction for the associated stream reach (Table \@ref(tab:perftab)).  Agreement between observed and predicted values for the entire calibration dataset was $\rho =$ 0.84 and RMSE = 0.14.  The intercept and slope for a regression between observed and predicted values were 0.24 and 0.72, suggesting a slight negative bias of predictions at lower scores and slight positive bias at higher scores.  The statewide calibration data showed similar results, with slightly smaller correlation ($\rho =$ 0.72) and larger RMSE (0.18) estimates.  
-
-```{r perftab}
-# observed and predicted data
-obsdat <- csci_comid %>%
-  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
-  filter(SelectedSample %in% 'Selected')
-prddat <- comid_prd %>% 
-  dplyr::select(COMID, full0.50)
-
-# combined data to eval for perf
-dat <- obsdat %>% 
-  inner_join(prddat, by = 'COMID') %>% 
-  rename(
-    observed = CSCI,
-    predicted = full0.50
-  ) %>% 
-  dplyr::select(SiteSet, PSA6c, observed, predicted)
-
-# total dataset performance
-totdf <- dat %>% 
-  group_by(SiteSet) %>% 
-  nest %>% 
-  mutate(data = purrr::map(data, function(x){
-
-    nval <- nrow(x)
-    aveobs <- mean(x$observed, na.rm = T)
-    sdobs <- sd(x$observed, na.rm = T)
-    aveprd <- mean(x$predicted, na.rm = T)
-    sdprd <- sd(x$predicted, na.rm = T)
-    mod <- lm(predicted ~ observed, data = x)
-    intv <- coefficients(mod)[1]
-    slov <- coefficients(mod)[2]
-    corv <- with(x, cor.test(observed, predicted))$estimate
-    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
-    
-    out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
-    return(out)
-    
-  })) %>% 
-  unnest
-
-# PSA regional performance
-regdf <- dat %>% 
-  group_by(PSA6c, SiteSet) %>% 
-  nest %>% 
-  mutate(data = purrr::map(data, function(x){
-    
-    nval <- nrow(x)
-    aveobs <- mean(x$observed, na.rm = T)
-    sdobs <- sd(x$observed, na.rm = T)
-    aveprd <- mean(x$predicted, na.rm = T)
-    sdprd <- sd(x$predicted, na.rm = T)
-    ttst <- with(x, t.test(observed, predicted, na.rm = T))
-    mod <- lm(predicted ~ observed, data = x)
-    intv <- coefficients(mod)[1]
-    slov <- coefficients(mod)[2]
-    corv <- with(x, cor.test(observed, predicted))$estimate
-    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
-    
-    out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
-    return(out)
-    
-  })) %>% 
-  unnest %>% 
-  rename(set = PSA6c) %>% 
-  dplyr::select(SiteSet, set, everything())
-
-# combine and prep for table
-allerr <- totdf %>% 
-  bind_rows(regdf) %>% 
-  mutate_if(is.numeric, round, 2) %>% 
-  mutate(
-    sdobs = paste0('(', sdobs, ')'), 
-    sdprd = paste0('(', sdprd, ')'), 
-    set = factor(set, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN'))
-  ) %>% 
-  unite('Observed', aveobs, sdobs, sep = ' ') %>% 
-  unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
-  rename(
-    n = nval,
-    Correlation = corv, 
-    RMSE = errv, 
-    Slope = slov, 
-    Intercept = intv,
-    Location = set, 
-    Dataset = SiteSet
-  ) %>% 
-  arrange(Dataset, Location) %>% 
-  mutate(Dataset = ifelse(duplicated(Dataset), '', Dataset))
-
-# table stuff
-cap.val <- 'Performance of landscape models by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure \\@ref(fig:calires)) and individual regions of California (Figure \\@ref(fig:calimap) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted values of each dataset are shown.  Correlations, root mean squared errors (RMSE), intercept, and slopes are for comparisons of predicted and observed values to evaluate model performance.'
-
-# table
-knitr::kable(allerr, booktabs = T, caption = cap.val)
-```
-
-Model performance differed by region. Performance for the Chapparal and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration and validation datasets.  Model predictions for the Central Valley, Desert Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.75 with observed values in the calibration dataset and 0.55 in the validation dataset.  Model performance was poor for the Sierra Nevada region where the lowest correlation between predicted and observed values was observed. Regression estimates for the validation data in this region showed an intercept and slope of approximately 1 and 0.  Overall, model performance was strongly associated with land use gradients in each region (Figure \@ref(fig:perflu)).  The landscape model peformed well in regions with a mix of urban, agricultural, and open land, such as the South Coast, where strong gradients occur in many watersheds.  Conversely, the model did not perform well in regions where developed landscapes were less common, such as the Sierra Nevada region.   
 
 ```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI predicted - observed) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
@@ -760,8 +730,6 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
 grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
 ```
 
-Statewide patterns in stream constraints were apparent from the results of the landscape models consistent with land use (Figure \@ref(fig:calires)).  Stream reaches were more often constrained for biotic integrity in regions with more watershed development, either as urban or agricultural land.  For example, likely constrained reaches were apparent from the statewide map in coastal reaches of the South Coast where heavy urbanization occurs and in the Central Valley where agriculure is the dominant land use.  Stream reaches were more likely to be unconstrained in regions with less development, with areas in the North Coast and the Sierra Nevada region visible on the map (right, Figure \@ref(fig:calires)).  A majority of reaches statewide were classified as possibly constrained (23% of all stream length) or possibly unconstrained (67%), whereas a minority were likely constrained (3%) or likely unconstrained (7%) (Table \@ref(tab:reltot)).  By region, the most reaches classified as likely unconstrained reaches were in the North Coast (20%) and Sierra Nevada regions (19%) and the most reaches as likely constrained were observed in the Central Valley (25%) and South Coast (9%) regions.  Relative CSCI scores compared to reach expectations were as expected for 92% of the sampled locations statewide, whereas a much smaller percentage of sites were equally under or over scoring (Table \@ref(tab:reltot)).  Similar patterns were observed within regions, although a slightly larger percentage of sites in the Central Valley were under scoring compared to the other regions.  
-
 ```{r eval = F}
 # state base
 calista <- map_data('state', region = 'california')
@@ -827,188 +795,6 @@ dev.off()
 ```{r calires, fig.cap = "Statewide application of landscape models showing the median predicted CSCI scores for each stream reach (left) and corresponding stream reach classifications (right). Major regional boundaries are also shown (see Figure \\@ref(fig:calimap))."}
 knitr::include_graphics('figs/calires.png')
 ```
-
-*Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and in major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in kilometers with the percentage of the total length in a region in parentheses. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
-```{r clstot}
-st_geometry(strclslen) <- NULL
-lentot <- strclslen %>% 
-  filter(!is.na(strcls)) %>% 
-  mutate(
-    Region = factor(PSA6, 
-                  levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
-                  labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC')
-    )
-  ) %>% 
-  group_by(Region, strcls) %>% 
-  summarise(len = sum(lens)) %>% 
-  spread(strcls, len, fill = 0) %>% 
-  gather('strcls', 'len', -Region) %>% 
-  group_by(Region) %>% 
-  mutate(
-    perc = 100 * len / sum(len), 
-    perc = round(perc, 0),
-    perc = paste0('(', perc, ')'),
-    len = round(len, 0), 
-    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
-  ) %>% 
-  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
-  arrange(Region, strcls) %>% 
-  spread(strcls, `Stream km (%)`)
-
-lentotall <- strclslen %>% 
-  filter(!is.na(strcls)) %>% 
-  group_by(strcls) %>% 
-  summarise(len = sum(lens)) %>%
-  ungroup %>% 
-  mutate(
-    perc = 100 * len / sum(len), 
-    perc = round(perc, 0),
-    perc = paste0('(', perc, ')'),
-    len = round(len, 0), 
-    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
-  ) %>% 
-  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
-  arrange(strcls) %>% 
-  mutate(Region = 'Statewide') %>% 
-  spread(strcls, `Stream km (%)`)
-
-totab <- bind_rows(lentotall, lentot)
-
-# use flextable
-brd <- fp_border(color="black")
-
-tab <- regulartable(totab) %>% 
-  font(fontname = 'Times', part = 'all') %>% 
-  fontsize(size = 12, part = 'all') %>% 
-  border_remove %>%
-  set_header_labels(Region = 'Region', `likely constrained` = 'likely', `possibly constrained` = 'possibly', `possibly unconstrained` = 'possibly', `likely unconstrained` = 'likely') %>% 
-  add_header(Region = '', `likely constrained` = 'constrained', `possibly constrained` = 'constrained', `possibly unconstrained` = 'unconstrained', `likely unconstrained` = 'unconstrained') %>% 
-  merge_h(part = 'header', i = 1) %>% 
-  hline(part = 'header', border = brd) %>% 
-  align(align = 'left', part = 'all') %>% 
-  autofit 
-tab
-```
-
-*Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over scoring if the observed scores are above the range of expectations at a reach, expected if within the range, or under scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
-```{r reltot, eval = T}
-cscipsa <- csci_comid %>% 
-  dplyr::select(COMID, PSA6c) %>% 
-  unique %>% 
-  mutate(COMID = as.character(COMID))
-
-# format table of site counts by region
-reltot <- caliexp %>% 
-  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
-  filter(!is.na(strcls)) %>% 
-  left_join(cscipsa, by = 'COMID') %>% 
-  rename(Region = PSA6c) %>% 
-  group_by(Region, perf) %>% 
-  summarise(
-    n = n(), 
-    csciave = mean(csci, na.rm = T), 
-    csciave = round(csciave, 2),
-    cscisd = sd(csci, na.rm = T), 
-    cscisd = round(cscisd, 2), 
-    cscisd = paste0('(', cscisd, ')')
-  ) %>% 
-  group_by(Region) %>% 
-  mutate(
-    perc = n / sum(n), 
-    perc = round(100 * perc, 0), 
-    perc = paste0('(', perc, ')')
-  ) %>% 
-  unite('csci', csciave, cscisd, sep = ' ') %>% 
-  unite('n_perc', n, perc, sep = ' ') %>% 
-  complete(Region, perf, fill = list('n_perc' = '0 (0)', csci = '-')) %>% 
-  gather('var', 'val', -Region, -perf) %>%
-  arrange(Region, perf) %>%
-  unite('colnm', perf, var, sep = '-') %>%
-  spread(colnm, val) %>%
-  .[, c(1, 6, 7, 2, 3, 4, 5)]
-
-# whole state
-reltotall <- caliexp %>% 
-  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
-  filter(!is.na(strcls)) %>% 
-  left_join(cscipsa, by = 'COMID') %>% 
-  rename(Region = PSA6c) %>% 
-  group_by(perf) %>% 
-  summarise(
-    n = n(), 
-    csciave = mean(csci, na.rm = T), 
-    csciave = round(csciave, 2),
-    cscisd = sd(csci, na.rm = T), 
-    cscisd = round(cscisd, 2), 
-    cscisd = paste0('(', cscisd, ')')
-  ) %>% 
-  ungroup %>% 
-  mutate(
-    perc = n / sum(n), 
-    perc = round(100 * perc, 0), 
-    perc = paste0('(', perc, ')')
-  ) %>% 
-  unite('csci', csciave, cscisd, sep = ' ') %>% 
-  unite('n_perc', n, perc, sep = ' ') %>% 
-  gather('var', 'val', -perf) %>%
-  arrange(perf) %>%
-  unite('colnm', perf, var, sep = '-') %>%
-  mutate(Region = 'Statewide') %>% 
-  spread(colnm, val) %>%
-  .[, c(1, 6, 7, 2, 3, 4, 5)]
-
-totab <- bind_rows(reltotall, reltot)
-
-# use flextable
-brd <- fp_border(color="black")
-
-tab <- regulartable(totab) %>% 
-  font(fontname = 'Times', part = 'all') %>% 
-  fontsize(size = 12, part = 'all') %>% 
-  border_remove %>%
-  set_header_labels(Region = 'Region', `expected-csci` = 'CSCI', `expected-n_perc` = 'n (%)', `over scoring-csci` = 'CSCI', `over scoring-n_perc` = 'n (%)', `under scoring-csci` = 'CSCI', `under scoring-n_perc` = 'n (%)') %>% 
-  add_header(Region = '', `expected-csci` = 'expected', `expected-n_perc` = 'expected', `over scoring-csci` = 'over scoring', `over scoring-n_perc` = 'over scoring', `under scoring-csci` = 'under scoring', `under scoring-n_perc` = 'under scoring') %>% 
-  merge_h(part = 'header') %>% 
-  hline(part = 'header', border = brd) %>% 
-  align(align = 'left', part = 'all') %>% 
-  autofit 
-tab
-```
-
-## Case study
-
-```{r}
-##
-# ggplot of sgr site expecations, relative scores
-
-# requires spat, scrs
-
-thrsh <- 0.79; tails <- 0.05
-
-##
-# get biological condition expectations
-cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
-  mutate(COMID = as.character(COMID)) 
-
-# get csci difference
-sgrscrs <- spat %>% 
-  dplyr::select(COMID, full0.50) %>% 
-  mutate(COMID = as.character(COMID)) %>% 
-  left_join(scrs, ., by = 'COMID') %>% 
-  group_by(COMID, StationCode, lat, long) %>% 
-  summarise(
-    csci = mean(csci, na.rm = TRUE)
-  ) %>% 
-  ungroup %>%
-  left_join(cls, by = 'COMID')
-
-```
-
-Application of the landscape model to the San Gabriel River watershed and engagement with a stakeholder group demonstrated how the results can be used to locally prioritize actions for different stream reaches.  About 750 reaches in the SGR were identified and classified from NHDPlus, of which 10% were visited for bioassessment sampling.  CSCI scores ranged from `r round(min(sgrscrs$csci), 2)` to `r round(max(sgrscrs$csci), 2)` consistent with heavy urban development in the lower watershed and open land use at higher elevation in the upper watershed (Figure \@ref(fig:sgrresplo)).  Application of the landscape model results to the CSCI scores provided a context of expectations consistent with the strong land use gradient in the watershed.  Stream reaches in the upper watershed were a mix of likely and possibly unconstrained, whereas almost all stream reaches in the lower watershed were classified as likely constrained.  Several reaches in the lower watershed had ranges that were left-skewed toward very low CSCI scores consistent with extreme landscape pressures.
-
-Most of the sampling stations in the SGR watershed were within the expected ranges of CSCI scores for the defined stream classes (top, Figure \@ref(fig:sgrresmap)).  Using a hypothetical CSCI threshold of 0.79 and a relatively certain range of expected scores from the 5th to the 95th percentile of the model predictions, only three sites were under scoring (two likely unconstrained and one likely constrained) and two sites were over scoring (both likely constrained).  One of the under scoring sites was below the hypothetical CSCI threshold. None of the remaining sites in both possibly and likely classes were above or below the chosen CSCI threshold for the given class. 
-
-The three priority management actions identified by the stakeholder group (investigate, protect, restore) were ranked from low, medium, to high for each potential reach type (Figure \@ref(fig:pritem)). High priority recommendations were generally given to over and under scoring sites in likely unconstrained reaches or those below the hypothetical threshold with possibly unconstrained classification.  Low priority actions were most often recommended for possibly and likely constrained sites, or no action was recommended where it was assumed baseline monitoring and maintenance was sufficient. Recommended actions to investigate were more common for both over scoring and under scoring sites, protect was more common at over scoring sites, and restore was more common at under scoring sites.  A clear distinction between low and high priority actions was observed on the watershed map (bottom, Figure \@ref(fig:sgrresmap)). Sites in the lower watershed were low priority if an action was recommended, whereas the four high priority sites were in the upper watershed.  Several sites that were scoring as expected for likely and possibly unconstrained reaches in the upper watershed were recommended as medium priority for protection.
 
 ```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
 ##
@@ -1204,7 +990,7 @@ thm <- theme_void(base_family = 'serif') +
   theme(
     legend.position = 'top',
     # legend.justification = 'left',
-    legend.box.just = 'left',
+    # legend.box.just = 'left',
     axis.title = element_blank(), 
     strip.background = element_blank()
   )
@@ -1430,10 +1216,6 @@ grid.arrange(
 )
 ```
 
-## Drivers of biological constraints and sensitivity analysis
-
-Importance measures from random forest models identified key variables that explained the differences between constrained and unconstrained reaches between each region (Figure \@ref(fig:calicnstr)).  Relative magnitudes of the importance measures between regions confirmed the estimates of model performance, such that regions where the model performed well (e.g., South Coast, Central Valley) had higher importance measures than those where the model did not perform well (e.g., North Coast, Sierra Nevada).  The top five most important variables were similar between regions although some specific differences were observed.  The amount of biological nitrogen fixation in watershed soils was ranked the most important variable for the Central Valley, Desert Modoc, and North Coast region and second most important for the Chapparal and Sierra Nevada regions.  This variable was not in the top five for the South Coast region, which was exclusively described by imperviousness and urbanization. Soil erodibility was the most important variable in the Chaparral and Sierra Nevada regions.  Other important variables that were shared between regions (excluding the South Coast) were fertilizer applications and the amount of crops and hay at the riparian and watershed scale.
-
 ```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors explaining variation between constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # format for plotting, all data
@@ -1513,8 +1295,6 @@ grid.arrange(
 )
 ```
 
-The effects of changing certainty in the CSCI predictions and a hypothetical CSCI threshold were evaluated for nine scenarios to identify the change in stream reach classifications (Figure \@ref(fig:sensplo)).  Changes were evaluated as the percentage of stream length statewide and within major regions for each reach classification. Decreasing the certainty of predictions from the landscape model by choosing a narrower range of scores (5th to 95th, 25th to 75th, 45th to 55th) increased the number of streams from the possible to likely category in both constrained and unconstrained reaches.  Similarly, changing the CSCI threshold from relaxed to more conservative (0.63, 0.79, 0.92) increased the number of streams classified as possibly or likely constrained and decreased the number of streams as possibly or likely unconstrained.  Changes by region with the different scenarios were also observed.  For example, over 80% of reaches in the Central Valley were classified as likely constrained using a conservative CSCI threshold with low certainty of predictions, whereas less than 1% of reaches were in this category using a relaxed CSCI threshold with high certainty.  Opposite trends were observed in regions with reduced land use  pressures.  For example, almost all stream reaches in the North Coast and Sierra Nevada regions were classified as likely unconstrained using a relaxed CSCI threshold and low certainty of predictions.
-
 ```{r sensplo, fig.height = 6, fig.width = 7, fig.cap = 'Changes in stream reach classes by region and statweide for different scenarios used to define biological constraints.  Nine scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain as identified by the tail cutoff for the expected range) and potential CSCI threshold (relaxed to conservative).  The percentage of total stream length for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
@@ -1576,9 +1356,268 @@ grid.arrange(
 
 ```
 
-## Unclassified reaches
+# Tables 
 
-Ranges of expected CSCI scores for typical reaches in urban, agricultural, and neither of the two (other) are shown in table \@ref(tab:typscrs). These typical values are shown for more to less certainty in the range of predictions.  Unclassified reaches can be defined by the dominant watershed land use as urban, agricultural, or other, and then matched to the appropriate values in the table.  Between regions, the variation in expected scores also provides context for landscape pressures that differ by location.  For example, the expected range of scores in regions with heavy urban development (e.g., South Coast) are much lower than streams that are neither urban nor agricultural.  The North Coast region in contrast has an expected range of scores in urban streams that is similar to streams that are neither urban nor agricultural.  Interestingly, the range of scores in urban and agricultural streams were similar in the Central Valley where agriculture is the dominant land use.  
+```{r typetab, tidy = F}
+# table content format
+totab <- typetab %>% 
+  mutate(
+    `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
+    `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('**', `Reach expectation`, '**')), 
+    Type = as.character(Type)
+  ) %>% 
+  rename(`Relative site score` = `Site performance`) %>% 
+  dplyr::select(-Sites)
+
+# table stuff
+cap.val <- 'Possible site types based on stream reach classification, relative site score, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 5th and 95th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'
+
+# table
+knitr::kable(totab, booktabs = T, caption = cap.val)
+```
+
+```{r perftab}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, full0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  rename(
+    observed = CSCI,
+    predicted = full0.50
+  ) %>% 
+  dplyr::select(SiteSet, PSA6c, observed, predicted)
+
+# total dataset performance
+totdf <- dat %>% 
+  group_by(SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    mod <- lm(predicted ~ observed, data = x)
+    intv <- coefficients(mod)[1]
+    slov <- coefficients(mod)[2]
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
+    return(out)
+    
+  })) %>% 
+  unnest
+
+# PSA regional performance
+regdf <- dat %>% 
+  group_by(PSA6c, SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+    
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    ttst <- with(x, t.test(observed, predicted, na.rm = T))
+    mod <- lm(predicted ~ observed, data = x)
+    intv <- coefficients(mod)[1]
+    slov <- coefficients(mod)[2]
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
+    return(out)
+    
+  })) %>% 
+  unnest %>% 
+  rename(set = PSA6c) %>% 
+  dplyr::select(SiteSet, set, everything())
+
+# combine and prep for table
+allerr <- totdf %>% 
+  bind_rows(regdf) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
+  mutate(
+    sdobs = paste0('(', sdobs, ')'), 
+    sdprd = paste0('(', sdprd, ')'), 
+    set = factor(set, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN'))
+  ) %>% 
+  unite('Observed', aveobs, sdobs, sep = ' ') %>% 
+  unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
+  rename(
+    n = nval,
+    Correlation = corv, 
+    RMSE = errv, 
+    Slope = slov, 
+    Intercept = intv,
+    Location = set, 
+    Dataset = SiteSet
+  ) %>% 
+  arrange(Dataset, Location) %>% 
+  mutate(Dataset = ifelse(duplicated(Dataset), '', Dataset))
+
+# table stuff
+cap.val <- 'Performance of landscape models by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure \\@ref(fig:calires)) and individual regions of California (Figure \\@ref(fig:calimap) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted values of each dataset are shown.  Correlations, root mean squared errors (RMSE), intercept, and slopes are for comparisons of predicted and observed values to evaluate model performance.'
+
+# table
+knitr::kable(allerr, booktabs = T, caption = cap.val)
+```
+
+*Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and in major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in kilometers with the percentage of the total length in a region in parentheses. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+```{r clstot}
+st_geometry(strclslen) <- NULL
+lentot <- strclslen %>% 
+  filter(!is.na(strcls)) %>% 
+  mutate(
+    Region = factor(PSA6, 
+                  levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+                  labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC')
+    )
+  ) %>% 
+  group_by(Region, strcls) %>% 
+  summarise(len = sum(lens)) %>% 
+  spread(strcls, len, fill = 0) %>% 
+  gather('strcls', 'len', -Region) %>% 
+  group_by(Region) %>% 
+  mutate(
+    perc = 100 * len / sum(len), 
+    perc = round(perc, 0),
+    perc = paste0('(', perc, ')'),
+    len = round(len, 0), 
+    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+  ) %>% 
+  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
+  arrange(Region, strcls) %>% 
+  spread(strcls, `Stream km (%)`)
+
+lentotall <- strclslen %>% 
+  filter(!is.na(strcls)) %>% 
+  group_by(strcls) %>% 
+  summarise(len = sum(lens)) %>%
+  ungroup %>% 
+  mutate(
+    perc = 100 * len / sum(len), 
+    perc = round(perc, 0),
+    perc = paste0('(', perc, ')'),
+    len = round(len, 0), 
+    strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+  ) %>% 
+  unite(`Stream km (%)`, len, perc, sep = ' ') %>% 
+  arrange(strcls) %>% 
+  mutate(Region = 'Statewide') %>% 
+  spread(strcls, `Stream km (%)`)
+
+totab <- bind_rows(lentotall, lentot)
+
+# use flextable
+brd <- fp_border(color="black")
+
+tab <- regulartable(totab) %>% 
+  font(fontname = 'Times', part = 'all') %>% 
+  fontsize(size = 12, part = 'all') %>% 
+  border_remove %>%
+  set_header_labels(Region = 'Region', `likely constrained` = 'likely', `possibly constrained` = 'possibly', `possibly unconstrained` = 'possibly', `likely unconstrained` = 'likely') %>% 
+  add_header(Region = '', `likely constrained` = 'constrained', `possibly constrained` = 'constrained', `possibly unconstrained` = 'unconstrained', `likely unconstrained` = 'unconstrained') %>% 
+  merge_h(part = 'header', i = 1) %>% 
+  hline(part = 'header', border = brd) %>% 
+  align(align = 'left', part = 'all') %>% 
+  autofit 
+tab
+```
+
+*Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over scoring if the observed scores are above the range of expectations at a reach, expected if within the range, or under scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+```{r reltot, eval = T}
+cscipsa <- csci_comid %>% 
+  dplyr::select(COMID, PSA6c) %>% 
+  unique %>% 
+  mutate(COMID = as.character(COMID))
+
+# format table of site counts by region
+reltot <- caliexp %>% 
+  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
+  filter(!is.na(strcls)) %>% 
+  left_join(cscipsa, by = 'COMID') %>% 
+  rename(Region = PSA6c) %>% 
+  group_by(Region, perf) %>% 
+  summarise(
+    n = n(), 
+    csciave = mean(csci, na.rm = T), 
+    csciave = round(csciave, 2),
+    cscisd = sd(csci, na.rm = T), 
+    cscisd = round(cscisd, 2), 
+    cscisd = paste0('(', cscisd, ')')
+  ) %>% 
+  group_by(Region) %>% 
+  mutate(
+    perc = n / sum(n), 
+    perc = round(100 * perc, 0), 
+    perc = paste0('(', perc, ')')
+  ) %>% 
+  unite('csci', csciave, cscisd, sep = ' ') %>% 
+  unite('n_perc', n, perc, sep = ' ') %>% 
+  complete(Region, perf, fill = list('n_perc' = '0 (0)', csci = '-')) %>% 
+  gather('var', 'val', -Region, -perf) %>%
+  arrange(Region, perf) %>%
+  unite('colnm', perf, var, sep = '-') %>%
+  spread(colnm, val) %>%
+  .[, c(1, 6, 7, 2, 3, 4, 5)]
+
+# whole state
+reltotall <- caliexp %>% 
+  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
+  filter(!is.na(strcls)) %>% 
+  left_join(cscipsa, by = 'COMID') %>% 
+  rename(Region = PSA6c) %>% 
+  group_by(perf) %>% 
+  summarise(
+    n = n(), 
+    csciave = mean(csci, na.rm = T), 
+    csciave = round(csciave, 2),
+    cscisd = sd(csci, na.rm = T), 
+    cscisd = round(cscisd, 2), 
+    cscisd = paste0('(', cscisd, ')')
+  ) %>% 
+  ungroup %>% 
+  mutate(
+    perc = n / sum(n), 
+    perc = round(100 * perc, 0), 
+    perc = paste0('(', perc, ')')
+  ) %>% 
+  unite('csci', csciave, cscisd, sep = ' ') %>% 
+  unite('n_perc', n, perc, sep = ' ') %>% 
+  gather('var', 'val', -perf) %>%
+  arrange(perf) %>%
+  unite('colnm', perf, var, sep = '-') %>%
+  mutate(Region = 'Statewide') %>% 
+  spread(colnm, val) %>%
+  .[, c(1, 6, 7, 2, 3, 4, 5)]
+
+totab <- bind_rows(reltotall, reltot)
+
+# use flextable
+brd <- fp_border(color="black")
+
+tab <- regulartable(totab) %>% 
+  font(fontname = 'Times', part = 'all') %>% 
+  fontsize(size = 12, part = 'all') %>% 
+  border_remove %>%
+  set_header_labels(Region = 'Region', `expected-csci` = 'CSCI', `expected-n_perc` = 'n (%)', `over scoring-csci` = 'CSCI', `over scoring-n_perc` = 'n (%)', `under scoring-csci` = 'CSCI', `under scoring-n_perc` = 'n (%)') %>% 
+  add_header(Region = '', `expected-csci` = 'expected', `expected-n_perc` = 'expected', `over scoring-csci` = 'over scoring', `over scoring-n_perc` = 'over scoring', `under scoring-csci` = 'under scoring', `under scoring-n_perc` = 'under scoring') %>% 
+  merge_h(part = 'header') %>% 
+  hline(part = 'header', border = brd) %>% 
+  align(align = 'left', part = 'all') %>% 
+  autofit 
+tab
+```
 
 ```{r typscrs}
 totab <- typscrs %>% 
@@ -1597,41 +1636,6 @@ cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, a
 # table
 knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
-
-# Discussion
-
-* What is the value of identifying constrained channels?
-     * Identification of constrained channels allows us to determine how best to spend limited resources and to focus on reaches where we have a decent chance of improving the biological condition.
-     * Use of more data to develop context of assessment
-     * Targeted management for desired outcomes
-     * Informing decisions about future monitoring (i.e., prioritize future monitoring locations)
-     * Listing implications, perhaps with a subheader, "Implications for determining biological impairments". We should enlist Chad to help with this—after presenting him with LACSD’s proposal.
-
-* What is useful about our approach compared to alternatives?
-     * Field-based methods to identify constrained channels vs. landscape modelling
-     * Related directly to biological condition and regulatory standards
-     * Results are widely corraborated by other landscape studies - land use is big determinant of macroinvert assemblage
-
-* What contributed to our success in defining priorities? 
-     * Stakeholder involvement guided process, contributed to achieving goals
-     * An interactive/iterative approach was used - we provided tools to facilitate (web apps) and we did not assume priorities
-
-* Caveats of our aproach
-     * This analysis doesn’t truly tell us if a site can be fixed or if the conditions are truly constrained (key message, need to mention in intro)
-     * What do priorities really mean? Depends on your interests, needs, values, etc.
-     * Constrained may not always mean constrained - CSCI vs other biological indicators
-     * Site-specific approaches are warranted in certain cases
-     * Changing certainty or CSCI treshold - mechanistic effects and implications. Don't cook the books. 
-
-* Future work
-     * Ability to link with other assessment tools besides CSCI
-     * Link with engineered channels study
-     * Priorities statewide
-     * Application to larger regions possible (national-scale), or how it can be applied in other areas
-     
-# Supplement
-
-Online application.
 
 # References
 
