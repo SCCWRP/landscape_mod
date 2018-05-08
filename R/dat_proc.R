@@ -492,7 +492,7 @@ sgrlu <- ludat
 save(sgrlu, file = 'data/sgrlu.RData', compress = 'xz')
 
 ######
-# sensitity analysis, statewide
+# sensitivity analysis, statewide
 
 data(comid_prd)
 data(csci_comid)
@@ -538,13 +538,13 @@ cscipsa <- csci_comid %>%
 
 # search grid
 grd_chk <- list(
-  thrsh = c(0.63, 0.79, 0.92), 
-  tails = c(0.05, 0.25, 0.45)
+  thrsh = c(0.79), 
+  tails = seq(0.05, 0.45, by = 0.05)
   ) %>% 
   cross_df
 
 # setup parallel backend
-ncores <- detectCores() - 1  
+ncores <- detectCores() - 3  
 cl<-makeCluster(ncores)
 registerDoParallel(cl)
 strt<-Sys.time()
