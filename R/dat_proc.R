@@ -538,7 +538,7 @@ cscipsa <- csci_comid %>%
 
 # search grid
 grd_chk <- list(
-  thrsh = c(0.79), 
+  thrsh = c(0.63, 0.79, 0.92), 
   tails = seq(0.05, 0.45, by = 0.05)
   ) %>% 
   cross_df

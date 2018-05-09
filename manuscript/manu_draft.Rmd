@@ -1290,12 +1290,12 @@ grid.arrange(
 )
 ```
 
-```{r sensplo, fig.height = 6, fig.width = 7, fig.cap = 'Changes in stream reach classes by region and statweide for different scenarios used to define biological constraints.  Nine scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (more certain to less certain as identified by the tail cutoff for the expected range) and potential CSCI threshold (relaxed to conservative).  The percentage of total stream length for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r sensplo, fig.height = 8, fig.width = 6, fig.cap = 'Changes in stream reach classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios more certain to less certain as identified by the tail cutoff for the expected range) and potential CSCI threshold (three scenarios for relaxed to more conservative).  The percentage of total stream length for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
 grd_chk <- list(
   thrsh = c(0.63, 0.79, 0.92), 
-  tails = c(0.05, 0.25, 0.45)
+  tails = seq(0.05, 0.45, by = 0.05)
 ) %>% 
   cross_df
 
@@ -1309,46 +1309,40 @@ senscls <- sensres %>%
   mutate(
     thrsh = as.character(thrsh),
     tails = as.character(tails), 
-    Region = gsub('^statewide$', 'Statewide', Region)
-    ) 
-  
+    Region = gsub('^statewide$', 'Statewide', Region),
+    strcls = factor(strcls, levels = rev(levels(strcls)))
+  ) 
+
 # results plot
-pres <- ggplot(senscls, aes(x = thrsh, y = perc, fill = strcls)) + 
-  geom_bar(stat = 'identity', colour = scales::alpha('black', 0.5), width = 1) +
-  facet_grid(tails~Region) + 
+pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls)) + 
+  geom_bar(stat = 'identity', colour = scales::alpha('black', 0.5), width = 1, alpha = 0.7) +
+  facet_grid(Region ~ thrsh) +
   scale_fill_manual('Stream reach class', values = pal_exp(levels(senscls$strcls))) +
   theme_bw(base_family = 'serif') +     
   scale_y_continuous('% stream length', expand = c(0, 0)) + 
-  scale_x_discrete(expand = c(0, 0)) + 
+  scale_x_discrete('Certainty in CSCI predictions (more to less)', expand = c(0, 0)) +
   theme(
     strip.background = element_blank(), 
-    axis.title.x = element_blank(),
-    axis.text.x = element_text(size = 8),
-    legend.position = 'top'
+    axis.text.x = element_text(size = 7),
+    axis.text.y = element_text(size = 7),
+    legend.position = 'top', 
+    panel.grid = element_blank()
   ) + 
-  guides(fill = guide_legend(title.position = 'left'))
+  guides(fill = guide_legend(title.position = 'left', ncol = 2))
+
 
 pleg <- g_legend(pres)
 pres <- pres + theme(legend.position = 'none')
-
 
 grobsz <- gpar(cex = 0.7)
 grid.arrange(
   arrangeGrob(
     pleg,
-    arrangeGrob(
-      arrangeGrob(
-        pres, 
-        textGrob('Example CSCI threshold (relaxed to conservative)', gp = grobsz), 
-        heights= c(1, 0.05), ncol = 1
-      ), 
-      arrangeGrob(textGrob('Certainty in CSCI predictions (more to less)', gp = grobsz, rot = 270), textGrob(''), ncol = 1, heights = c(1, 0.05)),
-      ncol = 2, widths = c(1, 0.05)
-    ), 
-    ncol = 1, heights = c(0.07, 1)
-  )
+    textGrob('Example CSCI threshold (relaxed to conservative)', gp = grobsz), 
+    pres,
+    heights= c(0.1, 0.02, 1), ncol = 1
+  ) 
 )
-
 ```
 
 # Tables 
