@@ -10,6 +10,7 @@ library(leaflet)
 library(RColorBrewer)
 library(doParallel)
 library(foreach)
+library(gridExtra)
 
 source('R/funcs.R')
 prj <- geo_wgs84
@@ -133,13 +134,15 @@ pcr <- ggplot(toplocr) +
 pleg <- g_legend(pcr)
 pcr <- pcr + theme(legend.position = 'none')
 
-png('C:/Users/Marcus.SCCWRP2K/Desktop/p1.png', height = 6, width = 8, units = 'in', res = 400, family = 'serif')
+setEPS(height = 6, width = 8, family = 'serif')
+postscript('C:/Users/Marcus.SCCWRP2K/Desktop/p1.eps')
+# png('C:/Users/Marcus.SCCWRP2K/Desktop/p1.png', height = 6, width = 8, units = 'in', res = 400, family = 'serif')
 grid.arrange(
   pleg,
   arrangeGrob(pfl, pcr, ncol = 2), 
   ncol = 1, heights = c(0.2, 1)
 )
-
+dev.off()
 ######
 # different tails
 
@@ -249,7 +252,9 @@ p3 <- ggplot(toplo3) +
 pleg <- g_legend(p3)
 p3 <- p3 + theme(legend.position = 'none')
 
-png('C:/Users/Marcus.SCCWRP2K/Desktop/p2.png', height = 6, width = 10, units = 'in', res = 400, family = 'serif')
+setEPS(height = 6, width = 10, family = 'serif')
+postscript('C:/Users/Marcus.SCCWRP2K/Desktop/p2.eps')
+# png('C:/Users/Marcus.SCCWRP2K/Desktop/p2.png', height = 6, width = 10, units = 'in', res = 400, family = 'serif')
 grid.arrange(
   pleg,
   arrangeGrob(p1, p2, p3, ncol = 3), 
@@ -366,7 +371,9 @@ p3 <- ggplot(toplo3) +
 pleg <- g_legend(p3)
 p3 <- p3 + theme(legend.position = 'none')
 
-png('C:/Users/Marcus.SCCWRP2K/Desktop/p3.png', height = 6, width = 10, units = 'in', res = 400, family = 'serif')
+setEPS(height = 6, width = 10, family = 'serif')
+postscript('C:/Users/Marcus.SCCWRP2K/Desktop/p3.eps')
+# png('C:/Users/Marcus.SCCWRP2K/Desktop/p3.png', height = 6, width = 10, units = 'in', res = 400, family = 'serif')
 grid.arrange(
   pleg,
   arrangeGrob(p1, p2, p3, ncol = 3), 
