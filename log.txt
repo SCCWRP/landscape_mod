@@ -1,2 +1,2 @@
 27 of 27 
-Time difference of 6.95599 hours
+Time difference of 35.53315 secs

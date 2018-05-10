@@ -666,6 +666,79 @@ sensres <- foreach(i = 1:nrow(grd_chk),
 save(sensres, file = 'data/sensres.RData', compress = 'xz')
 
 ######
+# sensitivity analysis, SGR only
+
+data(scrs)
+data(spat)
+
+source('R/funcs.R')
+
+# search grid
+grd_chk <- list(
+  thrsh = c(0.63, 0.79, 0.92),
+  tails = seq(0.05, 0.45, by = 0.05)
+) %>%
+  cross_df
+
+# setup parallel backend
+ncores <- detectCores() - 3
+cl<-makeCluster(ncores)
+registerDoParallel(cl)
+strt<-Sys.time()
+
+senssgr <- foreach(i = 1:nrow(grd_chk),
+                   .export = c('scrs', 'spat'),
+                   .packages = c('sp', 'mapview', 'leaflet', 'tidyverse', 'raster', 'maptools', 'rgdal', 'sf')) %dopar% {
+
+   sink('log.txt')
+   cat(i, 'of', nrow(grd_chk), '\n')
+   print(Sys.time()-strt)
+   sink()
+
+   source("R/funcs.R")
+
+   thrshi <- grd_chk[[i, 'thrsh']]
+   tailsi <- grd_chk[[i, 'tails']]
+
+   # get biological condition expectations
+   cls <- getcls2(spat, thrsh = thrshi, tails = tailsi, modls = 'full')
+
+   spat2 <- spat %>%
+     left_join(cls, by = 'COMID')
+
+   ######
+   # get stream length total and percent
+
+   strclsleni <- spat2 %>%
+     dplyr::select(COMID, strcls)
+
+   lens <- strclsleni %>%
+     as('Spatial') %>%
+     sp::SpatialLinesLengths(longlat = T)
+
+   strclsleni <- strclsleni %>% mutate(lens = lens)
+
+   st_geometry(strclsleni) <- NULL
+   lentot <- strclsleni %>%
+     filter(!is.na(strcls)) %>%
+     group_by(strcls) %>%
+     summarise(len = sum(lens)) %>%
+     spread(strcls, len, fill = 0) %>%
+     gather('strcls', 'len') %>%
+     mutate(
+       perc = 100 * len / sum(len),
+       strcls = factor(strcls, levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+     )
+
+   out <- lentot
+   return(out)
+
+  }
+
+save(senssgr, file = 'data/senssgr.RData', compress = 'xz')
+
+
+######
 # create data from Rafi
 # create csci comid data, rf core and full models for csci quantiles, quantile preds for all comid in CA
 # original file from Z:/MarcusBeck/Landscape models from rafi/modlu_120117.R
