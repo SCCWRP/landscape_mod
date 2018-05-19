@@ -118,7 +118,7 @@ A framework for identifying site priorities for management actions was developed
 
 Identifying site priorities began with defining a classification framework for stream reaches to identify the possible or likely extent of biological constraints.  Classifications were developed using the range of CSCI expectations at a reach (Figure \@ref(fig:ridges)a,b) relative to a chosen threshold for the CSCI to define nominally low or high scores (Figure \@ref(fig:ridges)c).  The reach classification was based solely on the intersection of CSCI expectations at a reach with the chosen CSCI threshold, where expectations could be below, above, or overlapping the threshold.  Stream reaches with a range of CSCI score expectations entirely below the threshold were considered likely constrained, whereas those with expectations entirely above were considered likely unconstrained.  Reaches with score expectations that overlapped the CSCI threshold were considered possibly constrained or possibly unconstrained, where distinction between the two was based on location of the median expectation of a reach relative to the threshold.  
 
-CSCI scores from biomonitoring data were used to define relative sites scores at a sample site given the stream reach classification (Figure \@ref(fig:ridges)d). For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), relative site scores were defined based on location to the range of expected CSCI scores (Table \@ref(tab:clsdef)).  This provided a definition that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 95th percentile of expected scores) were considered over scoring and sites below the lower limit were under scoring.  Sites with CSCI scores within the range of expectations were as expected.   
+CSCI scores from biomonitoring data were used to define relative sites scores at a sample site given the stream reach classification (Figure \@ref(fig:ridges)d). For each of the four reach classifications (likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained), relative site scores were defined based on location to the range of expected CSCI scores (Table \@ref(tab:clsdef)).  This provided a definition that can be used to understand the observed score relative to the biological context of a reach.  Sites with observed scores above the upper limit of the reach expectation (e.g., above the 90th percentile of expected scores) were considered over scoring and sites below the lower limit (e.g., 10th percentile) were under scoring.  Sites with CSCI scores within the range of expectations were as expected.   
 
 Categories for relative sites scores were further split if they were above or below the selected CSCI threshold.  This final split was created with the intent that description of site scores relative to a defined threshold (e.g., impairment threshold or restoration target) should also be considered.  Specifically, a fourth category for sites within each reach classification was added to define a site as above or below the threshold.  For a likely unconstrained reach, under-scoring sites below the minimum expected score were additionally defined as being above or below the CSCI threshold.  Similarly, over scoring sites above the maximum expected score in a likely constrained reach were additionally defined as being below or above the CSCI threshold.  For possibly constrained and possibly unconstrained reaches, sites that were as expected were additionally defined as being below or above the CSCI threshold.  In total, sixteen site types were defined for the reach classifications (Table \@ref(tab:typetab)).
 
@@ -134,7 +134,7 @@ Each site type was ranked as high, medium, or low priority for each action.  No 
 
 Factors explaining variation between constrained and unconstrained stream reaches were evaluated for the major regions in California (Figure \@ref(fig:calimap)). Landscape and geological data in StreamCat at the riparian and watershed scale were used to model variation between reach classes using random forest models [@Breiman01]. For each region, 1000 regression trees were created and the mean reduction in accuracy was estimated for the exclusion of each variable across all models. This created an estimate of importance of each variable for describing differences between constrained and unconstrained stream classes. Mean reduction in accuracy was estimated for all variables in each model to identify the top five important variables in each region.  Reach classes as possibly or likely constrained (or unconstrained) were combined to evaluate the complete dataset.  Although the landscape models were developed from land use data derived from StreamCat, relatively coarse measures of land use were used (i.e., combined estimates of low to high intensity urban or agricultural land use).  The StreamCat dataset includes additional information at the riparian to watershed scale that could provide greater insight into specific factors within each region that potentially constrain stream integrity.  
 
-Stream reach classifications and site performance categories depend on the range of score expectations (or certainty) from the landscape model (Figure  \@ref(fig:ridges)b) and the CSCI threshold for defining nominally low or high scores (Figure \@ref(fig:ridges)c).  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  The 5th and 95th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more conservative threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification.     
+Stream reach classifications and site performance categories depend on the range of score expectations (or certainty) from the landscape model (Figure  \@ref(fig:ridges)b) and the CSCI threshold for defining nominally low or high scores (Figure \@ref(fig:ridges)c).  This framework for identifying priorities was developed to allow flexibility in how the model could be applied.  The 10th and 90th percentile of expected scores at a reach are used as a default range in which a high degree of certainty in the model output is assumed.  The ability to reduce this range (e.g., 25th to 75th percentile) to assume less certainty in the model is provided.  The CSCI threshold can also be changed to assess effects of relaxing or increasing flexibility in a potential definition of a regulatory standard. A threshold of 0.79 is used by default as a measure of the 10th percentile of scores at all reference (non-impacted) sites that were used to calibrate the CSCI index. This value can be increased to examine effects of a more conservative threshold or decreased for a more relaxed threshold.  The combined effects of changing both the certainty in the model and the CSCI threshold were evaluated to estimate the changes in stream miles in each classification.     
 
 ## Unclassified reaches
 
@@ -148,7 +148,7 @@ The landscape model was used to predict an expected range of CSCI scores for `r 
 
 Model performance differed by region. Performance for the Chapparal and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration and validation datasets.  Model predictions for the Central Valley, Desert Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.75 with observed values in the calibration dataset and 0.55 in the validation dataset.  Model performance was poor for the Sierra Nevada region where the lowest correlation between predicted and observed values was observed. Regression estimates for the validation data in this region showed an intercept and slope of approximately 1 and 0.  Overall, model performance was strongly associated with land use gradients in each region (Figure \@ref(fig:perflu)).  The landscape model peformed well in regions with a mix of urban, agricultural, and open land, such as the South Coast, where strong gradients occur in many watersheds.  Conversely, the model did not perform well in regions where developed landscapes were less common, such as the Sierra Nevada region.   
 
-Statewide patterns in stream constraints were apparent from the results of the landscape models consistent with land use (Figure \@ref(fig:calires)).  Stream reaches were more often constrained for biotic integrity in regions with more watershed development, either as urban or agricultural land.  For example, likely constrained reaches were apparent from the statewide map in coastal reaches of the South Coast where heavy urbanization occurs and in the Central Valley where agriculure is the dominant land use.  Stream reaches were more likely to be unconstrained in regions with less development, with areas in the North Coast and the Sierra Nevada region visible on the map (right, Figure \@ref(fig:calires)).  A majority of reaches statewide were classified as possibly constrained (23% of all stream length) or possibly unconstrained (67%), whereas a minority were likely constrained (3%) or likely unconstrained (7%) (Table \@ref(tab:reltot)).  By region, the most reaches classified as likely unconstrained reaches were in the North Coast (20%) and Sierra Nevada regions (19%) and the most reaches as likely constrained were observed in the Central Valley (25%) and South Coast (9%) regions.  Relative CSCI scores compared to reach expectations were as expected for 92% of the sampled locations statewide, whereas a much smaller percentage of sites were equally under or over scoring (Table \@ref(tab:reltot)).  Similar patterns were observed within regions, although a slightly larger percentage of sites in the Central Valley were under scoring compared to the other regions.  
+Statewide patterns in stream constraints were apparent from the results of the landscape models consistent with land use (Figure \@ref(fig:calires)).  Stream reaches were more often constrained for biotic integrity in regions with more watershed development, either as urban or agricultural land.  For example, likely constrained reaches were apparent from the statewide map in coastal reaches of the South Coast where heavy urbanization occurs and in the Central Valley where agriculture is the dominant land use.  Stream reaches were more likely to be unconstrained in regions with less development, with areas in the North Coast and the Sierra Nevada region visible on the map (right, Figure \@ref(fig:calires)).  A majority of reaches statewide were classified as possibly constrained (11% of all stream length) or possibly unconstrained (46%), whereas a minority were likely constrained (4%) or likely unconstrained (39%) (Table \@ref(tab:reltot)).  By region, the most reaches classified as likely unconstrained reaches were in the Sierra Nevad (50%), North Coast (46%), and Desert Modoc (46%) regions, whereas the most reaches as likely constrained were observed in the Central Valley (22%) and South Coast (15%) regions.  Relative CSCI scores compared to reach expectations were as expected for 80% of the sampled locations statewide, whereas a much smaller percentage of sites were equally under or over scoring (Table \@ref(tab:reltot)).  Similar patterns were observed within regions, although a slightly larger percentage of sites in the Central Valley were under scoring compared to the other regions.  
 
 ## Case study
 
@@ -158,16 +158,16 @@ Statewide patterns in stream constraints were apparent from the results of the l
 
 # requires spat, scrs
 
-thrsh <- 0.79; tails <- 0.05
+thrsh <- 0.79; tails <- 0.1
 
 ##
 # get biological condition expectations
-cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
   mutate(COMID = as.character(COMID)) 
 
 # get csci difference
 sgrscrs <- spat %>% 
-  dplyr::select(COMID, full0.50) %>% 
+  dplyr::select(COMID, core0.50) %>% 
   mutate(COMID = as.character(COMID)) %>% 
   left_join(scrs, ., by = 'COMID') %>% 
   group_by(COMID, StationCode, lat, long) %>% 
@@ -179,11 +179,11 @@ sgrscrs <- spat %>%
 
 ```
 
-Application of the landscape model to the San Gabriel River watershed and engagement with a stakeholder group demonstrated how the results can be used to locally prioritize actions for different stream reaches.  About 750 reaches in the SGR were identified and classified from NHDPlus, of which 10% were visited for bioassessment sampling.  CSCI scores ranged from `r round(min(sgrscrs$csci), 2)` to `r round(max(sgrscrs$csci), 2)` consistent with heavy urban development in the lower watershed and open land use at higher elevation in the upper watershed (Figure \@ref(fig:sgrresplo)).  Application of the landscape model results to the CSCI scores provided a context of expectations consistent with the strong land use gradient in the watershed.  Stream reaches in the upper watershed were a mix of likely and possibly unconstrained, whereas almost all stream reaches in the lower watershed were classified as likely constrained.  Several reaches in the lower watershed had ranges that were left-skewed toward very low CSCI scores consistent with extreme landscape pressures.
+Application of the landscape model to the San Gabriel River watershed and engagement with a stakeholder group demonstrated how the results can be used to locally prioritize actions for different stream reaches.  About 750 reaches in the SGR were identified and classified from NHDPlus, of which 10% were visited for bioassessment sampling.  CSCI scores ranged from `r round(min(sgrscrs$csci), 2)` to `r round(max(sgrscrs$csci), 2)` consistent with heavy urban development in the lower watershed and open land use at higher elevation in the upper watershed (Figure \@ref(fig:sgrresplo)).  Application of the landscape model results to the CSCI scores provided a context of expectations consistent with the strong land use gradient in the watershed.  Stream reaches in the upper watershed were a mix of likely and possibly unconstrained, whereas all stream reaches in the lower watershed were classified as likely constrained.  Several reaches in the lower watershed had ranges that were right-skewed toward very low CSCI scores consistent with extreme landscape pressures.
 
-Most of the sampling stations in the SGR watershed were within the expected ranges of CSCI scores for the defined stream classes (top, Figure \@ref(fig:sgrresmap)).  Using a CSCI threshold based on the 10th percentile of reference calibration sites (i.e., 0.79, @Mazor16) and a relatively certain range of expected scores from the 5th to the 95th percentile of the model predictions, only three sites were under-scoring (two likely unconstrained and one likely constrained) and two sites were over-scoring (both likely constrained).  One of the under scoring sites was below the hypothetical CSCI threshold. None of the remaining sites in both possibly and likely classes were above or below the chosen CSCI threshold for the given class. 
+Most of the sampling stations in the SGR watershed were within the expected ranges of CSCI scores for the defined stream classes (top, Figure \@ref(fig:sgrresmap)).  Using a CSCI threshold based on the 10th percentile of reference calibration sites (i.e., 0.79, @Mazor16) and a relatively certain range of expected scores from the 10th to the 90th percentile of the model predictions, only six sites were under-scoring (two likely unconstrained and four likely constrained) and eight sites were over-scoring (five likely constrained, one possibly unconstrained, and two likely unconstrained).  One of the under-scoring sites in the likely unconstrained class was below the hypothetical CSCI threshold. One site scoring as expected in the possibly unconstrained class was below the chosen CSCI threshold, whereas none of the constrained (possibly or likely) sites were above the threshold. 
 
-The three priority management actions identified by the stakeholder group (investigate, protect, restore) were ranked from low, medium, to high for each potential reach type (Figure \@ref(fig:pritem)). High priority recommendations were generally given to over and under scoring sites in likely unconstrained reaches or those below the hypothetical threshold with possibly unconstrained classification.  Low priority actions were most often recommended for possibly and likely constrained sites, or no action was recommended where it was assumed baseline monitoring and maintenance was sufficient. Recommended actions to investigate were more common for both over scoring and under scoring sites, protect was more common at over scoring sites, and restore was more common at under scoring sites.  A clear distinction between low and high priority actions was observed on the watershed map (bottom, Figure \@ref(fig:sgrresmap)). Sites in the lower watershed were low priority if an action was recommended, whereas the four high priority sites were in the upper watershed.  Several sites that were scoring as expected for likely and possibly unconstrained reaches in the upper watershed were recommended as medium priority for protection.
+The three priority management actions identified by the stakeholder group (investigate, protect, restore) were ranked from low, medium, to high for each potential reach type (Figure \@ref(fig:pritem)). High priority recommendations were generally given to over and under scoring sites in likely unconstrained reaches or those below the hypothetical threshold with possibly unconstrained classification.  Low priority actions were most often recommended for possibly and likely constrained sites, or no action was recommended where it was assumed baseline monitoring and maintenance was sufficient. Recommended actions to investigate were more common for both over scoring and under scoring sites, protect was more common at over scoring sites, and restore was more common at under scoring sites.  A clear distinction between low and high priority actions was observed on the watershed map (bottom, Figure \@ref(fig:sgrresmap)). Sites in the lower watershed were lower priority if an action was recommended, whereas the four high priority sites were in the upper watershed.  Several sites that were scoring as expected for likely and possibly unconstrained reaches in the upper watershed were recommended as medium priority for protection.
 
 ## Drivers of biological constraints and sensitivity analysis
 
@@ -343,7 +343,7 @@ luplo <- sgrlu %>%
 
 # hydrolines
 spatdat <- spat %>% 
-  dplyr::select(COMID, full0.50) %>% 
+  dplyr::select(COMID, core0.50) %>% 
   mutate(id = as.character(1:nrow(.)))
 st_geometry(spatdat) <- NULL
 spatfrt <- spat %>% 
@@ -352,8 +352,8 @@ spatfrt <- spat %>%
   left_join(spatdat, by = 'id') %>% 
   mutate(COMID = as.character(COMID)) %>% 
   left_join(scrs, by = 'COMID') %>% 
-  mutate(csci_diff = csci - full0.50) %>% 
-  filter(!is.na(full0.50))
+  mutate(csci_diff = csci - core0.50) %>% 
+  filter(!is.na(core0.50))
 
 # wshed boundary fortified
 shedfrt <- shed %>% 
@@ -444,7 +444,7 @@ p1 <- ggplot(luplo) +
 # hydrolines plot with CSCI pts
 p2 <- ggplot() +
   geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
-  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = full0.50, linetype = 'Reach predicted\nmedian CSCI')) +
+  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = core0.50, linetype = 'Reach predicted\nmedian CSCI')) +
   scale_colour_gradientn(colours = pal(seqcsc)) +
   geom_point(data = spatfrt, aes(x = long.y, y = lat.y, fill = csci, shape = 'Observed CSCI'), size = 3, alpha = 0.9) +
   scale_fill_gradientn('', colours = pal(seqcsc)) +
@@ -483,7 +483,7 @@ grid.arrange(
 sel <- 16
 bnd <- 0.1
 pts <- 2000
-qts <- 0.05
+qts <- 0.1
 thrsh <- 0.79
 
 catcds <- data.frame(
@@ -664,14 +664,14 @@ obsdat <- csci_comid %>%
   dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
   filter(SelectedSample %in% 'Selected')
 prddat <- comid_prd %>% 
-  dplyr::select(COMID, full0.50)
+  dplyr::select(COMID, core0.50)
 
 # combined data to eval for perf
 dat <- obsdat %>% 
   inner_join(prddat, by = 'COMID') %>% 
   rename(
     observed = CSCI,
-    predicted = full0.50, 
+    predicted = core0.50, 
     imperv = PctImp2006Ws, 
     ag = TotAg2011Ws,
     urb = TotUrb2011Ws,
@@ -757,10 +757,10 @@ toplo2 <- caliclsplo %>%
 
 # median csci predictions
 p1 <- ggplot(calmed) +
-  geom_path(aes(x = long, y = lat, group = id, colour = full0.50), size = 0.30) +
+  geom_path(aes(x = long, y = lat, group = id, colour = core0.50), size = 0.30) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
   coord_map() +
-  scale_colour_gradientn(colours = pal(range(calmed$full0.50, na.rm = T))) +
+  scale_colour_gradientn(colours = pal(range(calmed$core0.50, na.rm = T))) +
   guides(colour = guide_colourbar('Reach predicted median CSCI\n', barheight = 0.5, barwidth = 8, title.position = 'top')) +
   theme_void(base_family = 'serif') +
   theme(
@@ -798,11 +798,11 @@ knitr::include_graphics('figs/calires.png')
 
 # requires spat, scrs
 
-thrsh <- 0.79; tails <- 0.05
+thrsh <- 0.79; tails <- 0.1
 
 ## get sgr expectation for ggplot
 # process
-incl <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+incl <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'core') %>% 
   dplyr::select(-lat, -long) %>% 
   group_by(StationCode) %>% 
   nest
@@ -865,7 +865,7 @@ p1 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
 
 # plot, context
 p2 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
-  geom_line(data = toplo2, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
+  geom_line(data = toplo1, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
   geom_line(aes(colour = `Stream Class`), alpha = 0.6, size = 2) +
   geom_point(data = toplo3, colour = 'white', size = 1, alpha = 1, shape = 15) +
   theme_bw(base_family = 'serif', base_size = 12) +
@@ -901,22 +901,22 @@ grid.arrange(
 ```{r sgrresmap, fig.height = 7.5, fig.width = 8, fig.cap = "Relative site scores and recommended management actions for locations with CSCI scores in the San Gabriel River watershed. Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained. Recommended management actions are ranked by priority for actions to investigate, protect, and restore a site.  No recommended actions assumes baseline maintainence and monitoring is sufficient for a site. Recommended actions were defined by a local stakeholder group (see Figure \\@ref(fig:pritem))."}
 # requires spat, scrs
 
-thrsh <- 0.79; tails <- 0.05
+thrsh <- 0.79; tails <- 0.1
 
 ##
 # nhd sgr str class
-sgrcls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+sgrcls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
   left_join(spat, ., by = 'COMID') %>% 
   dplyr::select(COMID, strcls)
 
 ##
 # get biological condition expectations
-cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
   mutate(COMID = as.character(COMID)) 
 
 # get csci difference
 sgrscrs <- spat %>% 
-  dplyr::select(COMID, full0.50) %>% 
+  dplyr::select(COMID, core0.50) %>% 
   mutate(COMID = as.character(COMID)) %>% 
   left_join(scrs, ., by = 'COMID') %>% 
   group_by(COMID, StationCode, lat, long) %>% 
@@ -946,7 +946,7 @@ pritab <- tibble(
 # stuff to plot
 
 # relative site scores
-sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'full') %>% 
+sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'core') %>% 
   dplyr::select(-data, -datcut) %>% 
   mutate(
     strcls = factor(strcls, levels = levels(strcls)),
@@ -1138,7 +1138,7 @@ exps_ex <- data.frame(
   mutate(medv = ((maxv - minv) / 2) + minv)
 
 # calculate class, performance, type, 
-plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.05) %>% 
+plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.1) %>% 
   rename(
     `Stream\nclass` = `Stream class`
   ) %>% 
@@ -1166,7 +1166,7 @@ mythm <- theme_minimal(base_family = 'serif', base_size = 12) +
   )
 
 p1 <- ggplot(plot_ex, aes(x = typelv)) + 
-  geom_errorbar(aes(ymin = minv, ymax = maxv, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.2) + 
+  geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.2) + 
   geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.7) + 
   geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
   geom_point(aes(y  = `CSCI score`, fill = `Stream\nclass`, shape = perf), size = 4, alpha = 0.8) +
@@ -1375,7 +1375,7 @@ totab <- typetab %>%
   dplyr::select(-Sites)
 
 # table stuff
-cap.val <- 'Possible site types based on stream reach classification, relative site score, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 5th and 95th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'
+cap.val <- 'Possible site types based on stream reach classification, relative site score, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 10th and 90th) of expected scores for a reach and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for nominally low or high values.'
 
 # table
 knitr::kable(totab, booktabs = T, caption = cap.val)
@@ -1387,14 +1387,14 @@ obsdat <- csci_comid %>%
   dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
   filter(SelectedSample %in% 'Selected')
 prddat <- comid_prd %>% 
-  dplyr::select(COMID, full0.50)
+  dplyr::select(COMID, core0.50)
 
 # combined data to eval for perf
 dat <- obsdat %>% 
   inner_join(prddat, by = 'COMID') %>% 
   rename(
     observed = CSCI,
-    predicted = full0.50
+    predicted = core0.50
   ) %>% 
   dplyr::select(SiteSet, PSA6c, observed, predicted)
 
