@@ -100,7 +100,7 @@ The California Stream Condition Index (CSCI) [@Mazor16] was used as a measure of
 
 ## Building and validating landscape models
 
-A prediction model of the CSCI was developed to estimate likely ranges of scores associated with land use gradients.  Measures of land use development were quantified for riparian, catchment, and watershed areas of each stream reach in California using the StreamCat database [@Hill16]. CSCI scores were modelled using estimates of canal/ditch density, imperviousness, road density/crossings, and urban and agricultural land use for each stream reach (Table \@ref(tab:crvr)). The model was incomplete by design to describe scores only in relation to large-scale constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  Deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
+A prediction model of the CSCI was developed to estimate likely ranges of scores associated with land use gradients.  Measures of land use development were quantified for riparian, catchment, and watershed areas of each stream reach in California using the StreamCat database [@Hill16]. CSCI scores were modelled using estimates of canal/ditch density, imperviousness, road density/crossings, and urban and agricultural land use for each stream reach (Table \@ref(tab:crvr)). These variables were chosen specifically to model scores only in relation to long-term constraints on biological condition that are not easily controlled by management actions or where costs to mitigate are likely to be excessive.  The remainder of the variation in scores not related to to these landscape constraints could be attributed to additional, unmeasured environmental variables that influence stream biointegrity.  In other words, deviation of observed scores from the model predictions were considered diagnostic of variation not related to landscape effects.     
 
 Models were developed using quantile regression forests to estimate ranges of likely CSCI scores in different landscapes [@Meinshausen06;@Meinshausen17].  Quantile models evaluate the conditional response across the range of values that are expected, such as the lower and upper percentiles of the distribution, as compared to only the mean response with conventional models [@Cade03].  This allows use of model predictions to describe where bioassessment targets are unlikely to be met or where streams are unlikely to be impacted by placing bounds on the range of expectations relative to landscape constraints. Random forest models also provide robust predictions by evaluating different subsets of observations from random splits of the predictor variables.  The final predictions are the averaged response across several models.  These models have been used extensively in bioassessment applications [@Carlisle09;@Chen14;@Mazor16;@Fox17] and can produce unbiased estimates that are relatively invariant to noisy relationships or non-normal distributions [@Breiman01;@Hastie09;@Fox17].  Quantile regression forests were used to predict CSCI scores in each stream reach from the 5th to the 95th percentile of expectations at five percent intervals (i.e., 5th, 10th, etc.). 
 
@@ -233,9 +233,9 @@ The SCAPE model application website: [http://shiny.sccwrp.org/scape/](http://shi
 
 # Figures
 
-```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Urban and agricultural land use (left) and distribution of observed stream CSCI scores (right) in California. Cover of urban and agricultural land use in stream catchments was used to develop landscape models for stream reach expectations of bioassessment scores.  Grey lines are ecoregions in California, CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 4.5, fig.width = 7, fig.cap = 'Urban and agricultural land use (left) and distribution of observed stream CSCI scores (right) in California. Cover of urban and agricultural land use in stream catchments was used to develop landscape models for stream reach expectations of bioassessment scores.  Grey lines are ecoregions in California, CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
-lucol <- c('lightsalmon', 'grey')
+lucol <- c('grey80', 'grey45')
 
 # country base
 country <- map_data('state')
@@ -249,7 +249,7 @@ psadat <- calipsa %>%
   as.data.frame %>% 
   rownames_to_column('id') %>% 
   dplyr::select(id, PSA6) %>% 
-  rename(PSA = PSA6) %>% 
+  dplyr::rename(PSA = PSA6) %>% 
   mutate(Region = factor(PSA, 
     levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
     labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
@@ -263,17 +263,21 @@ psafrt <- calipsa %>%
 # psalab
 psalab <- psalab %>% 
   mutate(
+    lat = ifelse(Region == 'CV', 37.26575, lat), # fiddle with locs
+    long = ifelse(Region == 'CV', -120.6, long),
+    lat = ifelse(Region == 'CH', 36, lat),
+    long = ifelse(Region == 'CH', -121, long),
     Region = as.character(Region),
-    Region = paste0('bolditalic(', Region, ')')
-    )
-
+    Region = paste0('bold(', Region, ')')
+  )
+    
 # land use data fortified  
 toplo <- ludat %>% 
   as('Spatial') %>% 
   fortify %>% 
   filter(id %in% c(2, 3)) %>% 
   mutate(id = factor(id, levels = c(2, 3), labels = c('Agriculture', 'Urban'))) %>% 
-  rename(`Land use` = id)
+  dplyr::rename(`Land use` = id)
 
 # csci seq for color pal
 palseq <- range(csci_raw$CSCI, na.rm = T) 
@@ -292,11 +296,11 @@ for(i in theta) {
   p1 <- p1 + geom_text_repel(data = psalab, 
     aes_q(x = bquote(long +.(cos(i)*xo)),
           y = bquote(lat +.(sin(i)*yo)),
-          label = ~Region), point.padding = NA, parse = T, family = 'serif', size = 5, colour = 'black')
+          label = ~Region), point.padding = NA, parse = T, family = 'serif', size = 6.5, colour = 'black')
     
 }
 p1 <- p1 + 
-  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 5, colour = 'white') + 
+  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 6.5, colour = 'white') + 
   coord_map() + 
   scale_fill_manual(values = lucol) +
   theme_void(base_family = 'serif') + 
@@ -322,23 +326,26 @@ pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   geom_polygon(data = calista, fill = 'black', color = "black", size = 0.3)+
   coord_map() +
   theme_void() 
-  
+
 grid.newpage()
 v1 <- viewport(width = 1, height = 1, x = 0.3, y = 0.5) 
 v2 <- viewport(width = 1, height = 1, x = 0.7, y = 0.5) 
 v3 <- viewport(width = 0.25, height = 0.25, x = 0.85, y = 0.65)
+
+# png('figs/calimap.png', height = 4.5, width = 7, units = 'in', res = 300, family = 'serif')
 print(p1, vp = v1) 
 print(p2, vp = v2)
 print(pinset, vp = v3)
+# dev.off()
 ```
 
-```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream reach and observed CSCI scores are shown in (b). The watershed is undeveloped in the north and heavily urbanized in the south.'}
+```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream reach and observed CSCI scores are shown in (b). The watershed is largely undeveloped in the north and heavily urbanized in the south.'}
 
 # land use raster data
 luplo <- sgrlu %>% 
   rasterToPoints %>% 
   data.frame %>% 
-  rename(`Land cover` = layer) %>% 
+  dplyr::rename(`Land cover` = layer) %>% 
   mutate(`Land cover` = factor(`Land cover`, levels = c(5, 4, 3, 2, 1), labels = c('Urban: hi', 'Urban: md', 'Urban: lo', 'Open: forest', 'Open: chaparral'))) 
 
 # hydrolines
@@ -369,7 +376,7 @@ psadat <- calipsa %>%
   as.data.frame %>% 
   rownames_to_column('id') %>% 
   dplyr::select(id, PSA6) %>% 
-  rename(PSA = PSA6) %>% 
+  dplyr::rename(PSA = PSA6) %>% 
   mutate(Region = factor(PSA, 
     levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
     labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
@@ -475,7 +482,7 @@ grid.arrange(
 # dev.off()
 ```
 
-```{r ridges, fig.height = 8, fig.width = 10, fig.cap = 'Application of landscape models to identify site expectations and bioassessment performance for sixteen example stream reaches.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each reach with a chosen CSCI threshold (c) defines the stream reach classification as likely unconstrained (lu), possibly unconstrained (pu), possibly constrained (pc), and likely constrained (lc).  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
+```{r ridges, fig.height = 8, fig.width = 10, fig.cap = 'Application of landscape models to identify site expectations and bioassessment performance for sixteen example stream reaches.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each reach with a chosen CSCI threshold (c) defines the stream reach classification as likely unconstrained, possibly unconstrained, possibly constrained, and likely constrained.  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
 ##
 # plot data
 
@@ -575,7 +582,7 @@ toplo3 <- rnd %>%
     prfcat = paste0(prfcat, ' (', estcat, ')'), 
     estcat = factor(estcat, levels = catcds$clsabv, labels = catcds$cls)
   ) %>% 
-  rename(`Stream class` = estcat)
+  dplyr::rename(`Stream class` = estcat)
 
 toplo4 <- rnd %>% 
   dplyr::select(id, scrshyp, estcat, prfcat) %>% 
@@ -585,7 +592,7 @@ toplo4 <- rnd %>%
     estcat = factor(estcat, levels = catcds$clsabv, labels = catcds$cls),
     hght = scrshyp
   ) %>% 
-  rename(
+  dplyr::rename(
     `Relative site score` = prfcat,
     `Stream class` = estcat
     )
@@ -653,7 +660,7 @@ grid.arrange(
 )
 ```
 
-```{r app, fig.cap='Screenshot of the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape models.  The application allowed users to visualize results of reach classications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
+```{r app, fig.cap='Screenshot of the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape models.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
 knitr::include_graphics('figs/app.png')
 ```
 
@@ -669,7 +676,7 @@ prddat <- comid_prd %>%
 # combined data to eval for perf
 dat <- obsdat %>% 
   inner_join(prddat, by = 'COMID') %>% 
-  rename(
+  dplyr::rename(
     observed = CSCI,
     predicted = core0.50, 
     imperv = PctImp2006Ws, 
@@ -736,7 +743,7 @@ psadat <- calipsa %>%
   as.data.frame %>%
   rownames_to_column('id') %>%
   dplyr::select(id, PSA6) %>%
-  rename(PSA = PSA6) %>%
+  dplyr::rename(PSA = PSA6) %>%
   mutate(Region = factor(PSA,
                          levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
                          labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
@@ -829,7 +836,7 @@ toplo1 <- ggsgrexp %>%
     strcls = factor(strcls, levels = levels(strcls)),
     perf = factor(perf, levels = levels(perf))
     ) %>%
-  rename(
+  dplyr::rename(
     `Stream Class` = strcls,
     `Relative\nscore` = perf_mlt,
     Type = typelv
@@ -840,7 +847,7 @@ toplo2 <- ggsgrexp %>%
   dplyr::select(COMID, StationCode, data, strcls) %>%
   unnest %>%
   mutate(strcls = factor(strcls, levels = levels(strcls))) %>%
-  rename(`Stream Class` = strcls)
+  dplyr::rename(`Stream Class` = strcls)
 
 # median expectation
 toplo3 <- ggsgrexp %>%
@@ -1139,7 +1146,7 @@ exps_ex <- data.frame(
 
 # calculate class, performance, type, 
 plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.1) %>% 
-  rename(
+  dplyr::rename(
     `Stream\nclass` = `Stream class`
   ) %>% 
   mutate(`Stream\nclass` = factor(`Stream\nclass`, levels = rev(levels(`Stream\nclass`))))
@@ -1231,7 +1238,7 @@ toplo <- cnstrfrst %>%
     })
   ) %>% 
   unnest %>% 
-  rename(
+  dplyr::rename(
     Region = PSA6,
     Importance = MeanDecreaseAccuracy
     ) %>% 
@@ -1387,7 +1394,7 @@ unt <- c('km/sq km', 'km/sq km', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%
          'crosssings/sq km')
 
 totab <- data.frame(nms, scl, dsc, unt) %>% 
-  rename(Name = nms, Scale = scl, Description = dsc, Unit = unt)
+  dplyr::rename(Name = nms, Scale = scl, Description = dsc, Unit = unt)
 
 # table stuff
 cap.val <- 'Land use variables used to develop landscape models of stream bioassessment scores.  All variables were obtained from StreamCat [@Hill16].  The measurement scale for each variable is at the catchment, watershed, and/or riparian scale (100 m buffer) relative to a stream reach. Total urban and agriculture land use variables were based on sums of indvidual variables in StreamCat as noted in the desciption.'
@@ -1420,7 +1427,7 @@ totab <- typetab %>%
     `Reach expectation` = ifelse(duplicated(`Reach expectation`), '', paste0('**', `Reach expectation`, '**')), 
     Type = as.character(Type)
   ) %>% 
-  rename(`Relative site score` = `Site performance`) %>% 
+  dplyr::rename(`Relative site score` = `Site performance`) %>% 
   dplyr::select(-Sites)
 
 # table stuff
@@ -1441,7 +1448,7 @@ prddat <- comid_prd %>%
 # combined data to eval for perf
 dat <- obsdat %>% 
   inner_join(prddat, by = 'COMID') %>% 
-  rename(
+  dplyr::rename(
     observed = CSCI,
     predicted = core0.50
   ) %>% 
@@ -1493,7 +1500,7 @@ regdf <- dat %>%
     
   })) %>% 
   unnest %>% 
-  rename(set = PSA6c) %>% 
+  dplyr::rename(set = PSA6c) %>% 
   dplyr::select(SiteSet, set, everything())
 
 # combine and prep for table
@@ -1507,7 +1514,7 @@ allerr <- totdf %>%
   ) %>% 
   unite('Observed', aveobs, sdobs, sep = ' ') %>% 
   unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
-  rename(
+  dplyr::rename(
     n = nval,
     Correlation = corv, 
     RMSE = errv, 
@@ -1600,7 +1607,7 @@ reltot <- caliexp %>%
   dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
   filter(!is.na(strcls)) %>% 
   left_join(cscipsa, by = 'COMID') %>% 
-  rename(Region = PSA6c) %>% 
+  dplyr::rename(Region = PSA6c) %>% 
   group_by(Region, perf) %>% 
   summarise(
     n = n(), 
@@ -1630,7 +1637,7 @@ reltotall <- caliexp %>%
   dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
   filter(!is.na(strcls)) %>% 
   left_join(cscipsa, by = 'COMID') %>% 
-  rename(Region = PSA6c) %>% 
+  dplyr::rename(Region = PSA6c) %>% 
   group_by(perf) %>% 
   summarise(
     n = n(), 
