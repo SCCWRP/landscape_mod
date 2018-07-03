@@ -63,6 +63,7 @@ load(file = '../data/strclslen.RData')
 load(file = '../data/cnstrfrst.RData')
 load(file = '../data/sensres.RData')
 load(file = '../data/typscrs.RData')
+load(file = '../data/sgrclslen.RData')
 ```
 
 ```{r echo = F, cache = F}
@@ -144,7 +145,7 @@ An approach for assigning biological expectations to unclassified reaches was de
 
 A framework for identifying site priorities for management actions using the landscape model was developed through engagement with a local stakeholder group. The San Gabriel River Regional Monitoring Program (SGRRMP) includes stakeholders from local municipalities, water districts, water quality regulatory agencies, consulting groups, and non-government organizations that cooperatively work to increase awareness of issues in the SGR watershed and improve coordination of compliance and ambient monitoring efforts. The stakeholder workgroup met monthly over a six-month period to discuss model application and to refine the interpretation of results.
 
-A strong land-use gradient occurs in the SGR watershed that creates challenges for managing stream health (Figure \@ref(fig:sgrshd)). Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for recreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles river to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements. Approximately half of the monitored sites in the watershed are in poor biological condition, all of which are in the lower watershed.  Pioritizing among the many sites that require some management intervention was a critical objective of the stakeholder group in applying the landscape model.
+A strong land-use gradient occurs in the SGR watershed that creates challenges for managing stream health (Figure \@ref(fig:sgrshd)). Headwaters begin in the San Gabriel mountains where the land is primarily undeveloped or protected for recreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The San Gabriel river is dammed at four locations for flood control in the upper watershed and is hydrologically connected to the Los Angeles River to the west through the Whittier Reservoir in the lower watershed. Spreading grounds are present in the middle of the watershed for groundwater recharge during high flow.  Nearly all of the stream reaches in the lower half of the watershed are channelized with concrete or other reinforcements. Approximately half of the monitored sites in the watershed are in poor biological condition, all of which are in the lower watershed.  Pioritizing among the many sites that require some management intervention was a critical objective of the stakeholder group in applying the landscape model.
 
 The stakeholder group identified priorities in the watershed by first describing the types of management actions that were desired. Stakeholders identified their relevant priorities by evaluating the different site types that were possible from the landscape model relative to the stream class (under-scoring, expected, over-scoring for each of four reach classes).  The priorities were also defined by considering if an observed CSCI score at a site was above or below a potential biological threshold, in addition to the scoring expectation for the stream class (Table \@ref(tab:typetab)).  To facilitate the process, a template was used that showed the site scores relative to the reach classifications (Figure \@ref(fig:pritem), left side).  The priorities defined by the group were generalized into three categories:
 
@@ -205,22 +206,7 @@ sgrscrs <- spat %>%
   ungroup %>%
   left_join(cls, by = 'COMID')
 
-# get percentage of stream lengths in SGR in each class
-lens <- cls %>% 
-  mutate(COMID = as.numeric(COMID)) %>% 
-  left_join(spat, ., by = 'COMID') %>% 
-  dplyr::select(COMID, strcls) %>% 
-  as('Spatial') %>% 
-  sp::SpatialLinesLengths(longlat = T)
-clslen <- cls %>% 
-  mutate(lens = lens) %>% 
-  group_by(strcls) %>% 
-  summarise(lens = sum(lens)) %>% 
-  filter(!is.na(strcls)) %>% 
-  mutate(
-    lenper = 100 *  lens / sum(lens), 
-    lenper = round(lenper, 0)
-    ) %>% 
+clslen <- sgrclslen %>% 
   dplyr::select(-lens) %>% 
   spread(strcls, lenper)
 
@@ -704,11 +690,11 @@ grid.arrange(
 )
 ```
 
-```{r app, fig.cap='Screenshot of the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
+```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
 knitr::include_graphics('figs/app.png')
 ```
 
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI predicted - observed) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI predicted - observed) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
 # observed and predicted data
 obsdat <- csci_comid %>%
@@ -843,7 +829,7 @@ dev.off()
 knitr::include_graphics('figs/calires.png')
 ```
 
-```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a hypothetical biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
+```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream reaches in the San Gabriel River watershed, Los Angeles County, California.  CSCI scores with no context from the model are on the left (a) and scores with context from the model are on the right (b). Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Reach classes are based on overlap of the expectations with a biological threshold for the CSCI (dashed lined) and location of the median expectation (white ticks)."}
 ##
 # ggplot of sgr site expecations, relative scores
 
@@ -949,7 +935,7 @@ grid.arrange(
 # dev.off()
 ```
 
-```{r sgrresmap, fig.height = 7.5, fig.width = 8, fig.cap = "Relative site scores and recommended management actions for locations with CSCI scores in the San Gabriel River watershed. Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained. Recommended management actions are ranked by priority for actions to investigate, protect, and restore a site.  No recommended actions assumes baseline maintainence and monitoring is sufficient for a site. Recommended actions were defined by a local stakeholder group (see Figure \\@ref(fig:pritem))."}
+```{r sgrresmap, fig.height = 7.5, fig.width = 8, fig.cap = "Relative site scores and recommended management actions for locations with CSCI scores in the San Gabriel River watershed. Relative site scores as under scoring, expected, or over scoring are based on observed scores given the reach class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained. Recommended management actions are ranked by priority for actions to investigate, protect, and restore a site.  No recommended actions assumes baseline maintenance and monitoring is sufficient for a site. Recommended actions were defined by a local stakeholder group (see Figure \\@ref(fig:pritem))."}
 # requires spat, scrs
 
 thrsh <- 0.79; tails <- 0.1
@@ -1263,7 +1249,7 @@ grid.arrange(
 )
 ```
 
-```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors associated with constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors associated with constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # format for plotting, all data
 toplo <- cnstrfrst %>% 
@@ -1346,7 +1332,7 @@ grid.arrange(
 varImpPlot(rf_core, main = NULL)
 ```
 
-```{r sensplo, fig.height = 8, fig.width = 6, fig.cap = 'Changes in stream reach classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios more certain to less certain as identified by the tail cutoff for the expected range) and potential CSCI threshold (three scenarios for relaxed to more conservative).  The percentage of total stream length for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r sensplo, fig.height = 5, fig.width = 7, fig.cap = 'Changes in stream reach classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios from wide to narrow prediction intervals as identified by the tail cutoff for the expected range) and potential CSCI threshold (three scenarios for relaxed to more conservative).  The percentage of total stream length for each classification is shown for each scenario. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
 grd_chk <- list(
@@ -1363,42 +1349,35 @@ senscls <- sensres %>%
   dplyr::select(-name) %>% 
   unnest %>% 
   mutate(
-    thrsh = as.character(thrsh),
+    thrsh = factor(thrsh, levels = c(0.63, 0.79, 0.92), labels = c('low (0.63)', 'medium (0.79)', 'high (0.92)')), 
     tails = as.character(tails), 
     Region = gsub('^statewide$', 'Statewide', Region),
-    strcls = factor(strcls, levels = rev(levels(strcls)))
-  ) 
+    strcls = factor(strcls, levels = c('possibly unconstrained', 'likely unconstrained', 'likely constrained', 'possibly constrained'))
+  )
+
+# fill colors
+fills <- pal_exp(levels(senscls$strcls))
+fills[c(1, 4)] <- 'white'
 
 # results plot
 pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls)) + 
-  geom_bar(stat = 'identity', colour = scales::alpha('black', 0.5), width = 1, alpha = 0.7) +
+  geom_bar(stat = 'identity', width = 0.9, alpha = 0.7) +
   facet_grid(Region ~ thrsh) +
-  scale_fill_manual('Stream reach class', values = pal_exp(levels(senscls$strcls))) +
+  scale_fill_manual('Stream reach class', values = fills) +
   theme_bw(base_family = 'serif') +     
   scale_y_continuous('% stream length', expand = c(0, 0)) + 
-  scale_x_discrete('Certainty in CSCI predictions (more to less)', expand = c(0, 0)) +
+  scale_x_discrete('Width of CSCI prediction interval (wide to narrow)', expand = c(0, 0)) +
   theme(
     strip.background = element_blank(), 
     axis.text.x = element_text(size = 7),
     axis.text.y = element_text(size = 7),
-    legend.position = 'top', 
-    panel.grid = element_blank()
-  ) + 
-  guides(fill = guide_legend(title.position = 'left', ncol = 2))
+    panel.grid = element_blank(), 
+    panel.border = element_blank(),
+    plot.title = element_text(size = 11, hjust = 0.5)
+  ) +
+  ggtitle('Example CSCI threshold (relaxed to conservative)')
 
-
-pleg <- g_legend(pres)
-pres <- pres + theme(legend.position = 'none')
-
-grobsz <- gpar(cex = 0.7)
-grid.arrange(
-  arrangeGrob(
-    pleg,
-    textGrob('Example CSCI threshold (relaxed to conservative)', gp = grobsz), 
-    pres,
-    heights= c(0.1, 0.02, 1), ncol = 1
-  ) 
-)
+pres
 ```
 
 # Tables 
@@ -1514,8 +1493,11 @@ totdf <- dat %>%
     sdprd <- sd(x$predicted, na.rm = T)
     mod <- lm(predicted ~ observed, data = x)
     intv <- coefficients(mod)[1]
+    intvp <- p_ast(coef(summary(mod))[1, 4])
     slov <- coefficients(mod)[2]
+    slovp <- p_ast(coef(summary(mod))[2, 4])
     corv <- with(x, cor.test(observed, predicted))$estimate
+    corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
     errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
     
     out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
@@ -1529,7 +1511,7 @@ regdf <- dat %>%
   group_by(PSA6c, SiteSet) %>% 
   nest %>% 
   mutate(data = purrr::map(data, function(x){
-    
+
     nval <- nrow(x)
     aveobs <- mean(x$observed, na.rm = T)
     sdobs <- sd(x$observed, na.rm = T)
@@ -1538,8 +1520,11 @@ regdf <- dat %>%
     ttst <- with(x, t.test(observed, predicted, na.rm = T))
     mod <- lm(predicted ~ observed, data = x)
     intv <- coefficients(mod)[1]
+    intvp <- p_ast(coef(summary(mod))[1, 4])
     slov <- coefficients(mod)[2]
+    slovp <- p_ast(coef(summary(mod))[2, 4])
     corv <- with(x, cor.test(observed, predicted))$estimate
+    corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
     errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
     
     out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
@@ -1553,8 +1538,9 @@ regdf <- dat %>%
 # combine and prep for table
 allerr <- totdf %>% 
   bind_rows(regdf) %>% 
-  mutate_if(is.numeric, round, 2) %>% 
+  mutate_if(is.numeric, function(x) round(x, 2) %>% formatC(., format = 'f', flag = '0', digits = 2)) %>% 
   mutate(
+    nval = as.numeric(nval),
     sdobs = paste0('(', sdobs, ')'), 
     sdprd = paste0('(', sdprd, ')'), 
     set = factor(set, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN'))
@@ -1563,7 +1549,7 @@ allerr <- totdf %>%
   unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
   dplyr::rename(
     n = nval,
-    Correlation = corv, 
+    r = corv, 
     RMSE = errv, 
     Slope = slov, 
     Intercept = intv,
@@ -1574,15 +1560,17 @@ allerr <- totdf %>%
   mutate(Dataset = ifelse(duplicated(Dataset), '', Dataset))
 
 # table stuff
-cap.val <- 'Performance of the landscape model by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure \\@ref(fig:calires)) and individual regions of California (Figure \\@ref(fig:calimap) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted values of each dataset are shown.  Correlations, root mean squared errors (RMSE), intercept, and slopes are for comparisons of predicted and observed values to evaluate model performance.'
+cap.val <- 'Performance of the landscape model by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure \\@ref(fig:calires)) and individual regions of California (Figure \\@ref(fig:calimap)) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted CSCI values of each dataset are shown.  Pearson correlations (r), root mean squared errors (RMSE), intercept, and slopes are for comparisons of predicted and observed values to evaluate model performance. All correlations, intercepts, and slopes are significant at alpha = 0.05.'
 
 # table
 knitr::kable(allerr, booktabs = T, caption = cap.val)
 ```
 
-*Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and in major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in kilometers with the percentage of the total length in a region in parentheses. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+*Table \@ref(tab:clstot): (\#tab:clstot) Summary of stream length for each stream class statewide and major regions of California (Figures \@ref(fig:calimap), \@ref(fig:calires)).  Lengths are in kilometers with the percentage of the total length in a region in parentheses. All lengths are based on a CSCI threshold of 0.79 and the 10th to 90th percentile of expected scores from the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
 ```{r clstot}
 st_geometry(strclslen) <- NULL
+
+# by region
 lentot <- strclslen %>% 
   filter(!is.na(strcls)) %>% 
   mutate(
@@ -1607,6 +1595,7 @@ lentot <- strclslen %>%
   arrange(Region, strcls) %>% 
   spread(strcls, `Stream km (%)`)
 
+# statewide
 lentotall <- strclslen %>% 
   filter(!is.na(strcls)) %>% 
   group_by(strcls) %>% 
@@ -1642,7 +1631,7 @@ tab <- regulartable(totab) %>%
 tab
 ```
 
-*Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over scoring if the observed scores are above the range of expectations at a reach, expected if within the range, or under scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
+*Table \@ref(tab:reltot): \(\#tab:reltot) Summary of CSCI scores by relative expectations for each stream class statewide and in each major region of California (Figures \@ref(fig:calimap), \@ref(fig:calires)). Average (standard deviation) scores and counts (percents) of the number of monitoring stations in each relative expectation and region are shown.  Sites are over scoring if the observed scores are above the range of expectations at a reach, expected if within the range, or under scoring if below the range. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.*
 ```{r reltot, eval = T}
 cscipsa <- csci_comid %>% 
   dplyr::select(COMID, PSA6c) %>% 
@@ -1733,13 +1722,13 @@ totab <- typscrs %>%
     grps = factor(grps, levels = c('urb', 'ag', 'oth'), labels = c('Urban', 'Ag', 'Open')),
     Region = ifelse(duplicated(Region), '', Region)
     ) %>% 
-  mutate_if(is.numeric, round, 2) %>% 
-  unite('5th - 95th (More certain)', lo05, hi95, sep = ' - ') %>% 
-  unite('25th - 75th', lo25, hi75, sep = ' - ') %>% 
-  unite('45th - 55th (Less certain)', lo45, hi55, sep = ' - ')
+  mutate_if(is.numeric, function(x) round(x, 2) %>% formatC(., format = 'f', flag = '0', digits = 2)) %>% 
+  unite('High certainty (10th - 90th)', lo10, hi90, sep = ' - ') %>% 
+  unite('Moderate (25th - 75th)', lo25, hi75, sep = ' - ') %>% 
+  unite('Low certainty (40th - 60th)', lo40, hi60, sep = ' - ')
 
 # table stuff
-cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, agricultural, or open (neither urban nor agricultural) land uses by major regions in California and statewide. Ranges can be used to identify approximate expectations for stream reaches with insufficient data for application of the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts Modoc, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'
+cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, agricultural, or open (neither urban nor agricultural) land uses by major regions in California and statewide. Ranges can be used to identify approximate expectations for stream reaches with insufficient data for application of the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'
 
 # table
 knitr::kable(totab, booktabs = T, caption = cap.val)

@@ -22,6 +22,7 @@ All files created using `R/dat_proc.R` (sometimes not from local source)
 * `scrs.RData` data.frame of CSCI scores for sites in SGR, from SGRRMP .rproj file
 * `sensres.RData` results of sensitivity analysis statewide, list of lists for each region and statewide, classification and relative score changes
 * `senssgr.RData` results of sensitivity analysis, SGR watershed only
+* `sgrclslen.RData` length of stream classifications for all reaches in SGR watershed
 * `shed.RData` sf object of San Gabriel watershed
 * `spat.RData` sf object of nhd hydrolines with CSCI predictions for SGR, from SGRRMP .rproj file
 * `strclslen.RData` sf object of all cali stream classes with length and PSA
