@@ -1,0 +1,500 @@
+---
+title: "Prioritizing management goals for stream biological integrity within the context of landscape constraints"
+output: 
+  bookdown::word_document2:
+    reference_docx: my_styles.docx
+bibliography: refs_supp.bib
+author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Karin Wisenbaker (karin@aquaticbioassay.com), Joshua Westfall (jwestfall@lacsd.org), Peter D. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Chad Loflen (Chad.Loflen@waterboards.ca.gov), Martha Sutula (marthas@sccwrp.org), Eric D. Stein (erics@sccwrp.org)'
+urlcolor: blue
+link-citations: true
+---
+
+# Supplemental Figures and Tables
+
+```{r setup, echo = F, warning = F, message = F, results = 'hide'}
+# figure path, chunk options
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
+  fig.process = function(x) {
+  x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+  if (file.rename(x, x2)) x2 else x
+  })
+
+# libraries
+library(tidyverse)
+library(Hmisc)
+library(Jabbrev)
+library(gridExtra)
+library(sf)
+library(maptools)
+library(maps)
+library(grid)
+library(ggrepel)
+library(RColorBrewer)
+library(ggridges)
+library(scales)
+library(quantregForest)
+library(leaflet)
+library(raster)
+library(flextable)
+library(officer)
+
+# functions (incl. color palettes)
+source('../R/funcs.R')
+
+# extract bib entries from online
+bib_scrp('supplement.Rmd', 'refs_supp.bib')
+
+# data
+load(file = '../data/typetab.RData')
+load(file = '../data/csci_raw.RData')
+load(file = '../data/ludat.RData')
+load(file = '../data/calipsa.RData')
+load(file = '../data/psalab.RData')
+load(file = '../data/rf_core.RData')
+load(file = '../data/sgrlu.RData')
+load(file = '../data/shed.RData')
+load(file = '../data/spat.RData')
+load(file = '../data/scrs.RData')
+load(file = '../data/csci_comid.RData')
+load(file = '../data/nhdplo.RData')
+load(file = '../data/caliclsplo.RData')
+load(file = '../data/calicls.RData')
+load(file = '../data/caliexp.RData')
+load(file = '../data/comid_prd.RData')
+load(file = '../data/strclslen.RData')
+load(file = '../data/cnstrfrst.RData')
+load(file = '../data/sensres.RData')
+load(file = '../data/typscrs.RData')
+load(file = '../data/sgrclslen.RData')
+```
+
+<!-- supp figures -->
+<!-- app - S1 -->
+<!-- perflu - S2 -->
+<!-- pritem - S3 -->
+<!-- calicnstr - S4 -->
+<!-- lndspimp - S5 -->
+
+<!-- manu figures -->
+<!-- calimap - 1 -->
+<!-- sgrshd - 2 -->
+<!-- ridges - 3 -->
+<!-- calires - 4 -->
+<!-- sgrresplo - 5 -->
+<!-- sgrresmap - 6 -->
+<!-- sensplo - 7 -->
+
+<!-- supp tables -->
+<!-- crvr - S1 -->
+<!-- perftab - S2 -->
+
+<!-- manu tables -->
+<!-- clsdef - 1 -->
+<!-- typetab - 2 -->
+<!-- clstot - 3 -->
+<!-- reltot - 4 -->
+<!-- typscrs - 5 -->
+
+```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
+knitr::include_graphics('figs/app.png')
+```
+
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI predicted - observed) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50, 
+    imperv = PctImp2006Ws, 
+    ag = TotAg2011Ws,
+    urb = TotUrb2011Ws,
+    Region = PSA6c
+  ) %>% 
+  mutate(
+    modrsd = predicted - observed
+  ) %>%
+  gather('var', 'val', urb, ag) %>% 
+  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
+
+col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
+
+# residuals by land use
+p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
+  geom_point(size = 1, alpha = 0.7) +
+  theme_bw(base_family = 'serif', base_size = 14) +
+  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
+  geom_hline(yintercept = 0) + 
+  theme(
+    strip.background = element_blank(), 
+    strip.placement = 'outside', 
+    axis.title.x = element_blank(), 
+    legend.position = 'none'
+  ) + 
+  scale_y_continuous('CSCI predicted - observed', limits = c(-0.65, 0.65)) + 
+  scale_colour_manual(values = col)
+
+# land use by region
+meds <- dat %>% 
+  spread(var, val) %>% 
+  group_by(Region) %>% 
+  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
+  arrange(urbmed)
+
+toplo <- dat %>% 
+  mutate(Region = factor(Region, levels = meds$Region))
+p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = col) +
+  scale_y_log10('% land cover, log10',
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
+```
+
+```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The reach types (Table 2) relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over scoring, expected, under scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the range of expected CSCI score for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+sts <- paste('Site', seq(1:16))
+
+# example data, csci scores
+scrs_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  csci = c(1.25, 0.98, 0.81, 0.68, 1.14, 0.87, 0.73, 0.58, 0.98, 0.83, 0.68, 0.5, 0.88, 0.76, 0.57, 0.39)
+)
+
+# example data, stream predictions
+exps_ex <- data.frame(
+  Site = factor(sts, levels = sts),
+  minv = rep(c(0.84, 0.68, 0.58, 0.43), each = 4),
+  maxv = rep(c(1.14, 0.98, 0.88, 0.73), each = 4),
+  stringsAsFactors = F
+) %>% 
+  mutate(medv = ((maxv - minv) / 2) + minv)
+
+# calculate class, performance, type, 
+plot_ex <- proc_all(exps_ex, scrs_ex, thrsh = 0.79, tails = 0.1) %>% 
+  dplyr::rename(
+    `Stream\nclass` = `Stream class`
+  ) %>% 
+  mutate(`Stream\nclass` = factor(`Stream\nclass`, levels = rev(levels(`Stream\nclass`))))
+
+# priorities
+pritab <- tibble(
+  Type = seq(1:length(sts)),
+  Investigate = c(rep(c('H', '', 'H', 'H'), 2), rep(c('M', 'M', '', 'M'), 2)),
+  Protect = c(rep(c('H', 'M', 'M', ''), 2), rep(c('H', '', '', ''), 2)),
+  Restore = c(rep(c('', '', 'M', 'H'), 2), rep(c('', 'L', 'L', 'L'), 2))
+  ) %>% 
+  gather('action', 'priority', -Type)
+
+mythm <- theme_minimal(base_family = 'serif', base_size = 12) +
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    axis.line.x = element_line(), 
+    axis.line.y = element_line(), 
+    axis.ticks.y = element_line(), 
+    axis.text.x = element_blank(),
+    legend.position = 'top',
+    plot.margin = grid::unit(c(5.5, 0, 5.5, 5.5), units = 'pt')
+  )
+
+p1 <- ggplot(plot_ex, aes(x = typelv)) + 
+  geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.2) + 
+  geom_errorbar(aes(ymin = minv_qt, ymax = maxv_qt, colour = `Stream\nclass`), width = 0, size = 2, alpha = 0.7) + 
+  geom_point(aes(y = medv), colour = 'white', size = 0.75, alpha = 0.6, shape = 15) +
+  geom_point(aes(y  = `CSCI score`, fill = `Stream\nclass`, shape = perf), size = 4, alpha = 0.8) +
+  geom_hline(yintercept = 0.79, linetype = 'dashed') +
+  scale_colour_manual('Stream reach class', values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
+                    guide = guide_legend(direction = 'vertical', title.position = 'left', ncol = 2)) +
+  scale_fill_manual(values = pal_exp(levels(plot_ex$`Stream\nclass`)), 
+                    guide = F) +
+  scale_shape_manual('Relative site score', values = c(25, 21, 24)) +
+  scale_x_discrete('Reach type', limits = rev(levels(plot_ex$typelv)), labels = rev(c(1:nrow(plot_ex)))) +
+  scale_y_continuous('CSCI score') +
+  guides(colour = guide_legend(title.position = 'top', ncol = 2), shape = guide_legend(title.position = 'top')) + 
+  mythm +
+  coord_flip() + 
+  ggtitle('')
+p1leg <- g_legend(p1)
+p1 <- p1 + mythm %+replace% theme(legend.position = 'none')
+
+p2 <- ggplot(pritab, aes(x = Type, y = 1)) +
+  geom_text(aes(label = priority), family = 'serif') + 
+  facet_wrap(~action) + 
+  coord_flip() + 
+  scale_x_reverse(breaks = c(1:length(sts)), labels = c(1:length(sts))) + 
+  theme(
+    panel.background = element_rect(fill = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.background = element_blank(),
+    strip.text = element_text(family = 'serif', size = 11),
+    axis.ticks.x = element_line(color = 'white'),
+    axis.text.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_blank(), 
+    # axis.text.y = element_text(family = 'serif', size = 12),
+    axis.title = element_text(colour = 'white'), 
+    plot.margin = grid::unit(c(4, 5.5, 5.5, -3), units = 'pt')
+  )
+
+grid.arrange(
+  p1leg, 
+  arrangeGrob(p1, p2, ncol = 2, widths = c(1, 0.8)), 
+  heights = c(0.25, 1)
+)
+```
+
+```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors associated with constrained and unconstrained stream reaches by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream reach classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+
+# format for plotting, all data
+toplo <- cnstrfrst %>% 
+  mutate(mods = purrr::map(mods, function(x){
+
+    out <- x %>%   
+      data.frame %>% 
+      rownames_to_column('var') %>% 
+      dplyr::select(var, MeanDecreaseAccuracy) %>% 
+      arrange(-MeanDecreaseAccuracy) %>% 
+      .[1:5, ] %>% 
+      mutate(var = factor(var, levels = var)) 
+    
+    return(out)
+    
+    })
+  ) %>% 
+  unnest %>% 
+  dplyr::rename(
+    Region = PSA6,
+    Importance = MeanDecreaseAccuracy
+    ) %>% 
+  mutate(Region = factor(Region, 
+         levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+         labels = c('CV', 'CH', 'DM', 'NC', 'SN', 'SC'))
+  )
+
+# these have to be manually changed
+toplo <- toplo %>% 
+  mutate(var = factor(var, 
+                      levels = c('AgKffactWs', 'CBNFWs', 'FertWs', 'PctCrop2011Ws', 'PctCrop2011WsRp100', 'PctHay2011Ws', 'PctHay2011WsRp100', 'PctImp2006Ws', 'PctImp2006WsRp100', 'PctUrbLo2011Ws', 'PctUrbLo2011WsRp100', 'PctUrbMd2011Ws'), 
+                      labels = c('soil erod.', 'bio. N fixation', 'fertilizer', '% crop', '% riparian crop', '% hay', '% riparian hay', '% imp.', '% riparian imp.', '% lo urban', '% riparian lo urban', '% mid urban')
+  ))
+
+cols <- brewer.pal(9, 'Paired')[c(6, 2)]
+
+ylims <- max(toplo$Importance)
+toplo1 <- toplo %>% 
+  unique %>% 
+  group_by(Region) %>% 
+  nest %>% 
+  arrange(Region) %>% 
+  mutate(plos = pmap(list(as.character(Region), data), function(Region, data){
+    
+    # format the data
+    x <- data %>% 
+      mutate(var = factor(var, levels = var))
+    
+    # make the plot
+    p <- ggplot(x, aes(x = var, y = Importance, group = 1)) + 
+      geom_segment(aes(xend = var, yend = 0)) +
+      geom_point(colour = 'black') +
+      theme_bw(base_family = 'serif') +
+      theme(
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 7), 
+        axis.title.x = element_blank(), 
+        plot.title = element_text(hjust = 0.5), 
+        axis.title.y = element_blank(), 
+        legend.position = 'top'
+      ) +
+      scale_y_continuous(limits = c(0, ylims)) +
+      ggtitle(as.character(Region))
+    
+    return(p)
+    
+  }))
+
+p1 <- toplo1$plos[[1]] + theme(legend.position = 'none')
+p2 <- toplo1$plos[[2]] + theme(legend.position = 'none')
+p3 <- toplo1$plos[[3]] + theme(legend.position = 'none')
+p4 <- toplo1$plos[[4]] + theme(legend.position = 'none')
+p5 <- toplo1$plos[[5]] + theme(legend.position = 'none')
+p6 <- toplo1$plos[[6]]
+grid.arrange(
+  p1, p2, p3, p4, p5, p6, ncol = 3, left = 'Importance'
+)
+```
+
+```{r lndscpimp, fig.height = 5, fig.width = 7, fig.cap = "Importance measures for landscape variables used to develop the landscape model of expected stream bioassessment scores in California. Values were obtained from quantile regression models of twenty landscape measures shown in Table \\@ref(tab:crvr) obtained from the StreamCat dataset [@Hill16]. The importance measures describe the percent increase in mean square error and the increase in node impurity with exclusion of a variable across all random trees for each model [@Meinshausen17]."}
+varImpPlot(rf_core, main = NULL)
+```
+
+```{r crvr, tidy = F}
+# streamcat variables used in core models
+
+nms <- c("CanalDensCat", "CanalDensWs", "PctImp2006Cat", "PctImp2006Ws", "PctImp2006CatRp100", 
+         "PctImp2006WsRp100", "TotUrb2011Ws", "TotUrb2011Cat", "TotUrb2011WsRp100", "TotUrb2011CatRp100", 
+         "TotAg2011Ws", "TotAg2011Cat", "TotAg2011WsRp100", "TotAg2011CatRp100", "RdDensCat", "RdDensWs", 
+         "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat", "RdCrsWs")
+scl <- c('catchment', 'watershed', 'catchment', 'watershed', 'catchment, riparian', 'watershed, riparian',
+         'watershed', 'catchment', 'watershed, riparian', 'catchment, riparian', 'watershed', 'catchment', 
+         'watershed, riparian', 'catchment, riparian', 'catchment', 'watershed', 'catchment, riparian', 
+         'watershed, riparian', 'catchment', 'watershed')
+dsc <- c(
+  'Density of NHDPlus line features classified as canal, ditch, or pipeline',
+  'Density of NHDPlus line features classified as canal, ditch, or pipeline',
+  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
+  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
+  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
+  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
+  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
+  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
+  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
+  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
+  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
+  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
+  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
+  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
+  'Density of roads (2010 Census Tiger Lines)',
+  'Density of roads (2010 Census Tiger Lines)',
+  'Density of roads (2010 Census Tiger Lines)',
+  'Density of roads (2010 Census Tiger Lines)',
+  'Density of roads-stream intersections (2010 Census Tiger Lines-NHD stream lines)',
+  'Density of roads-stream intersections (2010 Census Tiger Lines-NHD stream lines)'
+)
+
+unt <- c('km/sq km', 'km/sq km', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%',
+         'km/sq km', 'km/sq km', 'km/sq km', 'km/sq km', 'crossings/sq km', 
+         'crosssings/sq km')
+
+totab <- data.frame(nms, scl, dsc, unt) %>% 
+  dplyr::rename(Name = nms, Scale = scl, Description = dsc, Unit = unt)
+
+# table stuff
+cap.val <- 'Land use variables used to develop the landscape model of stream bioassessment scores.  All variables were obtained from StreamCat [@Hill16].  The measurement scale for each variable is at the catchment, watershed, and/or riparian scale (100 m buffer) relative to a stream reach. Total urban and agriculture land use variables were based on sums of indvidual variables in StreamCat as noted in the desciption.'
+
+# table
+knitr::kable(totab, booktabs = T, caption = cap.val)
+```
+
+```{r perftab}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50
+  ) %>% 
+  dplyr::select(SiteSet, PSA6c, observed, predicted)
+
+# total dataset performance
+totdf <- dat %>% 
+  group_by(SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    mod <- lm(predicted ~ observed, data = x)
+    intv <- coefficients(mod)[1]
+    intvp <- p_ast(coef(summary(mod))[1, 4])
+    slov <- coefficients(mod)[2]
+    slovp <- p_ast(coef(summary(mod))[2, 4])
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
+    return(out)
+    
+  })) %>% 
+  unnest
+
+# PSA regional performance
+regdf <- dat %>% 
+  group_by(PSA6c, SiteSet) %>% 
+  nest %>% 
+  mutate(data = purrr::map(data, function(x){
+
+    nval <- nrow(x)
+    aveobs <- mean(x$observed, na.rm = T)
+    sdobs <- sd(x$observed, na.rm = T)
+    aveprd <- mean(x$predicted, na.rm = T)
+    sdprd <- sd(x$predicted, na.rm = T)
+    ttst <- with(x, t.test(observed, predicted, na.rm = T))
+    mod <- lm(predicted ~ observed, data = x)
+    intv <- coefficients(mod)[1]
+    intvp <- p_ast(coef(summary(mod))[1, 4])
+    slov <- coefficients(mod)[2]
+    slovp <- p_ast(coef(summary(mod))[2, 4])
+    corv <- with(x, cor.test(observed, predicted))$estimate
+    corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
+    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    
+    out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
+    return(out)
+    
+  })) %>% 
+  unnest %>% 
+  dplyr::rename(set = PSA6c) %>% 
+  dplyr::select(SiteSet, set, everything())
+
+# combine and prep for table
+allerr <- totdf %>% 
+  bind_rows(regdf) %>% 
+  mutate_if(is.numeric, function(x) round(x, 2) %>% formatC(., format = 'f', flag = '0', digits = 2)) %>% 
+  mutate(
+    nval = as.numeric(nval),
+    sdobs = paste0('(', sdobs, ')'), 
+    sdprd = paste0('(', sdprd, ')'), 
+    set = factor(set, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN'))
+  ) %>% 
+  unite('Observed', aveobs, sdobs, sep = ' ') %>% 
+  unite('Predicted', aveprd, sdprd, sep = ' ') %>% 
+  dplyr::rename(
+    n = nval,
+    r = corv, 
+    RMSE = errv, 
+    Slope = slov, 
+    Intercept = intv,
+    Location = set, 
+    Dataset = SiteSet
+  ) %>% 
+  arrange(Dataset, Location) %>% 
+  mutate(Dataset = ifelse(duplicated(Dataset), '', Dataset))
+
+# table stuff
+cap.val <- 'Performance of the landscape model by calibration and validation datasets in predicting CSCI scores.  The statewide dataset (Figure 4) and individual regions of California (Figure 1) are evaluated.  Averages and standard deviations (in parentheses) for observed and predicted CSCI values of each dataset are shown.  Pearson correlations (r), root mean squared errors (RMSE), intercept, and slopes are for comparisons of predicted and observed values to evaluate model performance. All correlations, intercepts, and slopes are significant at alpha = 0.05.'
+
+# table
+knitr::kable(allerr, booktabs = T, caption = cap.val)
+```
+
+# References
+
+
