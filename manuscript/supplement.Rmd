@@ -9,8 +9,6 @@ urlcolor: blue
 link-citations: true
 ---
 
-# Supplemental Figures and Tables
-
 ```{r setup, echo = F, warning = F, message = F, results = 'hide'}
 # figure path, chunk options
 knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
@@ -68,6 +66,35 @@ load(file = '../data/typscrs.RData')
 load(file = '../data/sgrclslen.RData')
 ```
 
+# Unclassifiable reaches
+
+Some stream reaches were not classified following application of the landscape model to the statewide hydrography dataset.  Unclassifiable reaches occurred if StreamCat data were unavailable to predict bioassessment expectations using the landscape model or if a reach was excluded from the NHD-plus dataset (typically, small headwater streams).  The former was more common, particularly in developed areas where canals and ditches were sometimes excluded from the natural stream network.  Overall, unclassified reaches were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  As described below, approximately 15\% of the reaches in the San Gabriel River watershed were unclassifiable and a method for assigning a classification to these reaches was desired by the stakeholder group. 
+
+An approach for assigning biological expectations to unclassified reaches was developed for "typically" urban or agricultural reaches that was based on the range of expectations for reaches with similar land use.  This analysis was conducted statewide and stratified by major regions to account for statewide variation in land use. The approximate range of CSCI scores in unclassifiable reaches were defined for three different gruops: reaches dominated by either 1) urban, 2) agricultural, or 3) open (i.e., lack of urban or agricultural land use).  The three groups were identified using kmeans clustering of percentage land use estimates that were available across reaches [@MacQueen67].  This created groups of reaches with similar land use types, where membership of a reach within a particular group was based on the minimum difference in land use estimates for a reach from the group average for each land use type (within-group centroid).  The two groups that were dominated by agricultural or urban land use were identified based on the largest centroid average of the clusters for each land use type.  The third "open" group that was defined by a lack of urban and agricultural land use was identified by the minimum sum of the centroid values for the two land use types.  The expected range of CSCI scores for the three groups were based on averages from the landscape model for reaches with available predictions. 
+
+Ranges of expected CSCI scores for typical reaches in urban, agricultural, and open (neither urban, nor agriculture) are shown in table \@ref(tab:typscrs). These typical values are shown for more to less certainty in the range of predictions.  Unclassified reaches can be defined by the dominant watershed land use as urban, agricultural, or open, and then matched to the appropriate values in the table.  Between regions, the variation in expected scores also provides context for landscape pressures that differ by location.  For example, the expected range of scores in regions with heavy urban development (e.g., South Coast) are much lower than streams that are neither urban nor agricultural.  The North Coast region in contrast has an expected range of scores in urban streams that is similar to streams that are open. The range of scores in urban and agricultural streams were similar in the Central Valley where agriculture is the dominant land use.  
+
+```{r typscrs}
+totab <- typscrs %>% 
+  mutate(
+    grps = factor(grps, levels = c('urb', 'ag', 'oth'), labels = c('Urban', 'Ag', 'Open')),
+    Region = ifelse(duplicated(Region), '', Region)
+    ) %>% 
+  rename(`Land use` = grps) %>% 
+  mutate_if(is.numeric, function(x) round(x, 2) %>% formatC(., format = 'f', flag = '0', digits = 2)) %>% 
+  unite('High certainty (10th - 90th)', lo10, hi90, sep = ' - ') %>% 
+  unite('Moderate (25th - 75th)', lo25, hi75, sep = ' - ') %>% 
+  unite('Low certainty (40th - 60th)', lo40, hi60, sep = ' - ')
+
+# table stuff
+cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, agricultural, or open (neither urban nor agricultural) land uses by major regions in California and statewide. Ranges can be used to identify approximate expectations for stream reaches with insufficient data for application of the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'
+
+# table
+knitr::kable(totab, booktabs = T, caption = cap.val)
+```
+
+# Supplemental Figures and Tables
+
 <!-- supp figures -->
 <!-- app - S1 -->
 <!-- perflu - S2 -->
@@ -95,7 +122,7 @@ load(file = '../data/sgrclslen.RData')
 <!-- reltot - 4 -->
 <!-- typscrs - 5 -->
 
-```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app can be viewed in the supplementary material.'}
+```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of reach classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each reach type.  The app is accessible at [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/) [@Beck18c].'}
 knitr::include_graphics('figs/app.png')
 ```
 
