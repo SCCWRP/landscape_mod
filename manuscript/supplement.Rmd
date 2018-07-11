@@ -1,5 +1,5 @@
 ---
-title: "Prioritizing management goals for stream biological integrity within the context of landscape constraints"
+title: "Prioritizing management goals for stream biological integrity within the developed landscape context"
 output: 
   bookdown::word_document2:
     reference_docx: my_styles.docx
