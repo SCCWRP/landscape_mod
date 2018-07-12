@@ -1,0 +1,98 @@
+---
+title: "Prioritizing management goals for stream biological integrity within the developed landscape context"
+output: 
+  bookdown::word_document2:
+    reference_docx: my_styles.docx
+bibliography: refs_supp2.bib
+author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Karin Wisenbaker (karin@aquaticbioassay.com), Joshua Westfall (jwestfall@lacsd.org), Peter R. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Chad Loflen (Chad.Loflen@waterboards.ca.gov), Martha Sutula (marthas@sccwrp.org), Eric D. Stein (erics@sccwrp.org)'
+urlcolor: blue
+link-citations: true
+---
+
+```{r setup, echo = F, warning = F, message = F, results = 'hide'}
+# figure path, chunk options
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
+  fig.process = function(x) {
+  x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+  if (file.rename(x, x2)) x2 else x
+  })
+
+# libraries
+library(tidyverse)
+library(Hmisc)
+library(Jabbrev)
+library(gridExtra)
+library(sf)
+library(maptools)
+library(maps)
+library(grid)
+library(ggrepel)
+library(RColorBrewer)
+library(ggridges)
+library(scales)
+library(quantregForest)
+library(leaflet)
+library(raster)
+library(flextable)
+library(officer)
+
+# functions (incl. color palettes)
+source('../R/funcs.R')
+
+# extract bib entries from online
+bib_scrp('supplement2.Rmd', 'refs_supp2.bib')
+
+# data
+load(file = '../data/typetab.RData')
+load(file = '../data/csci_raw.RData')
+load(file = '../data/ludat.RData')
+load(file = '../data/calipsa.RData')
+load(file = '../data/psalab.RData')
+load(file = '../data/rf_core.RData')
+load(file = '../data/sgrlu.RData')
+load(file = '../data/shed.RData')
+load(file = '../data/spat.RData')
+load(file = '../data/scrs.RData')
+load(file = '../data/csci_comid.RData')
+load(file = '../data/nhdplo.RData')
+load(file = '../data/caliclsplo.RData')
+load(file = '../data/calicls.RData')
+load(file = '../data/caliexp.RData')
+load(file = '../data/comid_prd.RData')
+load(file = '../data/strclslen.RData')
+load(file = '../data/cnstrfrst.RData')
+load(file = '../data/sensres.RData')
+load(file = '../data/typscrs.RData')
+load(file = '../data/sgrclslen.RData')
+```
+
+# Supplement 2: Unclassifiable segments
+
+Some stream segments were not classified following application of the landscape model to the statewide hydrography dataset.  Unclassifiable segments occurred if StreamCat data [@Hill16] were unavailable to predict bioassessment expectations using the landscape model or if a segment was excluded from the NHD-plus dataset [@McKay12] (typically, small headwater streams).  The former was more common, particularly in developed areas where canals and ditches were sometimes excluded from the natural stream network.  Overall, unclassified segments were not common in the statewide dataset but they may have regional importance depending on needs of local management groups.  Approximately 15\% of the segments in the San Gabriel River watershed were unclassifiable and a method for assigning a classification to these segments was desired by the stakeholder group. 
+
+We assigned biological expectations to unclassified segments in "typically" urban or agricultural segments by estimating the range of expectations for segments with similar land use.  This analysis was conducted statewide and stratified by major regions to account for statewide variation in land use. The approximate range of CSCI scores in unclassifiable segments were defined for three different groups: segments dominated by either 1) urban, 2) agricultural, or 3) open (i.e., lack of urban or agriculture) land use.  The three groups were identified using kmeans clustering of percentage land use estimates that were available across segments [@MacQueen67].  This created groups of segments with similar land use types, where membership of a segment within a particular group was based on the minimum difference in land use estimates for a segment from the group average for each land use type (within-group centroid).  The two groups that were dominated by agricultural or urban land use were identified based on the largest centroid average of the clusters for each land use type.  The third "open" group that was defined by a lack of urban and agricultural land use was identified by the minimum sum of the centroid values for the two land use types.  The expected range of CSCI scores for the three groups were based on averages from the landscape model for segments with available predictions. 
+
+Ranges of expected CSCI scores for typical segments in urban, agricultural, and open (neither urban, nor agriculture) are shown in Table S\@ref(tab:typscrs). These typical values are shown for more to less certainty (wide to narrow range) in the landscape model predictions.  Unclassified segments can be defined by the dominant watershed land use as urban, agricultural, or open, and then matched to the appropriate values in the table.  Between regions, the variation in expected scores also provides context for landscape pressures that differ by location.  For example, the expected range of scores in regions with heavy urban development (e.g., South Coast) is much smaller than streams that are neither urban nor agricultural.  The North Coast region in contrast has an expected range of scores in urban streams that is similar to streams that are open. The range of scores in urban and agricultural streams were similar in the Central Valley where agriculture is the dominant land use.  
+
+```{r typscrs}
+totab <- typscrs %>% 
+  mutate(
+    grps = factor(grps, levels = c('urb', 'ag', 'oth'), labels = c('Urban', 'Ag', 'Open')),
+    Region = ifelse(duplicated(Region), '', Region)
+    ) %>% 
+  rename(`Land use` = grps) %>% 
+  mutate_if(is.numeric, function(x) round(x, 2) %>% formatC(., format = 'f', flag = '0', digits = 2)) %>% 
+  unite('High certainty (10th - 90th)', lo10, hi90, sep = ' - ') %>% 
+  unite('Moderate (25th - 75th)', lo25, hi75, sep = ' - ') %>% 
+  unite('Low certainty (40th - 60th)', lo40, hi60, sep = ' - ')
+
+# table stuff
+cap.val <- 'Ranges of expected CSCI scores for sites that are typically urban, agricultural, or open (neither urban nor agricultural) land uses by major regions in California and statewide. Ranges can be used to identify approximate expectations for stream segments with insufficient data for application of the landscape model. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'
+
+# table
+knitr::kable(totab, booktabs = T, caption = cap.val)
+```
+
+# References
+
+
