@@ -85,15 +85,15 @@ load(file = '../data/sgrclslen.RData')
 <!-- sensplo - 7 -->
 
 <!-- supp tables -->
-<!-- crvr - S1 -->
-<!-- typetab - S2 -->
+<!-- typetab - S1 -->
 
 <!-- manu tables -->
-<!-- clsdef - 1 -->
-<!-- perftab - 2 -->
-<!-- clstot - 3 -->
-<!-- reltot - 4 -->
-<!-- typscrs - 5 -->
+<!-- crvr - 1 -->
+<!-- clsdef - 2 -->
+<!-- perftab - 3 -->
+<!-- clstot - 4 -->
+<!-- reltot - 5 -->
+<!-- typscrs - 6 -->
 
 ```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of segment classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each segment type.  The app is accessible at [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/) [@Beck18c].'}
 knitr::include_graphics('figs/app.png')
@@ -340,56 +340,8 @@ grid.arrange(
 )
 ```
 
-```{r lndscpimp, fig.height = 5, fig.width = 7, fig.cap = "Importance measures for landscape variables used to develop the landscape model of expected stream bioassessment scores in California. Values were obtained from quantile regression models of twenty landscape measures shown in Table S\\@ref(tab:crvr) obtained from the StreamCat dataset [@Hill16]. The importance measures describe the percent increase in mean square error and the increase in node impurity with exclusion of a variable across all random trees for each model [@Meinshausen17]."}
+```{r lndscpimp, fig.height = 5, fig.width = 7, fig.cap = "Importance measures for landscape variables used to develop the landscape model of expected stream bioassessment scores in California. Values were obtained from quantile regression models of twenty landscape measures shown in Table 1 obtained from the StreamCat dataset [@Hill16]. The importance measures describe the percent increase in mean square error and the increase in node impurity with exclusion of a variable across all random trees for each model [@Meinshausen17]."}
 varImpPlot(rf_core, main = NULL)
-```
-
-```{r crvr, tidy = F}
-# streamcat variables used in core models
-
-nms <- c("CanalDensCat", "CanalDensWs", "PctImp2006Cat", "PctImp2006Ws", "PctImp2006CatRp100", 
-         "PctImp2006WsRp100", "TotUrb2011Ws", "TotUrb2011Cat", "TotUrb2011WsRp100", "TotUrb2011CatRp100", 
-         "TotAg2011Ws", "TotAg2011Cat", "TotAg2011WsRp100", "TotAg2011CatRp100", "RdDensCat", "RdDensWs", 
-         "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat", "RdCrsWs")
-scl <- c('catchment', 'watershed', 'catchment', 'watershed', 'catchment, riparian', 'watershed, riparian',
-         'watershed', 'catchment', 'watershed, riparian', 'catchment, riparian', 'watershed', 'catchment', 
-         'watershed, riparian', 'catchment, riparian', 'catchment', 'watershed', 'catchment, riparian', 
-         'watershed, riparian', 'catchment', 'watershed')
-dsc <- c(
-  'Density of NHDPlus line features classified as canal, ditch, or pipeline',
-  'Density of NHDPlus line features classified as canal, ditch, or pipeline',
-  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
-  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
-  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
-  'Mean imperviousness of anthropogenic surfaces (NLCD 2006)',
-  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
-  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
-  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
-  'Total urban land use as sum of developed open, low, medium, and high intensity (NLCD 2011)',
-  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
-  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
-  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
-  'Total argricultural land use as sum of hay and crops (NLCD 2011)',
-  'Density of roads (2010 Census Tiger Lines)',
-  'Density of roads (2010 Census Tiger Lines)',
-  'Density of roads (2010 Census Tiger Lines)',
-  'Density of roads (2010 Census Tiger Lines)',
-  'Density of roads-stream intersections (2010 Census Tiger Lines-NHD stream lines)',
-  'Density of roads-stream intersections (2010 Census Tiger Lines-NHD stream lines)'
-)
-
-unt <- c('km/sq km', 'km/sq km', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%', '%',
-         'km/sq km', 'km/sq km', 'km/sq km', 'km/sq km', 'crossings/sq km', 
-         'crosssings/sq km')
-
-totab <- data.frame(nms, scl, dsc, unt) %>% 
-  dplyr::rename(Name = nms, Scale = scl, Description = dsc, Unit = unt)
-
-# table stuff
-cap.val <- 'Land use variables used to develop the landscape model of stream bioassessment scores.  All variables were obtained from StreamCat [@Hill16].  The measurement scale for each variable is at the catchment, watershed, and/or riparian scale (100 m buffer) relative to a stream segment. Total urban and agriculture land use variables were based on sums of indvidual variables in StreamCat as noted in the desciption.'
-
-# table
-knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
 ```{r typetab, tidy = F}
