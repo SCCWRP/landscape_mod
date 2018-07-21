@@ -226,7 +226,7 @@ The primary objective of developing the landscape model was to provide a screeni
 
 The ability of the landscape model to predict the range of expected biological condition at a given site reflects an associative link between present land use and stream biology.  A relatively low expected range of CSCI scores is an indication that stressors originating from the landscape may have imposed habitat limits that constrain biology.  From a regulatory perspective, many states, including California, have explicit biological assessment requirements which are often interpreted in the context of land use.  The use of biological endpoints in the landscape model could facilitate the implementation of biological standards, although as indicated, the model is more appropriate in a supporting role for regulation rather than direct application.  Landscape models could also be used to support conservation planning, particularly at the watershed scale where land use practices can be a critical factor for decision-making.  Ongoing work in California has focused on setting priorities for managing biodiversity that focus on watersheds within a conservation network [@Howard18].  Results from the landscape model could be used to enhance this network by providing supporting information on constraints in an assessment framework. 
 
-Several states have recommended alternative use designations for applying bioassessment criteria in modified channels [@FLDEP11;@USEPA13;@MBI16]. Although our results generally support the link between impacted biology and channel modification, defining alternative standards and uses based solely on channel modification may be insufficient. Constrained channels in rural landscapes (e.g., the mainstem of the Klamath and Russian rivers in the North Coast region) were also identified by the model, as well as many streams in agricultural areas (e.g., Salinas River).  In the context of the model, a constrained channel may or may not be engineered, but an engineered channel will typically be constrained given the surrounding land use.  Modified channels may also be present in undeveloped landscapes and high bioassessment scores have been observed in armoured streams within national forest lands [@Stein13]. A classification framework for biological constraints using only channel modification would provide incomplete information relative to an approach using landscape information. These results are well supported by other landscape studies, particularly for macroinvertebrates [@May15].
+Several states have recommended alternative use designations for applying bioassessment criteria in modified channels [@FLDEP11;@USEPA13;@MBI16]. Although our results generally support the link between impacted biology and channel modification, defining alternative standards and uses based solely on channel modification may be insufficient.   Constrained channels in rural landscapes (e.g., the mainstem of the Klamath and Russian rivers in the North Coast region) were identified by the model, as well as many streams in agricultural areas (e.g., Salinas River).  In the context of the model, a constrained channel may or may not be engineered, but an engineered channel will typically be constrained given the surrounding land use.  For example, Tecolote Creek (San Diego County, USA) was identified as a constrained channel in an urban landscape (Figure \@ref(fig:tecolote)).  The channel is not modified and physical habitat measured at the sampling site suggests minimal alteration, whereas the CSCI score is 0.61 indicating degraded biological integrity.  Landscape pressures have impacted the biological community at this site because physical habitat is not likely a limiting factor.  Modified channels may also be present in undeveloped landscapes and high bioassessment scores have been observed in armoured streams within national forest lands [@Stein13]. A classification framework for biological constraints using only channel modification would provide incomplete information relative to an approach using landscape information. These results are well supported by other landscape studies, particularly for macroinvertebrates [@May15].
 
 The utility of landscape models in supporting watershed management has applications outside of California. Our use of national geospatial datasets (i.e., NHDPlus, @McKay12; StreamCat, @Hill16) means that these methods could be applied elsewhere in diverse bioassessment contexts. The CSCI was developed for macroinvertebrate assessment in California, but this approach could be applied with other methods, such as a multi-metric index (the most common bioassessment approach within the US; @Buss14), O/E assessments [@Moss87], biological condition gradients [@Davies06], or with other biological endpoints (e.g., fish or diatoms). In addition, extension of the landscape model could be explored to develop a national scale product of constraints on biological condition to complement recent work that predicted probable biological conditions with the National Rivers and Streams Assessment [@Hill17].  
 
@@ -1156,112 +1156,8 @@ pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls))
 pres
 ```
 
-```{r eval = F}
-library(tidyverse)
-library(readxl)
-
-load(file = '../data/caliexp.RData')
-
-# phab data
-phab <- read_excel('../data/raw/phab_all.xlsx') %>% 
-  filter(!VariableResult %in% 'Not Recorded') %>% 
-  filter(!is.na(VariableResult)) %>% 
-  mutate(VariableResult = as.numeric(VariableResult)) %>% 
-  dplyr::select(StationCode, VariableResult) %>% 
-  group_by(StationCode) %>% 
-  dplyr::summarise(ch_alt = mean(VariableResult, na.rm = T)) %>% 
-  ungroup %>% 
-  mutate(ch_alt = round(ch_alt, 0))
-
-# all csci scores and classes
-allscrs <- caliexp %>% 
-  dplyr::select(COMID, csci, StationCode, strcls, perf) %>% 
-  filter(!is.na(strcls)) %>%  
-  mutate(StationCode = as.character(StationCode)) %>% 
-  left_join(phab, by = 'StationCode') %>% 
-  filter(!is.na(ch_alt))
-
-ggplot(allscrs, aes(x = strcls, y = ch_alt, fill = strcls, colour = strcls)) + 
-  geom_boxplot(colour = 'black', alpha = 0.7, outlier.color = NA) +
-  geom_point(position = position_jitter(w = 0.15, h = 0.15), alpha = 0.6) +
-  scale_y_continuous('PHAB: Channel alteration') +
-  theme_bw(base_family = 'serif', base_size = 16) +
-  theme(
-    axis.title.y = element_blank(), 
-    legend.position = 'none'
-  ) +
-  scale_fill_manual(values = pal_exp(levels(allscrs$strcls))) +
-  scale_colour_manual(values = pal_exp(levels(allscrs$strcls))) +
-  coord_flip()
-
-###
-# other strmcat variables that may explain deviation from predictions
-library(tidyverse)
-
-load(file = '../data/cnstrfrst.RData')
-load(file = '../data/comid_prd.RData')
-load(file = '../data/csci_comid.RData')
-
-# streamcat data
-strmcat <- rbind(read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
-                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
-                 read.csv("Z:/MarcusBeck/Landscape models from rafi/Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
-comid.nats <- read.csv("Z:/MarcusBeck/Landscape models from rafi/ALL_COMID_Nats.csv", stringsAsFactors = F)
-strmcat <- plyr::join(strmcat, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
-
-
-# format for plotting, all data
-impvrs <- cnstrfrst %>% 
-  mutate(mods = purrr::map(mods, function(x){
-    
-    out <- x %>%   
-      data.frame %>% 
-      rownames_to_column('var') %>% 
-      dplyr::select(var, MeanDecreaseAccuracy) %>% 
-      arrange(-MeanDecreaseAccuracy) %>% 
-      .[1:5, ] 
-    
-    return(out)
-    
-  })
-  ) %>% 
-  unnest %>% 
-  pull(var) %>% 
-  unique
-
-# subset strmcat variables for most important across all regions
-strmcatind <- strmcat[, c('COMID', impvrs)]
-
-# observed and predicted data
-obsdat <- csci_comid %>%
-  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
-  filter(SelectedSample %in% 'Selected')
-prddat <- comid_prd %>% 
-  dplyr::select(COMID, core0.50)
-
-# combined data to eval for perf
-dat <- obsdat %>% 
-  inner_join(prddat, by = 'COMID') %>% 
-  dplyr::rename(
-    observed = CSCI,
-    predicted = core0.50
-  ) %>% 
-  dplyr::select(COMID, StationCode, SiteSet, PSA6c, observed, predicted) %>% 
-  mutate(resid = observed - predicted) %>% 
-  left_join(strmcatind, by = 'COMID')
-
-toplo <- dat %>% 
-  filter(PSA6c %in% 'SC') %>% 
-  gather('var', 'val', CBNFWs:PctUrbLo2011WsRp100)
-
-
-ggplot(toplo, aes(x = val, y = resid )) + 
-  geom_point() + 
-  stat_smooth(method = 'lm', linetype = 'dashed') +
-  geom_hline(yintercept = 0) +
-  # scale_x_log10() + 
-  facet_wrap(~ var, scales = 'free_x')
-
+```{r tecolote, fig.cap = 'Tecolote Creek (San Diego County, USA) is a constrained channel in an urban landscape (a, Source: 32.81736, -117.19986. Google Earth. November 8, 2016. Accessed July 20, 2018.).  Physical habitat assessments at the sample site suggest no channel alteration (b). The CSCI was scored at 0.61 indicating degraded biological integrity.', fig.height = 9}
+knitr::include_graphics('figs/Tecolotefig.png')
 ```
 
 # Tables 

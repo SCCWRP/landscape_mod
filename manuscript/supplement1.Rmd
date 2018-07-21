@@ -99,7 +99,7 @@ load(file = '../data/sgrclslen.RData')
 knitr::include_graphics('figs/app.png')
 ```
 
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI predicted - observed) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
 # observed and predicted data
 obsdat <- csci_comid %>%
@@ -120,7 +120,7 @@ dat <- obsdat %>%
     Region = PSA6c
   ) %>% 
   mutate(
-    modrsd = predicted - observed
+    modrsd = observed - predicted
   ) %>%
   gather('var', 'val', urb, ag) %>% 
   mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
@@ -139,7 +139,7 @@ p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
     axis.title.x = element_blank(), 
     legend.position = 'none'
   ) + 
-  scale_y_continuous('CSCI predicted - observed', limits = c(-0.65, 0.65)) + 
+  scale_y_continuous('CSCI observed - predicted', limits = c(-0.65, 0.65)) + 
   scale_colour_manual(values = col)
 
 # land use by region
