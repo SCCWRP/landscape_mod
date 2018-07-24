@@ -43,7 +43,6 @@ source('../R/funcs.R')
 bib_scrp('supplement1.Rmd', 'refs_supp1.bib')
 
 # data
-load(file = '../data/typetab.RData')
 load(file = '../data/csci_raw.RData')
 load(file = '../data/ludat.RData')
 load(file = '../data/calipsa.RData')
@@ -69,9 +68,9 @@ load(file = '../data/sgrclslen.RData')
 # Supplement 1: Figures and Tables
 
 <!-- supp figures -->
-<!-- app - S1 -->
-<!-- perflu - S2 -->
-<!-- pritem - S3 -->
+<!-- pritem - S1 -->
+<!-- app - S2 -->
+<!-- perflu - S3 -->
 <!-- calicnstr - S4 -->
 <!-- lndspimp - S5 -->
 
@@ -85,7 +84,7 @@ load(file = '../data/sgrclslen.RData')
 <!-- sensplo - 7 -->
 
 <!-- supp tables -->
-<!-- typetab - S1 -->
+<!-- none -->
 
 <!-- manu tables -->
 <!-- crvr - 1 -->
@@ -95,80 +94,7 @@ load(file = '../data/sgrclslen.RData')
 <!-- reltot - 5 -->
 <!-- typscrs - 6 -->
 
-```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of segment classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each segment type.  The app is accessible at [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/) [@Beck18c].'}
-knitr::include_graphics('figs/app.png')
-```
-
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
-
-# observed and predicted data
-obsdat <- csci_comid %>%
-  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
-  filter(SelectedSample %in% 'Selected')
-prddat <- comid_prd %>% 
-  dplyr::select(COMID, core0.50)
-
-# combined data to eval for perf
-dat <- obsdat %>% 
-  inner_join(prddat, by = 'COMID') %>% 
-  dplyr::rename(
-    observed = CSCI,
-    predicted = core0.50, 
-    imperv = PctImp2006Ws, 
-    ag = TotAg2011Ws,
-    urb = TotUrb2011Ws,
-    Region = PSA6c
-  ) %>% 
-  mutate(
-    modrsd = observed - predicted
-  ) %>%
-  gather('var', 'val', urb, ag) %>% 
-  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
-
-col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
-
-# residuals by land use
-p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
-  geom_point(size = 1, alpha = 0.7) +
-  theme_bw(base_family = 'serif', base_size = 14) +
-  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
-  geom_hline(yintercept = 0) + 
-  theme(
-    strip.background = element_blank(), 
-    strip.placement = 'outside', 
-    axis.title.x = element_blank(), 
-    legend.position = 'none'
-  ) + 
-  scale_y_continuous('CSCI observed - predicted', limits = c(-0.65, 0.65)) + 
-  scale_colour_manual(values = col)
-
-# land use by region
-meds <- dat %>% 
-  spread(var, val) %>% 
-  group_by(Region) %>% 
-  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
-  arrange(urbmed)
-
-toplo <- dat %>% 
-  mutate(Region = factor(Region, levels = meds$Region))
-p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
-  geom_boxplot() +
-  scale_fill_manual(values = col) +
-  scale_y_log10('% land cover, log10',
-                breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme_bw(base_family = 'serif', base_size = 12) +
-  theme(
-    legend.position = 'top', 
-    legend.title = element_blank(),
-    axis.title.x = element_blank()
-  )
-
-grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
-```
-
-```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The segment types (Table S\\@ref(tab:typetab)) relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The segment types relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
 sts <- paste('Site', seq(1:16))
 
 # example data, csci scores
@@ -261,6 +187,79 @@ grid.arrange(
 )
 ```
 
+```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of segment classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each segment type.  The app is accessible at [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/) [@Beck18c].'}
+knitr::include_graphics('figs/app.png')
+```
+
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50, 
+    imperv = PctImp2006Ws, 
+    ag = TotAg2011Ws,
+    urb = TotUrb2011Ws,
+    Region = PSA6c
+  ) %>% 
+  mutate(
+    modrsd = observed - predicted
+  ) %>%
+  gather('var', 'val', urb, ag) %>% 
+  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
+
+col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
+
+# residuals by land use
+p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
+  geom_point(size = 1, alpha = 0.7) +
+  theme_bw(base_family = 'serif', base_size = 14) +
+  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
+  geom_hline(yintercept = 0) + 
+  theme(
+    strip.background = element_blank(), 
+    strip.placement = 'outside', 
+    axis.title.x = element_blank(), 
+    legend.position = 'none'
+  ) + 
+  scale_y_continuous('CSCI observed - predicted', limits = c(-0.65, 0.65)) + 
+  scale_colour_manual(values = col)
+
+# land use by region
+meds <- dat %>% 
+  spread(var, val) %>% 
+  group_by(Region) %>% 
+  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
+  arrange(urbmed)
+
+toplo <- dat %>% 
+  mutate(Region = factor(Region, levels = meds$Region))
+p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = col) +
+  scale_y_log10('% land cover, log10',
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
+```
+
 ```{r calicnstr, fig.height = 5, fig.width = 7, fig.cap = 'Factors associated with constrained and unconstrained stream segments by major regions in California. Importance measures were obtained from random forest models of 130 watershed and riparian measures of landscape and geological characteristics from the StreamCat dataset [@Hill16]. The top five variables for each region are shown.  The importance measures describe the mean decrease in prediction accuracy with exclusion of a variable across 1000 random trees for each model. Stream segment classes as possibly or likely were combined for constrained and unconstrained to evaluate the complete dataset. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # format for plotting, all data
@@ -342,24 +341,6 @@ grid.arrange(
 
 ```{r lndscpimp, fig.height = 5, fig.width = 7, fig.cap = "Importance measures for landscape variables used to develop the landscape model of expected stream bioassessment scores in California. Values were obtained from quantile regression models of twenty landscape measures shown in Table 1 obtained from the StreamCat dataset [@Hill16]. The importance measures describe the percent increase in mean square error and the increase in node impurity with exclusion of a variable across all random trees for each model [@Meinshausen17]."}
 varImpPlot(rf_core, main = NULL)
-```
-
-```{r typetab, tidy = F}
-# table content format
-totab <- typetab %>% 
-  mutate(
-    `Observed score` = gsub('>=', '$\\\\geq$', `Observed score`),
-    `Segment expectation` = ifelse(duplicated(`Segment expectation`), '', paste0('**', `Segment expectation`, '**')), 
-    Type = as.character(Type)
-  ) %>% 
-  dplyr::rename(`Relative site score` = `Site performance`) %>% 
-  dplyr::select(-Sites)
-
-# table stuff
-cap.val <- 'Possible site types based on stream segment classification, relative site score, and observed CSCI score. The observed score column describes where a CSCI score is observed relative to the lower and upper percentiles (e.g., 10th and 90th) of expected scores for a segment and the chosen CSCI threshold (e.g., 10th percentile of scores at reference sites or 0.79) for defining low or high values.'
-
-# table
-knitr::kable(totab, booktabs = T, caption = cap.val)
 ```
 
 # References
