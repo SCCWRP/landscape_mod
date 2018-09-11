@@ -233,6 +233,10 @@ The landscape model can be used to characterize the extent of biologically const
 
 The SCAPE model application website: [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/), full source code accessible at @Beck18c. Additional figures and tables are available in the supplement.
 
+# Acknowledgments
+
+The authors acknowledge support from the San Gabriel River Regional Monitoring Program and the California State Water Resources Control Board.  We thank Phil Markle and Lester Yuan for reviewing an earlier draft of the manuscript. 
+
 # Figures
 
 ```{r calimap, fig.height = 5, fig.width = 7, fig.cap = 'Urban and agricultural land use (a) and distribution of observed stream CSCI scores (b) in California. Cover of urban and agricultural land use in stream watersheds was used to develop a landscape model for stream segment expectations of bioassessment scores.  Breakpoints for CSCI scores are the 1st, 10th, and 30th percentile of scores at least-disturbed, reference sites throughout the state.  Altered and intact refers to biological condition [@Mazor16]. Grey lines are major environmental regions in California defined by ecoregional and watershed boundaries, CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
