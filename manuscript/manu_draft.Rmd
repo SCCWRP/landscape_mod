@@ -699,7 +699,7 @@ grid.arrange(
 # dev.off()
 ```
 
-```{r eval = T}
+```{r eval = F}
 # state base
 calista <- map_data('state', region = 'california')
 
@@ -738,12 +738,12 @@ p1 <- ggplot(toplo) +
     plot.margin = grid::unit(c(0, 0, 0, 0), units = 'pt')
   )
 
-jpeg('figs/calires.jpg', height = 5.5, width = 4, units = 'in', res = 400, family = 'serif')
+jpeg('figs/calires.jpeg', height = 5.5, width = 4, units = 'in', res = 400, family = 'serif')
 p1
 dev.off()
 ```
 ```{r calires, fig.cap = "Statewide application of the landscape model showing the stream segment classifications. Major regional boundaries are also shown (see Figure \\@ref(fig:calimap))."}
-knitr::include_graphics('figs/calires.png')
+knitr::include_graphics('figs/calires.jpeg')
 ```
 
 ```{r sensplo, fig.height = 5, fig.width = 5.5, fig.cap = 'Changes in stream segment classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios from wide to narrow prediction intervals as identified by the tail cutoff for the expected range) and potential CSCI thresholds (three scenarios from low to high).  The percentage of total stream length for likely unconstrained and likely constrained is shown for each scenario.  Stream classifications as possibly unconstrained or possibly constrained are not shown but can be inferred form the area of white space above or below each bar. The solid black line indicates the percentage division between unconstrained and constrained classifications.  CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
@@ -1125,7 +1125,7 @@ grid.arrange(
 ```
 
 ```{r tecolote, fig.cap = 'Tecolote Creek (San Diego County, USA) is a constrained channel in an urban landscape (a, Source: 32.81736, -117.19986. Google Earth. November 8, 2016. Accessed July 20, 2018.).  Physical habitat (b, Source: R. Mazor) at the sample site suggests no channel alteration. The CSCI was scored at 0.61 indicating degraded biological integrity.', fig.height = 9}
-knitr::include_graphics('figs/Tecolotefig.png')
+knitr::include_graphics('figs/Tecolotefig.jpeg')
 ```
 
 # Tables 
