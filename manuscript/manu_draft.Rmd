@@ -241,7 +241,7 @@ MB, RM, SJ, KW, JW, PO, RH, CL, MS, and ES performed the research and analyzed t
 
 # Acknowledgments
 
-The authors acknowledge support from the San Gabriel River Regional Monitoring Program and the California State Water Resources Control Board.  We thank Phil Markle and Lester Yuan for reviewing an earlier draft of the manuscript. 
+The authors acknowledge support from the San Gabriel River Regional Monitoring Program and the California State Water Resources Control Board.  We thank Phil Markle and Lester Yuan for reviewing an earlier draft of the manuscript. The views expressed in this article are those of the authors and do not necessarily represent the views or policies of the U.S. Environmental Protection Agency. Any mention of trade names, products, or services does not imply an endorsement by the U.S. Government or the U.S. Environmental Protection Agency. The EPA does not endorse any commercial products, services, or enterprises.     
 
 # Figures
 
