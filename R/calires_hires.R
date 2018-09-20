@@ -7,10 +7,10 @@ library(RColorBrewer)
 library(rgdal)
 
 # data(caliclsplo)
-load(file = '../data/calipsa.RData')
-load(file = '../data/comid_prd.RData')
+load(file = 'data/calipsa.RData')
+load(file = 'data/comid_prd.RData')
 
-source('funcs.R')
+source('R/funcs.R')
 
 prj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 
