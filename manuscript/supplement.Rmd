@@ -81,7 +81,7 @@ load(file = '../data/sgrclslen.RData')
 <!-- tecolote - 8 -->
 
 <!-- supp tables -->
-<!-- none -->
+<!-- pridsc - S1 -->
 
 <!-- manu tables -->
 <!-- crvr - 1 -->
@@ -90,7 +90,7 @@ load(file = '../data/sgrclslen.RData')
 <!-- clstot - 4 -->
 <!-- reltot - 5 -->
 
-```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The site types relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type. Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The site types relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type (text descriptions in Table S1). Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
 sts <- paste('Site', seq(1:16))
 
 # example data, csci scores
@@ -255,3 +255,19 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
 
 grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
 ```
+
+```{r pridsc}
+tab <- tibble(
+  Action = c('Investigate', 'Protect', 'Restore'),
+  `Example activity` = c('Higher frequency of sampling, evaluate additional data (e.g., habitat)', 'Extra scrutiny of proposed impacts', 'Make funding recommendations, prioritize TMDL development'),
+  `Example high priority site` = c('Sites scoring outside prediction interval', 'Unconstrained sites', 'Low-scoring unconstrained sites'), 
+  `Example low priority site` = c('Sites scoring as expected', 'Constrained sites', 'Low-scoring cosntrained sites')
+)
+
+# table stuff
+cap.val <- 'Recommended management actions defined by a local stakeholder group for application of results from the landscape model to prioritize stream reaches.  Actions were assigned to stream types based on observed CSCI scores relative to the stream expectation from the landscape model (see Figure S1). Actions were recommended in addition to baseline monitoring and maintenance that occurred at all sites.'
+
+# table
+knitr::kable(tab, booktabs = T, caption = cap.val)
+```
+
