@@ -771,280 +771,281 @@ save(cnstrfrst, file = 'data/cnstrfrst.RData', compress = 'xz')
 # save(senssgr, file = 'data/senssgr.RData', compress = 'xz')
 # 
 # 
-# ######
-# # create data from Rafi
-# # create csci comid data, rf core and full models for csci quantiles, quantile preds for all comid in CA
-# # original file from Z:/MarcusBeck/Landscape models from rafi/modlu_120117.R
-# 
-# setwd("Z:/MarcusBeck/Landscape models from rafi/")
-# library(plyr)
-# library(dplyr)
-# library(reshape2)
-# 
-# # csci<-read.csv("CSCI_LU_temp_022817.csv", stringsAsFactors = F) #Load data
-# csci<-join(read.csv("CSCI_LU_temp_040617.csv", stringsAsFactors = F), #Load data
-#            read.csv("CSCI_Nat_temp_061217.csv", stringsAsFactors = F))
-# nat.vars.full<-setdiff(names(read.csv("CSCI_Nat_temp_061217.csv")), names(read.csv("CSCI_LU_temp_040617.csv")))
-# nat.vars.full<-unique(c("WsAreaSqKm",nat.vars.full))
-# 
-# csci$SampleID<-paste(csci$StationCode, csci$SampleDate, csci$CollectionMethodCode, csci$FieldReplicate, sep="_")
-# csci<-csci[which(!is.na(csci$PctFrstLossWs)),] #Drop rows with missing STREAMCAT data
-# 
-# 
-# csci$RdDensCatRp100[is.na(csci$RdDensCatRp100)]<-0
-# 
-# csci$TotUrb2011Ws<-  rowSums(csci[,c("PctUrbOp2011Ws","PctUrbLo2011Ws","PctUrbMd2011Ws","PctUrbHi2011Ws")])
-# csci$TotUrb2011Cat<-  rowSums(csci[,c("PctUrbOp2011Cat","PctUrbLo2011Cat","PctUrbMd2011Cat","PctUrbHi2011Cat")])
-# csci$TotUrb2011WsRp100<-  rowSums(csci[,c("PctUrbOp2011WsRp100","PctUrbLo2011WsRp100","PctUrbMd2011WsRp100","PctUrbHi2011WsRp100")])
-# csci$TotUrb2011CatRp100<-  rowSums(csci[,c("PctUrbOp2011CatRp100","PctUrbLo2011CatRp100","PctUrbMd2011CatRp100","PctUrbHi2011CatRp100")])
-# 
-# csci$TotAg2011Ws<-  rowSums(csci[,c("PctHay2011Ws","PctCrop2011Ws")])
-# csci$TotAg2011Cat<-  rowSums(csci[,c("PctHay2011Cat","PctCrop2011Cat")])
-# csci$TotAg2011WsRp100<-  rowSums(csci[,c("PctHay2011WsRp100","PctCrop2011WsRp100")])
-# csci$TotAg2011CatRp100<-  rowSums(csci[,c("PctHay2011CatRp100","PctCrop2011CatRp100")])
-# 
-# gis.area<-read.csv("csci_AREA.csv", stringsAsFactors = F)
-# 
-# setdiff(csci$StationCode, gis.area$StationCode)
-# #Let's look at PCA-space:
-# 
-# 
-# 
-# #COMIDs
-# all.comid<-rbind(read.csv("Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
-#                  read.csv("Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
-#                  read.csv("Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
-# comid.nats<-read.csv("ALL_COMID_Nats.csv", stringsAsFactors = F)
-# all.comid<-join(all.comid, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
-# 
-# all.comid$TotUrb2011Ws<-  rowSums(all.comid[,c("PctUrbOp2011Ws","PctUrbLo2011Ws","PctUrbMd2011Ws","PctUrbHi2011Ws")])
-# all.comid$TotUrb2011Cat<-  rowSums(all.comid[,c("PctUrbOp2011Cat","PctUrbLo2011Cat","PctUrbMd2011Cat","PctUrbHi2011Cat")])
-# all.comid$TotUrb2011WsRp100<-  rowSums(all.comid[,c("PctUrbOp2011WsRp100","PctUrbLo2011WsRp100","PctUrbMd2011WsRp100","PctUrbHi2011WsRp100")])
-# all.comid$TotUrb2011CatRp100<-  rowSums(all.comid[,c("PctUrbOp2011CatRp100","PctUrbLo2011CatRp100","PctUrbMd2011CatRp100","PctUrbHi2011CatRp100")])
-# 
-# all.comid$TotAg2011Ws<-  rowSums(all.comid[,c("PctHay2011Ws","PctCrop2011Ws")])
-# all.comid$TotAg2011Cat<-  rowSums(all.comid[,c("PctHay2011Cat","PctCrop2011Cat")])
-# all.comid$TotAg2011WsRp100<-  rowSums(all.comid[,c("PctHay2011WsRp100","PctCrop2011WsRp100")])
-# all.comid$TotAg2011CatRp100<-  rowSums(all.comid[,c("PctHay2011CatRp100","PctCrop2011CatRp100")])
-# 
-# all.comid$RdDensWsRp100<-all.comid$RoadDensityRipBuf100_CA.RdDensWsRp100
-# all.comid$RdDensCatRp100<-all.comid$RoadDensityRipBuf100_CA.RdDensCatRp100
-# 
-# library(plyr)
-# csci<-join(csci, gis.area)
-# 
-# 
-# 
-# library(dplyr)
-# # csci2<-csci %>% group_by(COMID) %>% slice(which.max(AREA_SQKM))
-# 
-# csci$Largest<-
-#   sapply(1:nrow(csci), function(i){
-#     comid<-csci$COMID[i]
-#     area<-csci$AREA_SQKM[i]
-#     mydf<-csci[which(csci$COMID==comid),]
-#     area==max(mydf$AREA_SQKM)
-#   })
-# 
-# # csci[which(csci$COMID==8264738),c("StationCode","COMID","AREA_SQKM","Largest")]
-# csci.full<-csci
-# csci<-csci.full[csci.full$Largest,]
-# 
-# library(quantregForest)
-# 
-# 
-# 
-# #Create cal and val data
-# sites<-unique(csci[,c("StationCode","PSA6c","PctImp2006Ws")]) #Create a sites DF
-# library(plyr)
-# sites.d<-ddply(sites, .(PSA6c), summarize, ImpT1=quantile(PctImp2006Ws, probs=c(0.25)),ImpT2=quantile(PctImp2006Ws, probs=c(0.5)),ImpT3=quantile(PctImp2006Ws, probs=c(0.75)))
-# write.table(sites.d, "clipboard", sep="\t")
-# 
-# sites$RegImpQ<-   #Divide regions into thirds based on imperviousness
-#   sapply(1:nrow(sites), function(i){
-#     region<-sites$PSA6c[i]
-#     imp<-sites$PctImp2006Ws[i]
-#     imp.t1<-sites.d$ImpT1[which(sites.d$PSA6c==region)]
-#     imp.t2<-sites.d$ImpT2[which(sites.d$PSA6c==region)]
-#     imp.t3<-sites.d$ImpT3[which(sites.d$PSA6c==region)]
-#     ifelse(imp<imp.t1,"T1", ifelse(imp<imp.t2,"T2", ifelse(imp<imp.t3,"T3","T4")))
-#   })
-# 
-# table(sites$PSA6c, sites$RegImpQ)
-# sites$Stratum<-paste(sites$PSA6c, sites$RegImpQ, sep="_") #Create strata by dividing each region into thirds
-# table(sites$Stratum)
-# 
-# #Random assignment into cal (80%) and val (20%) data sets by Stratum field
-# library(dplyr)
-# sites.t<- sites %>% group_by(Stratum)
-# set.seed(500)
-# sites.cal<-sample_frac(sites.t, 0.75, replace=F)
-# sites$SiteSet<-ifelse(sites$StationCode %in% sites.cal$StationCode, "Cal","Val")
-# csci<-join(csci, sites[,c("StationCode","RegImpQ", "Stratum", "SiteSet")])
-# 
-# #
-# #Select a single sample for assessment
-# csci.t<- csci %>% group_by(StationCode)
-# set.seed(501)
-# samps.sel<-sample_n(csci.t, 1)
-# csci$SelectedSample<-ifelse(csci$SampleID %in% samps.sel$SampleID, "Selected","NotSelected")
-# 
-# #PotentialVars
-# metrics<-read.csv("metrics.csv", stringsAsFactors = F)
-# 
-# 
-# core.candidates<-c("CanalDensCat","CanalDensWs", 
-#                    "PctImp2006Cat","PctImp2006Ws","PctImp2006CatRp100","PctImp2006WsRp100",
-#                    "TotUrb2011Ws","TotUrb2011Cat","TotUrb2011WsRp100","TotUrb2011CatRp100",
-#                    "TotAg2011Ws","TotAg2011Cat","TotAg2011WsRp100","TotAg2011CatRp100",
-#                    "RdDensCat", "RdDensWs", "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat","RdCrsWs")
-# core.candidates.disag<-c("CanalDensCat","CanalDensWs",
-#                          "PctImp2006Cat","PctImp2006Ws","PctImp2006CatRp100","PctImp2006WsRp100",
-#                          "PctUrbOp2011Cat", "PctUrbLo2011Cat",
-#                          "PctUrbMd2011Cat", "PctUrbHi2011Cat", "PctHay2011Cat", "PctCrop2011Cat",
-#                          "PctUrbOp2011Ws", "PctUrbLo2011Ws", "PctUrbMd2011Ws", "PctUrbHi2011Ws",
-#                          "PctHay2011Ws", "PctCrop2011Ws", "PctUrbOp2011CatRp100", "PctUrbLo2011CatRp100",
-#                          "PctUrbMd2011CatRp100", "PctUrbHi2011CatRp100", "PctHay2011CatRp100",
-#                          "PctCrop2011CatRp100", "PctUrbOp2011WsRp100", "PctUrbLo2011WsRp100",
-#                          "PctUrbMd2011WsRp100", "PctUrbHi2011WsRp100", "PctHay2011WsRp100",
-#                          "PctCrop2011WsRp100",
-#                          "RdDensCat", "RdDensWs", "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat", "RdCrsSlpWtdCat","RdCrsWs","RdCrsSlpWtdWs")
-# 
-# core.candidates.mines.dams<-c(core.candidates,
-#                               "MineDensCat", "MineDensWs", "MineDensCatRp100", "MineDensWsRp100",
-#                               "DamDensCat", "DamDensWs",  "DamNrmStorM3Cat",  "DamNrmStorM3Ws")
-# 
-# core.candidates.disag.mines.dams<-c(core.candidates.disag,
-#                                     "MineDensCat", "MineDensWs", "MineDensCatRp100", "MineDensWsRp100",
-#                                     "DamDensCat", "DamDensWs",  "DamNrmStorM3Cat",  "DamNrmStorM3Ws")
-# 
-# stressors.atm<-c(#"NH4_2008Cat","NO3_2008Cat","InorgNWetDep_2008Cat","SN_2008Cat", #Cats have a small number of NAs
-#   "NH4_2008Ws","NO3_2008Ws","InorgNWetDep_2008Ws","SN_2008Ws")
-# 
-# stressors.other<-c("PctNonAgIntrodManagVegCat","PctNonAgIntrodManagVegWs","PctNonAgIntrodManagVegCatRp100","PctNonAgIntrodManagVegWsRp100")
-# 
-# core.candidates.mines.dams.atm<-c(core.candidates.mines.dams, stressors.atm)
-# core.candidates.disag.mines.dams.atm<-c(core.candidates.disag.mines.dams, stressors.atm)
-# 
-# core.candidates.mines.dams.atm.veg<-c(core.candidates.mines.dams.atm,stressors.other)
-# nat.cands<-setdiff(nat.vars.full, c("MAST_2008","MAST_2009","MAST_2013","MAST_2014",
-#                                     "MSST_2008","MSST_2009","MSST_2013","MSST_2014",
-#                                     "MWST_2008","MWST_2009","MWST_2013","MWST_2014"))
-# const.vars<-c("PctGlacTilClayCat","PctHydricCat","PctGlacTilLoamCat","PctGlacLakeFineCat","PctGlacLakeCrsCat","PctGlacTilLoamWs","PctGlacLakeCrsWs","PctCoastCrsCat","PctGlacTilClayWs","PctHydricWs","PctCoastCrsWs",
-#               "MineDensCat","MineDensCatRp100", "DamDensCat","DamNrmStorM3Cat",
-#               "PctCarbResidCat","PctAlkIntruVolCat","PctColluvSedCat","PctEolCrsCat","PctEolCrsWs", "PctEolFineCat","PctSalLakeCat","PctWaterCat","PctAlkIntruVolWs",
-#               "PctColluvSedWs","PctEolFineWs","PctGlacLakeFineWs") #Includes nearly-constant vars, other rejects
-# full.vars<-setdiff(c(core.candidates.mines.dams.atm.veg, nat.cands), const.vars)
-# setdiff(full.vars, names(csci))
-# 
-# csci.rf.dat<-csci[which(csci$SiteSet=="Cal" & csci$SelectedSample=="Selected"),]
-# 
-# # junk<-melt(csci.rf.dat[,core.candidates])
-# # nrow(ddply(junk, .(variable), summarize, n_unique=length(unique(value))))
-# # 
-# # ggplot(data=junk[which(junk$variable %in% unique(junk$variable)[1:9]),],aes(x=value))+
-# #   geom_histogram()+
-# #   facet_wrap(~variable, scales="free")+scale_y_sqrt()
-# 
-# # summary(csci.rf.dat[,full.vars])
-# 
-# 
-# 
-# 
-# library(quantregForest)
-# 
-# rf_full.dat<-na.omit(csci.rf.dat[,c("SampleID", "COMID", "CSCI",full.vars)])
-# 
-# 
-# 
-# 
-# set.seed(10101)
-# rf_full<-quantregForest(y=rf_full.dat$CSCI,
-#                         x=as.matrix(rf_full.dat[,c(full.vars)]),
-#                         keep.inbag=T, importance=T,proximity=T)
-# 
-# set.seed(10012)
-# rf_core<-quantregForest(y=csci.rf.dat$CSCI,
-#                         x=as.matrix(csci.rf.dat[,core.candidates]),
-#                         keep.inbag=T, importance=T,proximity=T)
-# 
-# 
-# revisited.sites<-  unique(csci$StationCode[which(csci$SelectedSample=="NotSelected")])
-# csci$Revisited<-csci$StationCode %in% revisited.sites
-# 
-# ######
-# # get model predictions, have to separate calibration oob from statewide
-#   
-# ##
-# # core model
-# 
-# # prediction data w/o calibration dataset
-# newdatcr <- all.comid %>% 
-#   filter(!COMID %in% csci.rf.dat$COMID) %>% 
-#   select_(.dots = c('COMID', core.candidates)) %>% 
-#   na.omit
-# 
-# # out of bag predictions for calibration dataset
-# # estimates for same comid must be averaged with oob estimates
-# predcore_oob <- predict(rf_core, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
-#   as.data.frame %>% 
-#   mutate(COMID = csci.rf.dat$COMID) %>% 
-#   gather('var', 'val', -COMID) %>% 
-#   group_by(COMID, var) %>% 
-#   summarize(val = mean(val)) %>% 
-#   spread(var, val) %>% 
-#   .[, c(2:20, 1)]
-# predcore_all <- predict(rf_core, newdata = newdatcr[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
-#   as.data.frame %>% 
-#   mutate(COMID = newdatcr$COMID)
-# 
-# # join calibration oob with statewide
-# predcore <- bind_rows(predcore_oob, predcore_all)
-# names(predcore) <- c(paste0("core",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
-# 
-# ##
-# # full model
-# 
-# # prediction data w/o calibration dataset
-# newdatfl <- all.comid %>% 
-#   select_(.dots = c('COMID', core.candidates.mines.dams.atm.veg, nat.cands)) %>% 
-#   na.omit %>% 
-#   filter(!COMID %in% rf_full.dat$COMID) 
-# 
-# # out of bag predictions for calibration dataset
-# predfull_oob <- predict(rf_full, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
-#   as.data.frame %>% 
-#   mutate(COMID = rf_full.dat$COMID) %>% 
-#   gather('var', 'val', -COMID) %>% 
-#   group_by(COMID, var) %>% 
-#   summarize(val = mean(val)) %>% 
-#   spread(var, val) %>% 
-#   .[, c(2:20, 1)]
-# predfull_all <- predict(rf_core, newdata = newdatfl[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>% 
-#   as.data.frame %>% 
-#   mutate(COMID = newdatfl$COMID)
-# 
-# # join calibration oob with statewide
-# predfull <- bind_rows(predfull_oob, predfull_all)
-# names(predfull) <- c(paste0("full",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
-# 
-# pred_all <- predcore %>% 
-#   left_join(predfull, by = 'COMID') %>% 
-#   left_join(all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))], by = 'COMID') %>% 
-#   as.data.frame
-#               
-# pred_all$DevData<-
-#   ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Cal")],"Cal",
-#          ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Val")],"Val","No"))
-# comid_prd <- pred_all
-# 
-# # csci data for comparison with stream comid
-# csci_comid <- csci
-# 
-# ## 
-# # save all
-# 
-# save(csci_comid, file = 'C:/proj/manuscripts/landscape_mod/data/csci_comid.RData', compress = 'xz')
-# save(comid_prd, file = 'C:/proj/manuscripts/landscape_mod/data/comid_prd.RData', compress = 'xz')
-# save(rf_core,file = "C:/proj/manuscripts/landscape_mod/data/rf_core.Rdata", compress = 'xz')
-# save(rf_full,file = "C:/proj/manuscripts/landscape_mod/data/rf_full.Rdata", compress = 'xz')
+######
+# create data from Rafi
+# create csci comid data, rf core and full models for csci quantiles, quantile preds for all comid in CA
+# original file from Z:/MarcusBeck/Landscape models from rafi/modlu_120117.R
+
+setwd("Z:/MarcusBeck/Landscape models from rafi/")
+library(plyr)
+library(dplyr)
+library(reshape2)
+
+# csci<-read.csv("CSCI_LU_temp_022817.csv", stringsAsFactors = F) #Load data
+csci<-join(read.csv("CSCI_LU_temp_040617.csv", stringsAsFactors = F), #Load data
+           read.csv("CSCI_Nat_temp_061217.csv", stringsAsFactors = F))
+nat.vars.full<-setdiff(names(read.csv("CSCI_Nat_temp_061217.csv")), names(read.csv("CSCI_LU_temp_040617.csv")))
+nat.vars.full<-unique(c("WsAreaSqKm",nat.vars.full))
+
+csci$SampleID<-paste(csci$StationCode, csci$SampleDate, csci$CollectionMethodCode, csci$FieldReplicate, sep="_")
+csci<-csci[which(!is.na(csci$PctFrstLossWs)),] #Drop rows with missing STREAMCAT data
+
+
+csci$RdDensCatRp100[is.na(csci$RdDensCatRp100)]<-0
+
+csci$TotUrb2011Ws<-  rowSums(csci[,c("PctUrbOp2011Ws","PctUrbLo2011Ws","PctUrbMd2011Ws","PctUrbHi2011Ws")])
+csci$TotUrb2011Cat<-  rowSums(csci[,c("PctUrbOp2011Cat","PctUrbLo2011Cat","PctUrbMd2011Cat","PctUrbHi2011Cat")])
+csci$TotUrb2011WsRp100<-  rowSums(csci[,c("PctUrbOp2011WsRp100","PctUrbLo2011WsRp100","PctUrbMd2011WsRp100","PctUrbHi2011WsRp100")])
+csci$TotUrb2011CatRp100<-  rowSums(csci[,c("PctUrbOp2011CatRp100","PctUrbLo2011CatRp100","PctUrbMd2011CatRp100","PctUrbHi2011CatRp100")])
+
+csci$TotAg2011Ws<-  rowSums(csci[,c("PctHay2011Ws","PctCrop2011Ws")])
+csci$TotAg2011Cat<-  rowSums(csci[,c("PctHay2011Cat","PctCrop2011Cat")])
+csci$TotAg2011WsRp100<-  rowSums(csci[,c("PctHay2011WsRp100","PctCrop2011WsRp100")])
+csci$TotAg2011CatRp100<-  rowSums(csci[,c("PctHay2011CatRp100","PctCrop2011CatRp100")])
+
+gis.area<-read.csv("csci_AREA.csv", stringsAsFactors = F)
+
+setdiff(csci$StationCode, gis.area$StationCode)
+#Let's look at PCA-space:
+
+
+
+#COMIDs
+all.comid<-rbind(read.csv("Streamcat_v2_AllCOMID_030117/exp_1.csv", stringsAsFactors = F),
+                 read.csv("Streamcat_v2_AllCOMID_030117/exp_2.csv", stringsAsFactors = F),
+                 read.csv("Streamcat_v2_AllCOMID_030117/exp_3.csv", stringsAsFactors = F))
+comid.nats<-read.csv("ALL_COMID_Nats.csv", stringsAsFactors = F)
+all.comid<-join(all.comid, comid.nats[,setdiff(names(comid.nats), "WsAreaSqKm")])
+
+all.comid$TotUrb2011Ws<-  rowSums(all.comid[,c("PctUrbOp2011Ws","PctUrbLo2011Ws","PctUrbMd2011Ws","PctUrbHi2011Ws")])
+all.comid$TotUrb2011Cat<-  rowSums(all.comid[,c("PctUrbOp2011Cat","PctUrbLo2011Cat","PctUrbMd2011Cat","PctUrbHi2011Cat")])
+all.comid$TotUrb2011WsRp100<-  rowSums(all.comid[,c("PctUrbOp2011WsRp100","PctUrbLo2011WsRp100","PctUrbMd2011WsRp100","PctUrbHi2011WsRp100")])
+all.comid$TotUrb2011CatRp100<-  rowSums(all.comid[,c("PctUrbOp2011CatRp100","PctUrbLo2011CatRp100","PctUrbMd2011CatRp100","PctUrbHi2011CatRp100")])
+
+all.comid$TotAg2011Ws<-  rowSums(all.comid[,c("PctHay2011Ws","PctCrop2011Ws")])
+all.comid$TotAg2011Cat<-  rowSums(all.comid[,c("PctHay2011Cat","PctCrop2011Cat")])
+all.comid$TotAg2011WsRp100<-  rowSums(all.comid[,c("PctHay2011WsRp100","PctCrop2011WsRp100")])
+all.comid$TotAg2011CatRp100<-  rowSums(all.comid[,c("PctHay2011CatRp100","PctCrop2011CatRp100")])
+
+all.comid$RdDensWsRp100<-all.comid$RoadDensityRipBuf100_CA.RdDensWsRp100
+all.comid$RdDensCatRp100<-all.comid$RoadDensityRipBuf100_CA.RdDensCatRp100
+
+library(plyr)
+csci<-join(csci, gis.area)
+
+
+
+library(dplyr)
+# csci2<-csci %>% group_by(COMID) %>% slice(which.max(AREA_SQKM))
+
+# this finds out which station is most downstream if more than one on a COMID
+csci$Largest<-
+  sapply(1:nrow(csci), function(i){
+    comid<-csci$COMID[i]
+    area<-csci$AREA_SQKM[i]
+    mydf<-csci[which(csci$COMID==comid),]
+    area==max(mydf$AREA_SQKM)
+  })
+
+# csci[which(csci$COMID==8264738),c("StationCode","COMID","AREA_SQKM","Largest")]
+csci.full<-csci
+csci<-csci.full[csci.full$Largest,]
+
+library(quantregForest)
+
+
+
+#Create cal and val data
+sites<-unique(csci[,c("StationCode","PSA6c","PctImp2006Ws")]) #Create a sites DF
+library(plyr)
+sites.d<-ddply(sites, .(PSA6c), summarize, ImpT1=quantile(PctImp2006Ws, probs=c(0.25)),ImpT2=quantile(PctImp2006Ws, probs=c(0.5)),ImpT3=quantile(PctImp2006Ws, probs=c(0.75)))
+write.table(sites.d, "clipboard", sep="\t")
+
+sites$RegImpQ<-   #Divide regions into thirds based on imperviousness
+  sapply(1:nrow(sites), function(i){
+    region<-sites$PSA6c[i]
+    imp<-sites$PctImp2006Ws[i]
+    imp.t1<-sites.d$ImpT1[which(sites.d$PSA6c==region)]
+    imp.t2<-sites.d$ImpT2[which(sites.d$PSA6c==region)]
+    imp.t3<-sites.d$ImpT3[which(sites.d$PSA6c==region)]
+    ifelse(imp<imp.t1,"T1", ifelse(imp<imp.t2,"T2", ifelse(imp<imp.t3,"T3","T4")))
+  })
+
+table(sites$PSA6c, sites$RegImpQ)
+sites$Stratum<-paste(sites$PSA6c, sites$RegImpQ, sep="_") #Create strata by dividing each region into thirds
+table(sites$Stratum)
+
+#Random assignment into cal (80%) and val (20%) data sets by Stratum field
+library(dplyr)
+sites.t<- sites %>% group_by(Stratum)
+set.seed(500)
+sites.cal<-sample_frac(sites.t, 0.75, replace=F)
+sites$SiteSet<-ifelse(sites$StationCode %in% sites.cal$StationCode, "Cal","Val")
+csci<-join(csci, sites[,c("StationCode","RegImpQ", "Stratum", "SiteSet")])
+
+#
+#Select a single sample for assessment
+csci.t<- csci %>% group_by(StationCode)
+set.seed(501)
+samps.sel<-sample_n(csci.t, 1)
+csci$SelectedSample<-ifelse(csci$SampleID %in% samps.sel$SampleID, "Selected","NotSelected")
+
+#PotentialVars
+metrics<-read.csv("metrics.csv", stringsAsFactors = F)
+
+
+core.candidates<-c("CanalDensCat","CanalDensWs",
+                   "PctImp2006Cat","PctImp2006Ws","PctImp2006CatRp100","PctImp2006WsRp100",
+                   "TotUrb2011Ws","TotUrb2011Cat","TotUrb2011WsRp100","TotUrb2011CatRp100",
+                   "TotAg2011Ws","TotAg2011Cat","TotAg2011WsRp100","TotAg2011CatRp100",
+                   "RdDensCat", "RdDensWs", "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat","RdCrsWs")
+core.candidates.disag<-c("CanalDensCat","CanalDensWs",
+                         "PctImp2006Cat","PctImp2006Ws","PctImp2006CatRp100","PctImp2006WsRp100",
+                         "PctUrbOp2011Cat", "PctUrbLo2011Cat",
+                         "PctUrbMd2011Cat", "PctUrbHi2011Cat", "PctHay2011Cat", "PctCrop2011Cat",
+                         "PctUrbOp2011Ws", "PctUrbLo2011Ws", "PctUrbMd2011Ws", "PctUrbHi2011Ws",
+                         "PctHay2011Ws", "PctCrop2011Ws", "PctUrbOp2011CatRp100", "PctUrbLo2011CatRp100",
+                         "PctUrbMd2011CatRp100", "PctUrbHi2011CatRp100", "PctHay2011CatRp100",
+                         "PctCrop2011CatRp100", "PctUrbOp2011WsRp100", "PctUrbLo2011WsRp100",
+                         "PctUrbMd2011WsRp100", "PctUrbHi2011WsRp100", "PctHay2011WsRp100",
+                         "PctCrop2011WsRp100",
+                         "RdDensCat", "RdDensWs", "RdDensCatRp100", "RdDensWsRp100", "RdCrsCat", "RdCrsSlpWtdCat","RdCrsWs","RdCrsSlpWtdWs")
+
+core.candidates.mines.dams<-c(core.candidates,
+                              "MineDensCat", "MineDensWs", "MineDensCatRp100", "MineDensWsRp100",
+                              "DamDensCat", "DamDensWs",  "DamNrmStorM3Cat",  "DamNrmStorM3Ws")
+
+core.candidates.disag.mines.dams<-c(core.candidates.disag,
+                                    "MineDensCat", "MineDensWs", "MineDensCatRp100", "MineDensWsRp100",
+                                    "DamDensCat", "DamDensWs",  "DamNrmStorM3Cat",  "DamNrmStorM3Ws")
+
+stressors.atm<-c(#"NH4_2008Cat","NO3_2008Cat","InorgNWetDep_2008Cat","SN_2008Cat", #Cats have a small number of NAs
+  "NH4_2008Ws","NO3_2008Ws","InorgNWetDep_2008Ws","SN_2008Ws")
+
+stressors.other<-c("PctNonAgIntrodManagVegCat","PctNonAgIntrodManagVegWs","PctNonAgIntrodManagVegCatRp100","PctNonAgIntrodManagVegWsRp100")
+
+core.candidates.mines.dams.atm<-c(core.candidates.mines.dams, stressors.atm)
+core.candidates.disag.mines.dams.atm<-c(core.candidates.disag.mines.dams, stressors.atm)
+
+core.candidates.mines.dams.atm.veg<-c(core.candidates.mines.dams.atm,stressors.other)
+nat.cands<-setdiff(nat.vars.full, c("MAST_2008","MAST_2009","MAST_2013","MAST_2014",
+                                    "MSST_2008","MSST_2009","MSST_2013","MSST_2014",
+                                    "MWST_2008","MWST_2009","MWST_2013","MWST_2014"))
+const.vars<-c("PctGlacTilClayCat","PctHydricCat","PctGlacTilLoamCat","PctGlacLakeFineCat","PctGlacLakeCrsCat","PctGlacTilLoamWs","PctGlacLakeCrsWs","PctCoastCrsCat","PctGlacTilClayWs","PctHydricWs","PctCoastCrsWs",
+              "MineDensCat","MineDensCatRp100", "DamDensCat","DamNrmStorM3Cat",
+              "PctCarbResidCat","PctAlkIntruVolCat","PctColluvSedCat","PctEolCrsCat","PctEolCrsWs", "PctEolFineCat","PctSalLakeCat","PctWaterCat","PctAlkIntruVolWs",
+              "PctColluvSedWs","PctEolFineWs","PctGlacLakeFineWs") #Includes nearly-constant vars, other rejects
+full.vars<-setdiff(c(core.candidates.mines.dams.atm.veg, nat.cands), const.vars)
+setdiff(full.vars, names(csci))
+
+csci.rf.dat<-csci[which(csci$SiteSet=="Cal" & csci$SelectedSample=="Selected"),]
+
+# junk<-melt(csci.rf.dat[,core.candidates])
+# nrow(ddply(junk, .(variable), summarize, n_unique=length(unique(value))))
+#
+# ggplot(data=junk[which(junk$variable %in% unique(junk$variable)[1:9]),],aes(x=value))+
+#   geom_histogram()+
+#   facet_wrap(~variable, scales="free")+scale_y_sqrt()
+
+# summary(csci.rf.dat[,full.vars])
+
+
+
+
+library(quantregForest)
+
+rf_full.dat<-na.omit(csci.rf.dat[,c("SampleID", "COMID", "CSCI",full.vars)])
+
+
+
+
+set.seed(10101)
+rf_full<-quantregForest(y=rf_full.dat$CSCI,
+                        x=as.matrix(rf_full.dat[,c(full.vars)]),
+                        keep.inbag=T, importance=T,proximity=T)
+
+set.seed(10012)
+rf_core<-quantregForest(y=csci.rf.dat$CSCI,
+                        x=as.matrix(csci.rf.dat[,core.candidates]),
+                        keep.inbag=T, importance=T,proximity=T)
+
+
+revisited.sites<-  unique(csci$StationCode[which(csci$SelectedSample=="NotSelected")])
+csci$Revisited<-csci$StationCode %in% revisited.sites
+
+######
+# get model predictions, have to separate calibration oob from statewide
+
+##
+# core model
+
+# prediction data w/o calibration dataset
+newdatcr <- all.comid %>%
+  filter(!COMID %in% csci.rf.dat$COMID) %>%
+  select_(.dots = c('COMID', core.candidates)) %>%
+  na.omit
+
+# out of bag predictions for calibration dataset
+# estimates for same comid must be averaged with oob estimates
+predcore_oob <- predict(rf_core, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>%
+  as.data.frame %>%
+  mutate(COMID = csci.rf.dat$COMID) %>%
+  gather('var', 'val', -COMID) %>%
+  group_by(COMID, var) %>%
+  summarize(val = mean(val)) %>%
+  spread(var, val) %>%
+  .[, c(2:20, 1)]
+predcore_all <- predict(rf_core, newdata = newdatcr[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>%
+  as.data.frame %>%
+  mutate(COMID = newdatcr$COMID)
+
+# join calibration oob with statewide
+predcore <- bind_rows(predcore_oob, predcore_all)
+names(predcore) <- c(paste0("core",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
+
+##
+# full model
+
+# prediction data w/o calibration dataset
+newdatfl <- all.comid %>%
+  select_(.dots = c('COMID', core.candidates.mines.dams.atm.veg, nat.cands)) %>%
+  na.omit %>%
+  filter(!COMID %in% rf_full.dat$COMID)
+
+# out of bag predictions for calibration dataset
+predfull_oob <- predict(rf_full, what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>%
+  as.data.frame %>%
+  mutate(COMID = rf_full.dat$COMID) %>%
+  gather('var', 'val', -COMID) %>%
+  group_by(COMID, var) %>%
+  summarize(val = mean(val)) %>%
+  spread(var, val) %>%
+  .[, c(2:20, 1)]
+predfull_all <- predict(rf_core, newdata = newdatfl[, -1], what=seq(from=0.05, to=.95, by=.05), na.rm=T) %>%
+  as.data.frame %>%
+  mutate(COMID = newdatfl$COMID)
+
+# join calibration oob with statewide
+predfull <- bind_rows(predfull_oob, predfull_all)
+names(predfull) <- c(paste0("full",formatC(as.numeric(seq(from=0.05, to=.95, by=.05)), format = 'f', flag='0', digits = 2)), 'COMID')
+
+pred_all <- predcore %>%
+  left_join(predfull, by = 'COMID') %>%
+  left_join(all.comid[,c("COMID", core.candidates, setdiff(full.vars,core.candidates))], by = 'COMID') %>%
+  as.data.frame
+
+pred_all$DevData<-
+  ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Cal")],"Cal",
+         ifelse(pred_all$COMID %in% csci$COMID[which(csci$SiteSet=="Val")],"Val","No"))
+comid_prd <- pred_all
+
+# csci data for comparison with stream comid
+csci_comid <- csci
+
+##
+# save all
+
+save(csci_comid, file = 'C:/proj/manuscripts/landscape_mod/data/csci_comid.RData', compress = 'xz')
+save(comid_prd, file = 'C:/proj/manuscripts/landscape_mod/data/comid_prd.RData', compress = 'xz')
+save(rf_core,file = "C:/proj/manuscripts/landscape_mod/data/rf_core.Rdata", compress = 'xz')
+save(rf_full,file = "C:/proj/manuscripts/landscape_mod/data/rf_full.Rdata", compress = 'xz')
