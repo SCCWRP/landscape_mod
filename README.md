@@ -12,6 +12,7 @@ All files created using `R/dat_proc.R` (sometimes not from local source)
 * `calipsa.RData` sf object of california PSA regions
 * `cnstrfrst.RData` results from random forest models of constraints in each region, importance only
 * `comid_prd.RData` predicted csci quantiles for all comid in california
+* `coredat.RData` CSCI and StreamCat predictors used to build core landscape model
 * `csci_raw.RData` data.frame of current csci scores by lat/lon
 * `csci_comid.RData` csci scores by comid
 * `ludat.RData` sf object of california land use by ag, urban, other
