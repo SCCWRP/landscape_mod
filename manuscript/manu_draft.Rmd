@@ -170,9 +170,9 @@ The outcomes of these assignments were visualized in an interactive and online a
 
 ## Model performance
 
-Model performance statewide indicated generally good agreement between observed CSCI scores and the median prediction for the associated stream segment (Table \@ref(tab:perftab)).  Agreement between observed and predicted values for the entire calibration dataset was r = 0.75 (Pearson) and RMSE = 0.17.  The intercept and slope for a regression between observed and predicted values were 0.34 and 0.60, suggesting a slight negative bias of predictions at lower scores and slight positive bias at higher scores.  The statewide validation data showed similar results, with slightly smaller correlation (r = 0.72) and larger RMSE (0.18) estimates.  
+Model performance statewide indicated generally good agreement between observed CSCI scores and the median prediction for the associated stream segment (Table \@ref(tab:perftab), Figure S3).  Agreement between observed and predicted values for the entire calibration dataset was r = 0.75 (Pearson) and RMSE = 0.17.  The intercept and slope for a regression between observed and predicted values were 0.34 and 0.60, suggesting a slight negative bias of predictions at lower scores and slight positive bias at higher scores.  The statewide validation data showed similar results, with slightly smaller correlation (r = 0.72) and larger RMSE (0.18) estimates.  
 
-Overall, the model performed well in regions with a mix of urban, agricultural, and open land (e.g., South Coast and Chaparral regions), whereas performance was weakest in regions without strong development gradients (e.g., Sierra Nevada and North Coast regions) (Table \@ref(tab:perftab), Figure S3).  Performance for the Chaparral and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration (r = 0.71, 0.75, respectively) and validation (r = 0.74, 0.72) datasets. Model predictions for the Central Valley, Desert/Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.57 with observed values in the calibration dataset and 0.53 in the validation dataset.  Model performance was weakest for the Sierra Nevada and North Coast regions, where timber harvesting, rather than urban or agricultural development, is the most widespread stressor.
+Overall, the model performed well in regions with a mix of urban, agricultural, and open land (e.g., South Coast and Chaparral regions), whereas performance was weakest in regions without strong development gradients (e.g., Sierra Nevada and North Coast regions) (Table \@ref(tab:perftab), Figure S4).  Performance for the Chaparral and South Coast regions were comparable or slightly improved compared to the statewide dataset for both the calibration (r = 0.71, 0.75, respectively) and validation (r = 0.74, 0.72) datasets. Model predictions for the Central Valley, Desert/Modoc, and North Coast regions had slightly lower performance compared to the statewide results, with correlations of approximately 0.57 with observed values in the calibration dataset and 0.53 in the validation dataset.  Model performance was weakest for the Sierra Nevada and North Coast regions, where timber harvesting, rather than urban or agricultural development, is the most widespread stressor.
 
 ## Statewide patterns in stream constraints
 
@@ -1217,14 +1217,14 @@ totdf <- dat %>%
     sdobs <- sd(x$observed, na.rm = T)
     aveprd <- mean(x$predicted, na.rm = T)
     sdprd <- sd(x$predicted, na.rm = T)
-    mod <- lm(predicted ~ observed, data = x)
+    mod <- lm(observed ~ predicted, data = x)
     intv <- coefficients(mod)[1]
     intvp <- p_ast(coef(summary(mod))[1, 4])
     slov <- coefficients(mod)[2]
     slovp <- p_ast(coef(summary(mod))[2, 4])
     corv <- with(x, cor.test(observed, predicted))$estimate
     corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
-    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    errv <- with(x, sqrt(mean((observed - predicted)^2, na.rm = T)))
     
     out <- tibble(set = 'Statewide', nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
     return(out)
@@ -1243,15 +1243,14 @@ regdf <- dat %>%
     sdobs <- sd(x$observed, na.rm = T)
     aveprd <- mean(x$predicted, na.rm = T)
     sdprd <- sd(x$predicted, na.rm = T)
-    ttst <- with(x, t.test(observed, predicted, na.rm = T))
-    mod <- lm(predicted ~ observed, data = x)
+    mod <- lm(observed ~ predicted, data = x)
     intv <- coefficients(mod)[1]
     intvp <- p_ast(coef(summary(mod))[1, 4])
     slov <- coefficients(mod)[2]
     slovp <- p_ast(coef(summary(mod))[2, 4])
     corv <- with(x, cor.test(observed, predicted))$estimate
     corvp <- p_ast(with(x, cor.test(observed, predicted))$p.value)
-    errv <- with(x, sqrt(mean((predicted - observed)^2, na.rm = T)))
+    errv <- with(x, sqrt(mean((observed - predicted)^2, na.rm = T)))
     
     out <- tibble(nval, aveobs, sdobs, aveprd, sdprd, corv, errv, intv, slov)
     return(out)

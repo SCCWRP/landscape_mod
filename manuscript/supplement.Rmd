@@ -68,7 +68,8 @@ load(file = '../data/sgrclslen.RData')
 <!-- supp figures -->
 <!-- pritem - S1 -->
 <!-- app - S2 -->
-<!-- perflu - S3 -->
+<!-- perffig - S3 -->
+<!-- perflu - S4 -->
 
 <!-- manu figures -->
 <!-- calimap - 1 -->
@@ -187,6 +188,61 @@ grid.arrange(
 ```{r app, fig.cap='Screenshots from the Stream Classification and Priority Explorer (SCAPE) tool used by the stakeholder group to interact with and use results from the landscape model.  The application allowed users to visualize results of segment classifications, relative site scores for the CSCI based on the expectation, and recommend management actions for each segment type.  The app is accessible at [http://shiny.sccwrp.org/scape/](http://shiny.sccwrp.org/scape/).'}
 knitr::include_graphics('figs/app.png')
 ```
+
+```{r perffig, fig.height = 8, fig.width = 6.5, fig.cap = "Model performance statewide and by major regions in California. Results are grouped by calibration (Cal) and validation (Val) datasets. Blue lines indicate the regression fit and black lines indicate correspondene between observations and predictions. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50
+  ) %>% 
+  dplyr::select(SiteSet, PSA6c, observed, predicted)
+
+# statewide, same as dat but PSA6c is everything
+dat <- dat %>% 
+  mutate(PSA6c = 'Statewide') %>% 
+  rbind(dat) %>% 
+  rename(
+    Observed = observed, 
+    Predicted = predicted
+  ) %>% 
+  mutate(
+    PSA6c = factor(PSA6c, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN')),
+    ominuse = Observed - Predicted
+  )
+
+pthm <- theme_bw(base_family = 'serif') + 
+  theme(
+    strip.background = element_blank(),
+    axis.title.x = element_blank()
+    )
+
+p1 <- ggplot(dat, aes(x = Predicted, y = Observed)) + 
+  facet_grid(PSA6c ~ SiteSet) + 
+  geom_point(size = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) +
+  stat_smooth(method = 'lm', se = F) +
+  pthm
+
+p2 <- ggplot(dat, aes(x = Predicted, y = ominuse)) + 
+  facet_grid(PSA6c ~ SiteSet) + 
+  ylab('Observed - Predicted') +
+  geom_point(size = 0.5) + 
+  geom_abline(slope = 0, intercept = 0) +
+  stat_smooth(method = 'lm', se = F) +
+  pthm
+
+grid.arrange(p1, p2, ncol = 2, bottom = "Predicted")
+```
+
 
 ```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
 
