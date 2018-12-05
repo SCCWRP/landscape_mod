@@ -48,6 +48,30 @@ ggplot(allscrs, aes(x = strcls, y = ch_alt, fill = strcls, colour = strcls)) +
 allscrs %>% 
   filter(strcls %in% 'likely constrained' & ch_alt > 19)
 
+##
+# same analysis as above but using SMC channel mod data
+# evaluate channel mod with constraints via contingency table
+
+load(file = '../data/caliexp.RData')
+
+chdat <- read.csv('C:/proj/SMC_report/ignore/csci.alg.df.csv', stringsAsFactors = FALSE) %>%
+  dplyr::select(StationCode, ChannelClass_3ef) %>%
+  rename(
+    chcls = ChannelClass_3ef
+  ) %>% 
+  mutate(
+    chcls = case_when(
+      chcls %in% 'All or partially earthen' ~ 'Natural', 
+      T ~ chcls
+    )
+  )
+
+cmp <- caliexp %>% 
+  dplyr::select(StationCode, strcls) %>% 
+  inner_join(chdat, by = 'StationCode')
+
+table(cmp[, -1])
+
 ###
 # other strmcat variables that may explain deviation from predictions
 library(tidyverse)
