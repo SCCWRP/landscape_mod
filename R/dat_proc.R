@@ -964,6 +964,10 @@ rf_full<-quantregForest(y=rf_full.dat$CSCI,
                         x=as.matrix(rf_full.dat[,c(full.vars)]),
                         keep.inbag=T, importance=T,proximity=T)
 
+# # save core data for follow-up analysis
+# coredat <- csci.rf.dat[, c('StationCode', 'CSCI', core.candidates)]
+# save(coredat, file = 'L:/Channels in developed landscapes_RM/Marcus/landscape_mod/data/coredat.RData', compress = 'xz')
+
 set.seed(10012)
 rf_core<-quantregForest(y=csci.rf.dat$CSCI,
                         x=as.matrix(csci.rf.dat[,core.candidates]),
