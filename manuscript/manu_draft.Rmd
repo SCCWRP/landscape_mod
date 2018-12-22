@@ -1179,7 +1179,7 @@ tab <- tibble(
   Action = c('Investigate', 'Protect', 'Restore'),
   `Example activity` = c('Higher frequency of sampling, evaluate additional data (e.g., habitat)', 'Extra scrutiny of proposed impacts', 'Make funding recommendations, prioritize TMDL development'),
   `Example high priority site` = c('Sites scoring outside prediction interval', 'Unconstrained sites', 'Low-scoring unconstrained sites'), 
-  `Example low priority site` = c('Sites scoring as expected', 'Constrained sites', 'Low-scoring cosntrained sites')
+  `Example low priority site` = c('Sites scoring as expected', 'Constrained sites', 'Low-scoring constrained sites')
 )
 
 # table stuff
