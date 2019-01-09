@@ -87,6 +87,7 @@ p1 <- ggplot(toplo) +
     plot.margin = grid::unit(c(0, 0, 0, 0), units = 'pt')
   )
 
-jpeg('C:/Users/Marcus.SCCWRP2K/Desktop/calires.jpeg', height = 36, width = 24, units = 'in', res = 600, family = 'serif')
+# jpeg('C:/Users/Marcus.SCCWRP2K/Desktop/calires.jpeg', height = 36, width = 24, units = 'in', res = 600, family = 'serif')
+pdf('C:/Users/Marcus.SCCWRP2K/Desktop/calires.pdf', height = 36, width = 24, family = 'serif')
 p1
 dev.off()
