@@ -262,7 +262,7 @@ dat <- caliexp %>%
   unnest(data) %>% 
   unite('varp', var, pvl, remove = F, sep = ', ') 
 
-# plot  
+# boxplot comparisons  
 ggplot(dat, aes(x = flow, y = val)) + 
   # geom_violin(draw_quantiles = 0.5, alpha = 0.2, fill = 'lightgrey') + 
   geom_boxplot(alpha = 0.5, fill = 'lightgrey', outlier.colour = NA) + 
@@ -276,6 +276,34 @@ ggplot(dat, aes(x = flow, y = val)) +
     axis.title.x = element_blank(), 
     strip.background = element_blank(), 
     axis.text.x = element_text(angle = 20, hjust = 1), 
+    legend.title = element_blank()
+  )
+
+# this looks at relationship between observed/predicted csci between perennial/intermittent
+# combine flow indication with csci, format for plots
+dat <- caliexp %>% 
+  select(StationCode, datcut, strcls, csci) %>% 
+  unnest %>% 
+  mutate(StationCode = as.character(StationCode)) %>% 
+  inner_join(flos, by = 'StationCode') %>% 
+  spread(var, val) %>% 
+  rename(
+    CSCI = csci, 
+    median = core0.50, 
+    tenth = core0.10, 
+    ninetieth = core0.90
+  )
+
+# plot  
+ggplot(dat, aes(x = median, y = CSCI)) + 
+  geom_errorbar(aes(ymin = tenth, ymax = ninetieth, colour = strcls), width = 0, size = 1) + 
+  geom_point(aes(shape = flow), size = 2.5) +
+  geom_smooth(method = 'lm', aes(linetype = flow), se = F, colour = 'black') + 
+  theme_bw(base_family = 'serif', base_size = 16) +
+  scale_colour_manual('', values = pal_exp(levels(dat$strcls)), drop = F) +
+  xlab('Median predicted CSCI') +
+  ylab('Observed CSCI') +
+  theme(
     legend.title = element_blank()
   )
 
