@@ -1,6 +1,8 @@
 # compare constraint classes to physical channel alteration
 library(tidyverse)
 library(readxl)
+library(leaflet)
+library(RColorBrewer)
 
 load(file = '../data/caliexp.RData')
 
@@ -212,6 +214,8 @@ ggplot(toeval, aes(x = val, y = resid)) +
 # look at score differences between perennial/intermittent
 # flow indicators from Chad, RB9
 
+source('R/funcs.R')
+
 data(caliexp)
 
 # format flow indication data (filter those where sop status not met)
@@ -262,15 +266,17 @@ dat <- caliexp %>%
 ggplot(dat, aes(x = flow, y = val)) + 
   # geom_violin(draw_quantiles = 0.5, alpha = 0.2, fill = 'lightgrey') + 
   geom_boxplot(alpha = 0.5, fill = 'lightgrey', outlier.colour = NA) + 
-  geom_point(position = 'jitter', col = 'lightgreen', alpha = 0.9) + 
+  geom_point(aes(fill = strcls), position = 'jitter', col = 'lightgrey', alpha = 0.9, pch = 21, size = 3) + 
   geom_hline(yintercept = 0.79, linetype = 'dotted', colour = 'tomato1', size = 2) + 
   theme_bw(base_family = 'serif', base_size = 16) +
   facet_wrap(~varp, ncol = 4) + 
+  scale_fill_manual(values = pal_exp(levels(dat$strcls)), drop = F) +
   ylab('CSCI') +
   theme(
     axis.title.x = element_blank(), 
     strip.background = element_blank(), 
-    axis.text.x = element_text(angle = 20, hjust = 1)
+    axis.text.x = element_text(angle = 20, hjust = 1), 
+    legend.title = element_blank()
   )
 
 
