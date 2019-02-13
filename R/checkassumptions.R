@@ -207,3 +207,70 @@ ggplot(toeval, aes(x = val, y = resid)) +
   stat_smooth(method = 'lm') +
   # scale_x_log10() +
   theme_bw()
+
+######
+# look at score differences between perennial/intermittent
+# flow indicators from Chad, RB9
+
+data(caliexp)
+
+# format flow indication data (filter those where sop status not met)
+flos <- read_excel('raw/FromChadTable 1b.xlsx', sheet = 'Sheet2') %>% 
+  select(StationCode, Flow_Simple, SOP_Status) %>% 
+  rename(flow = Flow_Simple) %>% 
+  filter(grepl('^SOP met', SOP_Status)) %>% 
+  select(-SOP_Status) %>% 
+  unique %>% 
+  mutate(flow = factor(flow, levels = c('P', 'I'), labels = c('Perennial', 'Intermittent')))
+
+# combine flow indication with csci, landscape mod ests, get pvals from t.tests
+dat <- caliexp %>% 
+  select(StationCode, datcut, strcls, csci) %>% 
+  unnest %>% 
+  mutate(StationCode = as.character(StationCode)) %>% 
+  inner_join(flos, by = 'StationCode') %>% 
+  spread(var, val) %>% 
+  gather('var', 'val', csci, core0.10, core0.50, core0.90) %>% 
+  mutate(
+    StationCode = as.character(StationCode),
+    var = factor(var, 
+                 levels = c('csci', 'core0.10', 'core0.50', 'core0.90'),
+                 labels = c('CSCI', 'tenth', 'median', 'ninetieth')
+    )
+  ) %>% 
+  group_by(var) %>% 
+  nest %>% 
+  mutate(
+    pvl = purrr::map(data, function(x){
+      int <- x %>% filter(flow %in% 'Intermittent')
+      per <- x %>% filter(flow %in% 'Perennial')
+      
+      tst <- t.test(int$val, per$val, var.equal = T)
+      pvl <- tst$p.value %>% 
+        round(2) %>% 
+        paste('p =', .)
+      
+      return(pvl)
+      
+    })
+  ) %>% 
+  unnest(pvl) %>% 
+  unnest(data) %>% 
+  unite('varp', var, pvl, remove = F, sep = ', ') 
+
+# plot  
+ggplot(dat, aes(x = flow, y = val)) + 
+  # geom_violin(draw_quantiles = 0.5, alpha = 0.2, fill = 'lightgrey') + 
+  geom_boxplot(alpha = 0.5, fill = 'lightgrey', outlier.colour = NA) + 
+  geom_point(position = 'jitter', col = 'lightgreen', alpha = 0.9) + 
+  geom_hline(yintercept = 0.79, linetype = 'dotted', colour = 'tomato1', size = 2) + 
+  theme_bw(base_family = 'serif', base_size = 16) +
+  facet_wrap(~varp, ncol = 4) + 
+  ylab('CSCI') +
+  theme(
+    axis.title.x = element_blank(), 
+    strip.background = element_blank(), 
+    axis.text.x = element_text(angle = 20, hjust = 1)
+  )
+
+
