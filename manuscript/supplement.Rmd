@@ -34,9 +34,10 @@ library(leaflet)
 library(raster)
 library(flextable)
 library(officer)
+library(here)
 
 # functions (incl. color palettes)
-source('../R/funcs.R')
+source(here('R', 'funcs.R'))
 
 # extract bib entries from online
 # bib_scrp('supplement.Rmd', 'refs_supp.bib')
@@ -64,36 +65,101 @@ load(file = '../data/sgrclslen.RData')
 load(file = '../data/coredat.RData')
 ```
 
-# Supplement
+```{r echo = F, cache = F, eval = F}
+spelling::spell_check_files(here('manuscript', 'supplement.Rmd'))
+```
 
-<!-- supp figures -->
-<!-- prddst - S1
-<!-- pritem - S2 -->
-<!-- app - S3 -->
-<!-- perffig - S4 -->
-<!-- perflu - S5 -->
+# Supplement
 
 <!-- manu figures -->
 <!-- calimap - 1 -->
-<!-- ridges - 2 -->
-<!-- sgrshd - 3 -->
+<!-- dpsirfig - 2 -->
+<!-- ridges - 3 -->
 <!-- calires - 4 -->
 <!-- sensplo - 5 -->
-<!-- sgrresplo - 6 -->
-<!-- sgrresmap - 7 -->
-<!-- tecolote - 8 -->
+<!-- tecolote - 6 -->
 
-<!-- supp tables -->
-<!-- none -->
+<!-- supp figures -->
+<!-- prddst - S1 -->
+<!-- perffig - S2 -->
+<!-- perflu - S3 -->
+<!-- sgrshd - S4 -->
+<!-- sgrresplo - S5 -->
+<!-- pritem - S6 -->
+<!-- app - S7 -->
+<!-- sgrresmap - S8 -->
 
 <!-- manu tables -->
 <!-- crvr - 1 -->
 <!-- clsdef - 2 -->
-<!-- pridsc - 3 -->
-<!-- perftab - 4 -->
-<!-- clstot - 5 -->
-<!-- reltot - 6 -->
+<!-- perftab - 3 -->
+<!-- clstot - 4 -->
+<!-- reltot - 5 -->
 
+<!-- supp tables -->
+<!-- pridsc - 1 -->
+
+# Case study: Application of the landscape model to the San Gabriel River watershed
+
+```{r}
+##
+# ggplot of sgr site expecations, relative scores
+
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.1
+
+##
+# get biological condition expectations
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
+  mutate(COMID = as.character(COMID)) 
+
+# get csci difference
+sgrscrs <- spat %>% 
+  dplyr::select(COMID, core0.50) %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, ., by = 'COMID') %>% 
+  group_by(COMID, StationCode, lat, long) %>% 
+  summarise(
+    csci = mean(csci, na.rm = TRUE)
+  ) %>% 
+  ungroup %>%
+  left_join(cls, by = 'COMID')
+
+clslen <- sgrclslen %>% 
+  dplyr::select(-lens) %>% 
+  spread(strcls, lenper)
+
+```
+
+The San Gabriel River (SGR) Regional Monitoring Program (Los Angeles County, California) includes stakeholders from water quality regulatory agencies, municipalities, and non-governmental organizations that cooperatively work to manage aquatic resources in the watershed and improve coordination of compliance and ambient monitoring efforts. A strong land-use gradient occurs in the SGR watershed that creates challenges for managing stream condition (Figure S\@ref(fig:sgrshd)). The upper watershed in the San Gabriel mountains is largely undeveloped or protected for recreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The SGR is dammed at four locations in the upper watershed for flood control. Spreading grounds in the middle of the watershed are used to recharge groundwater during high flow. As a result, the upper and lower watersheds are hydrologically disconnected when annual rainfall is normal. Nearly all of the stream segments in the lower half of the watershed are channelized with concrete or other reinforcements. The majority of flow in the lower watershed is provided to the mainstem and major tributaries of the SGR by wastewater treatment plants releasing tertiary treated effluent. Approximately half of the monitored sites in the watershed are in poor biological condition, nearly all of which are in the lower watershed.  
+
+Application of the landscape model results to the CSCI scores provided biological expectations consistent with the strong land use gradient in the watershed (Figure S\@ref(fig:sgrresplo)).  Stream segments in the upper watershed were a mix of likely and possibly unconstrained (`r clslen[['likely unconstrained']]`% and `r clslen[['possibly unconstrained']]`%), whereas stream segments in the lower watershed were classified as likely and possibly constrained (`r clslen[['likely constrained']]`% and `r clslen[['possibly constrained']]`%).  Several segments in the lower watershed had median CSCI scores that were very close to the 10th percentile (i.e., right-skewed) consistent with extreme landscape pressures (bottom left, Figure S\@ref(fig:sgrresplo)b).
+
+The stakeholder group identified management priorities based on observed CSCI scores and results from the landscape model.  A template that showed the possible site scores relative to the segment classifications  was given to the stakeholders (Figure S2, left side).  The three priorities (Table S1) were then assigned a low, medium, or high importance for the scoring possibilities that could occur from the landscape model (Figure S2, right side). The assignments were made with the explicit recognition that any priority recommendations were in addition to baseline monitoring and maintenance that is currently provided by existing management programs. The final assignments were then mapped to each monitoring site in the watershed.  Table S\@ref(tab:pridsc) shows examples of the priority recommendations and sites for which they applied.
+
+The SCAPE application allowed stakeholders to provide input on the two key decision points for classifying stream segments (i.e., choice of a threshold and a prediction interval), as well as to assign priorities to each management action described above. The application then allowed stakeholders to see the outcomes of these decisions.  Specifically, SCAPE created maps showing the classifications for segments in the watershed, deviation of observed CSCI scores from the expectation, and maps of recommended priority actions that were assigned to each of the scoring possibilities.  In addition, the application tabulated the extent of streams in each class, as well as the number of sites prioritized for each management action.  Crucially, SCAPE allowed the stakeholders to modify key decisions points in the model and rapidly evaluate how these changes propagated to changes in recommended priorities for each site.
+
+The SCAPE application also allowed the stakeholders to identify spatial patterns among the watershed priorities.  For example, a clear distinction between low and high priority actions was observed on the watershed map (Figure S\@ref(fig:sgrresmap)). Sites in the lower watershed were lower priority if an action was recommended, whereas the five high priority sites were in the upper watershed (multiple recommendations were assigned to the sites).  The distinction between lower and higher priorities between the lower and upper watershed was driven exclusively by the segment classifications, where constrained segments were in the lower watershed and unconstrained segments were in the upper watershed. Several sites that were scoring as expected for likely and possibly unconstrained segments in the upper watershed were recommended as medium priority for protection.
+
+# Supplemental tables
+
+```{r pridsc}
+tab <- tibble(
+  Action = c('Investigate', 'Protect', 'Restore'),
+  `Example activity` = c('Higher frequency of sampling, evaluate additional data (e.g., habitat)', 'Extra scrutiny of proposed impacts', 'Make funding recommendations, prioritize TMDL development'),
+  `Example high priority site` = c('Sites scoring outside prediction interval', 'Unconstrained sites', 'Low-scoring unconstrained sites'), 
+  `Example low priority site` = c('Sites scoring as expected', 'Constrained sites', 'Low-scoring constrained sites')
+)
+
+# table stuff
+cap.val <- 'Recommended management actions defined by a local stakeholder group for application of results from the landscape model to prioritize stream reaches.  Actions were assigned to stream types based on observed CSCI scores relative to the stream expectation from the landscape model (see Figures S5, S6). Actions were recommended in addition to baseline monitoring and maintenance that occurred at all sites.'
+
+# table
+knitr::kable(tab, booktabs = T, caption = cap.val)
+```
+
+# Supplemental figures
 
 ```{r prddst, fig.height = 6, fig.width = 12, fig.cap = "Relationship of predictor variables (watershed only, see Table 1) with stream classes.  The top plot (a) shows boxplot distributions (median, interquartile ranges, and outliers) and the bottom plot (b) shows the relationship with CSCI scores.  All x-axes are in log-scale."}
 toplo <- caliexp %>% 
@@ -157,7 +223,388 @@ grid.arrange(
 )
 ```
 
-```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The site types relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type (text descriptions in Table 3). Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
+```{r perffig, fig.height = 8, fig.width = 6.5, fig.cap = "Model performance statewide and by major regions in California. Results are grouped by calibration (Cal) and validation (Val) datasets. Blue lines indicate the regression fit and black lines indicate correspondene between observations and predictions. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50
+  ) %>% 
+  dplyr::select(SiteSet, PSA6c, observed, predicted)
+
+# statewide, same as dat but PSA6c is everything
+dat <- dat %>% 
+  mutate(PSA6c = 'Statewide') %>% 
+  rbind(dat) %>% 
+  rename(
+    Observed = observed, 
+    Predicted = predicted
+  ) %>% 
+  mutate(
+    PSA6c = factor(PSA6c, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN')),
+    ominuse = Observed - Predicted
+  )
+
+pthm <- theme_bw(base_family = 'serif') + 
+  theme(
+    strip.background = element_blank(),
+    axis.title.x = element_blank()
+    )
+
+p1 <- ggplot(dat, aes(x = Predicted, y = Observed)) + 
+  facet_grid(PSA6c ~ SiteSet) + 
+  geom_point(size = 0.5) + 
+  geom_abline(slope = 1, intercept = 0) +
+  stat_smooth(method = 'lm', se = F) +
+  pthm
+
+p2 <- ggplot(dat, aes(x = Predicted, y = ominuse)) + 
+  facet_grid(PSA6c ~ SiteSet) + 
+  ylab('Observed - Predicted') +
+  geom_point(size = 0.5) + 
+  geom_abline(slope = 0, intercept = 0) +
+  stat_smooth(method = 'lm', se = F) +
+  pthm
+
+grid.arrange(p1, p2, ncol = 2, bottom = "Predicted")
+```
+
+```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
+
+# observed and predicted data
+obsdat <- csci_comid %>%
+  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
+  filter(SelectedSample %in% 'Selected')
+prddat <- comid_prd %>% 
+  dplyr::select(COMID, core0.50)
+
+# combined data to eval for perf
+dat <- obsdat %>% 
+  inner_join(prddat, by = 'COMID') %>% 
+  dplyr::rename(
+    observed = CSCI,
+    predicted = core0.50, 
+    imperv = PctImp2006Ws, 
+    ag = TotAg2011Ws,
+    urb = TotUrb2011Ws,
+    Region = PSA6c
+  ) %>% 
+  mutate(
+    modrsd = observed - predicted
+  ) %>%
+  gather('var', 'val', urb, ag) %>% 
+  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
+
+col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
+
+# residuals by land use
+p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
+  geom_point(size = 1, alpha = 0.7) +
+  theme_bw(base_family = 'serif', base_size = 14) +
+  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
+  geom_hline(yintercept = 0) + 
+  theme(
+    strip.background = element_blank(), 
+    strip.placement = 'outside', 
+    axis.title.x = element_blank(), 
+    legend.position = 'none'
+  ) + 
+  scale_y_continuous('CSCI observed - predicted', limits = c(-0.65, 0.65)) + 
+  scale_colour_manual(values = col)
+
+# land use by region
+meds <- dat %>% 
+  spread(var, val) %>% 
+  group_by(Region) %>% 
+  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
+  arrange(urbmed)
+
+toplo <- dat %>% 
+  mutate(Region = factor(Region, levels = meds$Region))
+p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
+  geom_boxplot() +
+  scale_fill_manual(values = col) +
+  scale_y_log10('% land cover, log10',
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    legend.position = 'top', 
+    legend.title = element_blank(),
+    axis.title.x = element_blank()
+  )
+
+grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
+```
+
+```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream segment and observed CSCI scores are shown in (b).'}
+
+# csci seq for color pal
+palseq <- range(csci_raw$CSCI, na.rm = T) 
+palseq <- seq(palseq[1], palseq[2], length = 5)
+
+# land use raster data
+luplo <- sgrlu %>% 
+  rasterToPoints %>% 
+  data.frame %>% 
+  dplyr::rename(`Land cover` = layer) %>% 
+  mutate(`Land cover` = factor(`Land cover`, levels = c(5, 4, 3, 2, 1), labels = c('Urban: hi', 'Urban: md', 'Urban: lo', 'Open: forest', 'Open: chaparral'))) 
+
+# hydrolines
+spatdat <- spat %>% 
+  dplyr::select(COMID, core0.50) %>% 
+  mutate(id = as.character(1:nrow(.)))
+st_geometry(spatdat) <- NULL
+spatfrt <- spat %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  left_join(spatdat, by = 'id') %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, by = 'COMID') %>% 
+  mutate(csci_diff = csci - core0.50) %>% 
+  filter(!is.na(core0.50))
+
+# wshed boundary fortified
+shedfrt <- shed %>% 
+  as('Spatial') %>% 
+  fortify 
+
+# land use colors
+lucol <- c('grey20', 'grey40', 'grey60', 'khaki3', 'khaki2')
+
+# psa data fortified
+psadat <- calipsa %>% 
+  as('Spatial') %>% 
+  as.data.frame %>% 
+  rownames_to_column('id') %>% 
+  dplyr::select(id, PSA6) %>% 
+  dplyr::rename(PSA = PSA6) %>% 
+  mutate(Region = factor(PSA, 
+    levels = c('Central Valley', 'Chaparral', 'Deserts Modoc', 'North Coast', 'Sierra Nevada', 'South Coast'),
+    labels = c('CV', 'Ch', 'DM', 'NC', 'SN', 'SC')
+    ))
+psafrt <- calipsa %>% 
+  dplyr::select(-PSA_REGION, -AREA, -PERIMETER, -PSA8) %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  left_join(psadat, by = 'id')
+
+palseq <- seq(palseq[1], palseq[2], length = 5)
+
+# pinset
+pinset <- ggplot() + 
+  geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5), size = 0.2) +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'tomato1') +
+  theme_minimal() + 
+  theme(
+    panel.grid.minor = element_blank(), 
+    panel.grid.major = element_blank(), 
+    axis.text = element_blank(), 
+    axis.title = element_blank()
+    ) + 
+  coord_map()
+
+# csci seq for color pal
+seqcsc <- range(spatfrt$csci, na.rm = T) 
+seqcsc <- seq(seqcsc[1], seqcsc[2], length = 5)
+
+# color legend
+colleg <- ggplot() +
+  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, colour = csci)) +
+  theme_bw(base_family = 'serif') +
+  theme(
+    legend.position = 'top',
+    legend.justification = 'left',
+    legend.box.just = 'left',
+    legend.box = 'vertical'
+  ) +
+  scale_colour_gradientn('CSCI', colours = pal(seqcsc)) +
+  guides(colour = guide_colourbar('CSCI', barheight = 0.55, barwidth = 8, title.position = 'top'))
+colleg <- g_legend(colleg)
+
+# separate lu legend
+luleg <- ggplot(luplo) + 
+  geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
+  theme_bw(base_family = 'serif') +
+  theme(
+    legend.position = 'top', 
+    legend.justification = 'left',
+    legend.box.just = 'left',
+    legend.box = 'vertical'
+  ) +  
+  scale_fill_manual('Land cover', values = lucol) +
+  guides(fill = guide_legend(ncol = 2, title.position = 'top'))
+luleg <- g_legend(luleg)
+  
+# land use plot
+p1 <- ggplot(luplo) + 
+  geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
+  theme_void(base_family = 'serif') +
+  scale_fill_manual('Land cover', values = lucol) +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = NA, colour = 'black', alpha = 0.7) +
+  coord_equal() +
+  theme_void(base_family = 'serif') +
+  theme(
+    legend.position = 'none', 
+    axis.title = element_blank()
+    ) +
+  ggtitle('(b) Land cover in the San Gabriel watershed')
+
+# hydrolines plot with CSCI pts
+p2 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long.x, y = lat.x, group = id, colour = core0.50, linetype = 'Segment predicted\nmedian CSCI')) +
+  scale_colour_gradientn(colours = pal(seqcsc)) +
+  geom_point(data = spatfrt, aes(x = long.y, y = lat.y, fill = csci, shape = 'Observed CSCI'), size = 3, alpha = 0.9) +
+  scale_fill_gradientn('', colours = pal(seqcsc)) +
+  scale_linetype_manual('', values = 'solid') +
+  scale_shape_manual('', values = 21) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, transform = T, dist_unit = 'km', model = 'WGS84') +
+  guides(fill = F, colour = F) +
+  coord_equal() +
+  theme_void(base_family = 'serif') +
+  theme(
+    # legend.position = 'top',
+    legend.justification = 'left',
+    # legend.box.just = 'left'#,
+    axis.title = element_blank()
+    ) + 
+  ggtitle('(a) Segment median predictions and observed scores for the CSCI')
+p2leg <- g_legend(p2) 
+p2 <- p2 + theme(legend.position = 'none')
+
+# png('figs/sgrshd.png', height = 8, width = 5.5, units = 'in', res = 300, family = 'serif')
+grid.arrange(
+  arrangeGrob(p2, 
+              arrangeGrob(colleg, p2leg, ncol = 1, heights = c(1,1)), ncol = 2, widths = c(1, 0.5)), 
+  arrangeGrob(p1, 
+            arrangeGrob(pinset, luleg, ncol = 1, heights = c(1, 1)), ncol = 2, widths = c(1, 0.5)),
+  ncol = 1
+)
+# dev.off()
+```
+
+```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream segments in the San Gabriel River watershed, Los Angeles County, California.  CSCI scores with (a) no biological context from the model are on the left and (b) scores with context from the model are on the right. Relative site scores as under-scoring, expected, or over-scoring are based on observed scores given the segment class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Segment classes are based on overlap of the expectations with a biological threshold for the CSCI (0.79, dashed lined) and location of the median expectation (white ticks)."}
+##
+# ggplot of sgr site expecations, relative scores
+
+# requires spat, scrs
+
+thrsh <- 0.79; tails <- 0.1
+
+## get sgr expectation for ggplot
+# process
+incl <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'core') %>% 
+  dplyr::select(-lat, -long) %>% 
+  group_by(StationCode) %>% 
+  nest
+
+# average scors by station
+out <- sgrscrs %>% 
+  dplyr::select(StationCode, lat, long) %>% 
+  group_by(StationCode) %>% 
+  nest %>% 
+  mutate(StationCode = factor(StationCode, levels = levels(incl$StationCode))) %>% 
+  left_join(incl, ., by = 'StationCode') %>% 
+  unnest
+
+# add additional perf column for multicolor by strcls (pal_prf)
+# remove NA csci
+ggsgrexp <- get_perf_mlt(out) %>% 
+  filter(!is.na(strcls)) %>% 
+  mutate(
+    strcls = factor(strcls, 
+                    levels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'),
+                    labels = c('likely constrained', 'possibly constrained', 'possibly unconstrained', 'likely unconstrained'))
+  )
+
+# CSCI scores and expectations
+toplo1 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, datcut, strcls, csci, perf, typelv, perf_mlt) %>%
+  unnest %>%
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls)),
+    perf = factor(perf, levels = levels(perf))
+    ) %>%
+  dplyr::rename(
+    `Stream Class` = strcls,
+    `Relative\nscore` = perf_mlt,
+    Type = typelv
+    )
+
+# total expected range
+toplo2 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, data, strcls) %>%
+  unnest %>%
+  mutate(strcls = factor(strcls, levels = levels(strcls))) %>%
+  dplyr::rename(`Stream Class` = strcls)
+
+# median expectation
+toplo3 <- ggsgrexp %>%
+  dplyr::select(COMID, StationCode, datcut) %>%
+  unnest %>%
+  filter(grepl('0\\.50$', var)) 
+
+# plot, no context
+p1 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    axis.text.y = element_text(size = 6.5), 
+    axis.title.y = element_text(size = 13),
+    axis.title.x = element_blank(), 
+    title = element_text(size = 10)
+  ) +
+  scale_x_continuous('CSCI') +
+  scale_y_discrete('Stream segment') +
+  geom_point(aes(x = csci), shape = 16, size = 1.5, alpha = 0.8) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) + 
+  ggtitle('(a) CSCI scores with no context')
+
+# plot, context
+p2 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
+  geom_line(data = toplo1, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
+  geom_line(aes(colour = `Stream Class`), alpha = 0.6, size = 2) +
+  geom_point(data = toplo3, colour = 'white', size = 1, alpha = 1, shape = 15) +
+  theme_bw(base_family = 'serif', base_size = 12) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(), 
+    axis.ticks.y = element_blank(), 
+    legend.position = 'top', 
+    title = element_text(size = 10)
+  ) +
+  scale_x_continuous('CSCI') +
+  scale_y_discrete('Site') +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(toplo1$`Stream Class`)), drop = F) +
+  geom_point(aes(x = csci, fill = `Stream Class`, shape = perf), size = 2.5, alpha = 0.8) +
+  geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) +
+  scale_shape_manual('Relative site score', values = c(25, 21, 24)) +
+  scale_fill_manual(values = pal_exp(levels(toplo1$`Stream Class`)), na.value = 'yellow', guide = F, drop = F) +
+  guides(shape = guide_legend(title.position = 'top'), colour = guide_legend(title.position = 'top', ncol = 2)) +
+  ggtitle('(b) CSCI scores with context from the landscape model')
+p2leg <- g_legend(p2)
+p2 <- p2 + theme(legend.position = 'none')
+
+# png('figs/sgrresplo.png', height = 7, width = 9, units = 'in', res = 300, family = 'serif')
+grid.arrange(
+  arrangeGrob(p2leg),
+  arrangeGrob(p1, p2, ncol = 2, bottom = 'CSCI', widths = c(1, 0.9)),
+  ncol = 1, heights = c(0.15, 1)
+)
+# dev.off()
+```
+
+```{r pritem, fig.height = 4.75, fig.width = 7, fig.cap = 'Template provided to stakeholders for prioritization of recommended actions for each stream type.  The site types relate to the stream class for the biological expectation (likely unconstrained, possibly unconstrained, possibly constrained, likely constrained), relative site score for the observed CSCI (over-scoring, expected, under-scoring), and location of the score relative to a hypothetical biological threshold (dashed line, above or below).  Horizontal lines are the ranges of expected CSCI scores for a site with tick marks for the median. Priority actions defined by stakeholders are shown on the right for each stream type (text descriptions in Table S1). Actions are generalized as investigate, protect, or monitor as high (H), medium (M), or low (L) priority.  Blank cells indicate that no additional measures are recommended beyond the baseline monitoring and maintenance practiced at all sites.'}
 sts <- paste('Site', seq(1:16))
 
 # example data, csci scores
@@ -254,127 +701,224 @@ grid.arrange(
 knitr::include_graphics('figs/app.png')
 ```
 
-```{r perffig, fig.height = 8, fig.width = 6.5, fig.cap = "Model performance statewide and by major regions in California. Results are grouped by calibration (Cal) and validation (Val) datasets. Blue lines indicate the regression fit and black lines indicate correspondene between observations and predictions. CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
-# observed and predicted data
-obsdat <- csci_comid %>%
-  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, RegImpQ) %>% 
-  filter(SelectedSample %in% 'Selected')
-prddat <- comid_prd %>% 
-  dplyr::select(COMID, core0.50)
+```{r sgrresmap, fig.height = 7.5, fig.width = 8, fig.cap = "Relative site scores and recommended management actions for locations with CSCI scores in the San Gabriel River watershed. Relative site scores as under scoring, expected, or over scoring are based on observed scores given the segment class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Recommended management actions were defined by a local stakeholder group (see Figure S6, Table S1) and are ranked by priority for actions to investigate, protect, and restore a site.  No recommended actions assume baseline maintenance and monitoring is sufficient."}
+# requires spat, scrs
 
-# combined data to eval for perf
-dat <- obsdat %>% 
-  inner_join(prddat, by = 'COMID') %>% 
-  dplyr::rename(
-    observed = CSCI,
-    predicted = core0.50
-  ) %>% 
-  dplyr::select(SiteSet, PSA6c, observed, predicted)
+thrsh <- 0.79; tails <- 0.1
 
-# statewide, same as dat but PSA6c is everything
-dat <- dat %>% 
-  mutate(PSA6c = 'Statewide') %>% 
-  rbind(dat) %>% 
-  rename(
-    Observed = observed, 
-    Predicted = predicted
+##
+# nhd sgr str class
+sgrcls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
+  left_join(spat, ., by = 'COMID') %>% 
+  dplyr::select(COMID, strcls)
+
+##
+# get biological condition expectations
+cls <- getcls2(spat, thrsh = thrsh, tails = tails, modls = 'core') %>% 
+  mutate(COMID = as.character(COMID)) 
+
+# get csci difference
+sgrscrs <- spat %>% 
+  dplyr::select(COMID, core0.50) %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(scrs, ., by = 'COMID') %>% 
+  group_by(COMID, StationCode, lat, long) %>% 
+  summarise(
+    csci = mean(csci, na.rm = TRUE)
   ) %>% 
+  ungroup %>%
+  left_join(cls, by = 'COMID')
+
+# priorities
+pritab <- tibble(
+  typelv = paste0('Type', stringr::str_pad(seq(1:16), pad = '0', width = 2)),
+  I = c(rep(c('H', '', 'H', 'H'), 2), rep(c('M', 'M', '', 'M'), 2)),
+  P = c(rep(c('H', 'M', 'M', ''), 2), rep(c('H', '', '', ''), 2)),
+  R = c(rep(c('', '', 'M', 'H'), 2), rep(c('', 'L', 'L', 'L'), 2))
+) %>% 
+  gather('action', 'priority', I, P, R) %>% 
+  mutate(priority = ifelse(priority == '', 'baseline', priority)) %>% 
+  spread(action, priority) %>% 
   mutate(
-    PSA6c = factor(PSA6c, levels = c('Statewide', 'CH', 'CV', 'DM', 'NC', 'SC', 'SN')),
-    ominuse = Observed - Predicted
+    I = factor(I, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline')),
+    P = factor(P, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline')),
+    R = factor(R, levels = c('H', 'M', 'L', 'baseline'), labels = c('High', 'Medium', 'Low', 'baseline'))
   )
 
-pthm <- theme_bw(base_family = 'serif') + 
-  theme(
-    strip.background = element_blank(),
-    axis.title.x = element_blank()
-    )
+##
+# stuff to plot
 
-p1 <- ggplot(dat, aes(x = Predicted, y = Observed)) + 
-  facet_grid(PSA6c ~ SiteSet) + 
-  geom_point(size = 0.5) + 
-  geom_abline(slope = 1, intercept = 0) +
-  stat_smooth(method = 'lm', se = F) +
-  pthm
-
-p2 <- ggplot(dat, aes(x = Predicted, y = ominuse)) + 
-  facet_grid(PSA6c ~ SiteSet) + 
-  ylab('Observed - Predicted') +
-  geom_point(size = 0.5) + 
-  geom_abline(slope = 0, intercept = 0) +
-  stat_smooth(method = 'lm', se = F) +
-  pthm
-
-grid.arrange(p1, p2, ncol = 2, bottom = "Predicted")
-```
-
-
-```{r perflu, fig.height =  6, fig.width = 6, fig.cap = "Model performance in relation to land cover and land cover by major regions in California. Model residuals (CSCI observed - predicted) were smaller in regions with more urban or agricultural land use (e.g., SC, CV) and larger in regions with less anthropogenic land use (e.g., SN, DM). CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast."}
-
-# observed and predicted data
-obsdat <- csci_comid %>%
-  dplyr::select(COMID, StationCode, SiteSet, SelectedSample, CSCI, PSA6c, PctImp2006Ws, TotUrb2011Ws, TotAg2011Ws) %>% 
-  filter(SelectedSample %in% 'Selected')
-prddat <- comid_prd %>% 
-  dplyr::select(COMID, core0.50)
-
-# combined data to eval for perf
-dat <- obsdat %>% 
-  inner_join(prddat, by = 'COMID') %>% 
-  dplyr::rename(
-    observed = CSCI,
-    predicted = core0.50, 
-    imperv = PctImp2006Ws, 
-    ag = TotAg2011Ws,
-    urb = TotUrb2011Ws,
-    Region = PSA6c
-  ) %>% 
+# relative site scores
+sgrexp <- site_exp(spat, sgrscrs, thrsh = thrsh, tails = tails, modls = 'core') %>% 
+  dplyr::select(-data, -datcut) %>% 
   mutate(
-    modrsd = observed - predicted
-  ) %>%
-  gather('var', 'val', urb, ag) %>% 
-  mutate(var = factor(var, levels = c('urb', 'ag'), labels = c('Urban', 'Agriculture')))
+    strcls = factor(strcls, levels = levels(strcls)),
+    perf = factor(perf, levels = rev(levels(perf))),
+    typelv = as.character(typelv)
+    ) %>% 
+  filter(!is.na(perf))
 
-col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
+# priorities for sgr
+sgrpri <- sgrexp %>% 
+  left_join(pritab, by = 'typelv') %>% 
+  dplyr::select(StationCode, lat, long, typelv, I, P, R)
 
-# residuals by land use
-p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
-  geom_point(size = 1, alpha = 0.7) +
-  theme_bw(base_family = 'serif', base_size = 14) +
-  facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
-  geom_hline(yintercept = 0) + 
+# hydrolines
+spatdat <- spat %>% 
+  dplyr::select(COMID) %>% 
+  mutate(id = as.character(1:nrow(.)))
+st_geometry(spatdat) <- NULL
+spatfrt <- spat %>% 
+  as('Spatial') %>% 
+  fortify %>% 
+  left_join(spatdat, by = 'id') %>% 
+  mutate(COMID = as.character(COMID)) %>% 
+  left_join(cls, by = 'COMID') %>% 
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls))
+  ) %>% 
+  filter(!is.na(strcls))
+  
+# wshed boundary fortified
+shedfrt <- shed %>% 
+  as('Spatial') %>% 
+  fortify 
+
+
+thm <- theme_void(base_family = 'serif') +
   theme(
-    strip.background = element_blank(), 
-    strip.placement = 'outside', 
-    axis.title.x = element_blank(), 
-    legend.position = 'none'
+    legend.position = 'top',
+    # legend.justification = 'left',
+    # legend.box.just = 'left',
+    axis.title = element_blank(), 
+    strip.background = element_blank()
+  )
+
+##
+# relative site scores
+
+# sgr all leg
+pleg <- ggplot(sgrexp) +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls)) +
+  geom_point(data = sgrexp, aes(x = long, y = lat, shape = perf, fill = strcls), size = 3, alpha = 0.7) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, transform = T, dist_unit = 'km', model = 'WGS84') +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls))) +
+  scale_fill_manual(values = pal_exp(levels(sgrexp$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('Relative site score', values = c(24, 21, 25), guide = F) +
+  guides(colour = guide_legend(title.position = 'left', ncol = 2)) +
+  coord_equal() +
+  thm
+clsleg <- g_legend(pleg)
+
+# under
+sgrexpund <- sgrexp %>% 
+  filter(perf == 'under scoring') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p1 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpund, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, transform = T, dist_unit = 'km', model = 'WGS84') +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpund$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(25)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+# expected
+sgrexpexp <- sgrexp %>% 
+  filter(perf == 'expected') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p2 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpexp, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpexp$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(21)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+# over
+sgrexpovr <- sgrexp %>% 
+  filter(perf == 'over scoring') %>% 
+  mutate(strcls = forcats::fct_drop(strcls))
+p3 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrexpovr, aes(x = long, y = lat, fill = strcls, shape = perf), size = 3, alpha = 0.9) +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual(values = pal_exp(levels(sgrexpovr$strcls)), na.value = 'yellow', guide = F) +
+  scale_shape_manual('', values = c(24)) +
+  coord_equal() +
+  thm + 
+  theme(legend.position = c(0.5, 1.05))
+
+##
+# site priorities
+
+# investigate
+p4 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = I, size = I), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Investigate', values = pal_pri(levels(forcats::fct_drop(sgrpri$I)))) +
+  scale_size_manual('Investigate', values = pal_siz(levels(forcats::fct_drop(sgrpri$I)))) +
+  coord_equal() +
+  thm + 
+  theme(
+    legend.position = c('none'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
+    ) + 
+  ggtitle('Investigate')
+
+# protect
+p5 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = P, size = P), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Protect', values = pal_pri(levels(forcats::fct_drop(sgrpri$P)))) +
+  scale_size_manual('Protect', values = pal_siz(levels(forcats::fct_drop(sgrpri$P)))) +
+  coord_equal() +
+  thm + 
+  theme(
+    legend.position = c('none'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
   ) + 
-  scale_y_continuous('CSCI observed - predicted', limits = c(-0.65, 0.65)) + 
-  scale_colour_manual(values = col)
+  ggtitle('Protect')
 
-# land use by region
-meds <- dat %>% 
-  spread(var, val) %>% 
-  group_by(Region) %>% 
-  summarise(urbmed = median(log10(Urban), na.rm = T)) %>% 
-  arrange(urbmed)
-
-toplo <- dat %>% 
-  mutate(Region = factor(Region, levels = meds$Region))
-p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) + 
-  geom_boxplot() +
-  scale_fill_manual(values = col) +
-  scale_y_log10('% land cover, log10',
-                breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme_bw(base_family = 'serif', base_size = 12) +
+# restore
+p6 <- ggplot() +
+  geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = 'white', colour = 'black', alpha = 0.7) +
+  geom_path(data = spatfrt, aes(x = long, y = lat, group = id, colour = strcls), size = 0.3) +
+  geom_point(data = sgrpri, aes(x = long, y = lat, fill = R, size = R), shape = 21, alpha = 1) +
+  scale_colour_manual('Stream segment class', values = pal_exp(levels(spatfrt$strcls)), guide = F) +
+  scale_fill_manual('Priority', values = pal_pri(levels(forcats::fct_drop(sgrpri$R)))) +
+  scale_size_manual('Priority', values = pal_siz(levels(forcats::fct_drop(sgrpri$R)))) +
+  coord_equal() +
+  thm + 
   theme(
-    legend.position = 'top', 
-    legend.title = element_blank(),
-    axis.title.x = element_blank()
-  )
+    legend.position = c('top'), 
+    plot.title = element_text(hjust = 0.5, size = 9)
+  ) + 
+  ggtitle('Restore') +
+  guides(fill = guide_legend(title.position = 'left'), size = guide_legend(title.position = 'left'))
+prileg <- g_legend(p6)
+p6 <- p6 + theme(legend.position = 'none')
 
-grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
+# png('figs/sgrresmap.png', height = 7.5, width = 8, units = 'in', res = 400, family = 'serif')
+grid.arrange(
+  arrangeGrob(clsleg),
+  arrangeGrob(p1, p2, p3, ncol = 3),
+  arrangeGrob(prileg),
+  arrangeGrob(p4, p5, p6, ncol = 3),
+  ncol = 1, heights = c(0.2, 1, 0.1, 1)
+)
+# dev.off()
 ```
 
