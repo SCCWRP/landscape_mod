@@ -4,6 +4,7 @@ output:
   bookdown::word_document2:
     reference_docx: my_styles.docx
 author: 'Marcus W. Beck (marcusb@sccwrp.org), Raphael D. Mazor (raphaelm@sccwrp.org), Scott Johnson (scott@aquaticbioassay.com), Karin Wisenbaker (karin@aquaticbioassay.com), Joshua Westfall (jwestfall@lacsd.org), Peter R. Ode (peter.ode@wildlife.ca.gov), Ryan Hill (hill.ryan@epa.gov), Chad Loflen (Chad.Loflen@waterboards.ca.gov), Martha Sutula (marthas@sccwrp.org), Eric D. Stein (erics@sccwrp.org)'
+bibliography: refs.bib
 urlcolor: blue
 link-citations: true
 ---
@@ -77,7 +78,6 @@ spelling::spell_check_files(here('manuscript', 'supplement.Rmd'))
 <!-- ridges - 3 -->
 <!-- calires - 4 -->
 <!-- sensplo - 5 -->
-<!-- tecolote - 6 -->
 
 <!-- supp figures -->
 <!-- prddst - S1 -->
@@ -88,6 +88,7 @@ spelling::spell_check_files(here('manuscript', 'supplement.Rmd'))
 <!-- pritem - S6 -->
 <!-- app - S7 -->
 <!-- sgrresmap - S8 -->
+<!-- tecolote - S9 -->
 
 <!-- manu tables -->
 <!-- crvr - 1 -->
@@ -132,15 +133,19 @@ clslen <- sgrclslen %>%
 
 ```
 
-The San Gabriel River (SGR) Regional Monitoring Program (Los Angeles County, California) includes stakeholders from water quality regulatory agencies, municipalities, and non-governmental organizations that cooperatively work to manage aquatic resources in the watershed and improve coordination of compliance and ambient monitoring efforts. A strong land-use gradient occurs in the SGR watershed that creates challenges for managing stream condition (Figure S\@ref(fig:sgrshd)). The upper watershed in the San Gabriel mountains is largely undeveloped or protected for recreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The SGR is dammed at four locations in the upper watershed for flood control. Spreading grounds in the middle of the watershed are used to recharge groundwater during high flow. As a result, the upper and lower watersheds are hydrologically disconnected when annual rainfall is normal. Nearly all of the stream segments in the lower half of the watershed are channelized with concrete or other reinforcements. The majority of flow in the lower watershed is provided to the mainstem and major tributaries of the SGR by wastewater treatment plants releasing tertiary treated effluent. Approximately half of the monitored sites in the watershed are in poor biological condition, nearly all of which are in the lower watershed.  
+The San Gabriel River (SGR) Regional Monitoring Program (Los Angeles County, California) includes stakeholders from water quality regulatory agencies, municipalities, and non-governmental organizations that cooperatively work to manage aquatic resources in the watershed and improve coordination of compliance and ambient monitoring efforts. A strong land-use gradient occurs in the SGR watershed that creates challenges for managing stream condition (Figure S\@ref(fig:sgrshd)). The upper watershed in the San Gabriel mountains is largely undeveloped or protected for recreational use, whereas the lower watershed is in a heavily urbanized region of Los Angeles County.  The SGR is dammed at four locations in the upper watershed for flood control. Groundwater recharge areas are present in the middle of the watershed where water is allowed to spread beyond the main channel for subsurface infiltration during high flow events. As a result, the upper and lower watersheds are hydrologically disconnected when annual rainfall is normal. Nearly all of the stream segments in the lower half of the watershed are channelized with concrete or other reinforcements. The majority of flow in the lower watershed is provided to the mainstem and major tributaries of the SGR by wastewater treatment plants releasing tertiary treated effluent. Approximately half of the monitored sites in the watershed are in poor biological condition, nearly all of which are in the lower watershed.  
 
 Application of the landscape model results to the CSCI scores provided biological expectations consistent with the strong land use gradient in the watershed (Figure S\@ref(fig:sgrresplo)).  Stream segments in the upper watershed were a mix of likely and possibly unconstrained (`r clslen[['likely unconstrained']]`% and `r clslen[['possibly unconstrained']]`%), whereas stream segments in the lower watershed were classified as likely and possibly constrained (`r clslen[['likely constrained']]`% and `r clslen[['possibly constrained']]`%).  Several segments in the lower watershed had median CSCI scores that were very close to the 10th percentile (i.e., right-skewed) consistent with extreme landscape pressures (bottom left, Figure S\@ref(fig:sgrresplo)b).
 
-The stakeholder group identified management priorities based on observed CSCI scores and results from the landscape model.  A template that showed the possible site scores relative to the segment classifications  was given to the stakeholders (Figure S2, left side).  The three priorities (Table S1) were then assigned a low, medium, or high importance for the scoring possibilities that could occur from the landscape model (Figure S2, right side). The assignments were made with the explicit recognition that any priority recommendations were in addition to baseline monitoring and maintenance that is currently provided by existing management programs. The final assignments were then mapped to each monitoring site in the watershed.  Table S\@ref(tab:pridsc) shows examples of the priority recommendations and sites for which they applied.
+The stakeholder group identified management priorities based on observed CSCI scores and results from the landscape model.  A template that showed how observed CSCI scores may compare (i.e., under-scored, expected, over-scoring, or above/below biological objective) to segment classifications (i.e., constrained, unconstrained) was provided to the stakeholder to assign priorities among the various outcomes (rows 1-16, Figure S2, left side) that could occur with actual data.  The three priorities (Table S1) were then assigned a low, medium, or high importance for the scoring possibilities that could occur from the landscape model (Figure S2, right side). The assignments were made with the explicit recognition that any priority recommendations were in addition to baseline monitoring and maintenance that is currently provided by existing management programs. The final assignments were then mapped to each monitoring site in the watershed.  Table S\@ref(tab:pridsc) shows examples of the priority recommendations and sites for which they applied.
 
 The SCAPE application allowed stakeholders to provide input on the two key decision points for classifying stream segments (i.e., choice of a threshold and a prediction interval), as well as to assign priorities to each management action described above. The application then allowed stakeholders to see the outcomes of these decisions.  Specifically, SCAPE created maps showing the classifications for segments in the watershed, deviation of observed CSCI scores from the expectation, and maps of recommended priority actions that were assigned to each of the scoring possibilities.  In addition, the application tabulated the extent of streams in each class, as well as the number of sites prioritized for each management action.  Crucially, SCAPE allowed the stakeholders to modify key decisions points in the model and rapidly evaluate how these changes propagated to changes in recommended priorities for each site.
 
 The SCAPE application also allowed the stakeholders to identify spatial patterns among the watershed priorities.  For example, a clear distinction between low and high priority actions was observed on the watershed map (Figure S\@ref(fig:sgrresmap)). Sites in the lower watershed were lower priority if an action was recommended, whereas the five high priority sites were in the upper watershed (multiple recommendations were assigned to the sites).  The distinction between lower and higher priorities between the lower and upper watershed was driven exclusively by the segment classifications, where constrained segments were in the lower watershed and unconstrained segments were in the upper watershed. Several sites that were scoring as expected for likely and possibly unconstrained segments in the upper watershed were recommended as medium priority for protection.
+
+# Tecolate Creek example
+
+For example, Tecolote Creek (San Diego County, USA) was identified by our model as a constrained channel in an urban landscape (Figure S\@ref(fig:tecolote)).  The CSCI score is 0.61 indicating degraded biological integrity, but the channel is not modified [@Rehn18].  Other stressors originating at the landscape scale (e.g., water or sediment chemistry) have likely constrained the biological community at this site independent of the physical habitat quality. 
 
 # Supplemental tables
 
@@ -921,4 +926,10 @@ grid.arrange(
 )
 # dev.off()
 ```
+
+```{r tecolote, fig.cap = 'Tecolote Creek (San Diego County, USA) is a constrained channel in an urban landscape (a, Source: 32.81736, -117.19986. Google Earth. November 8, 2016. Accessed July 20, 2018.).  Physical habitat (b, Source: R. Mazor) at the sample site suggests no channel alteration. The CSCI was scored at 0.61 indicating degraded biological integrity.', fig.height = 9}
+knitr::include_graphics('figs/Tecolotefig.jpeg')
+```
+
+# References
 
