@@ -36,6 +36,7 @@ library(raster)
 library(flextable)
 library(officer)
 library(here)
+library(caret)
 
 # functions (incl. color palettes)
 source(here('R', 'funcs.R'))
