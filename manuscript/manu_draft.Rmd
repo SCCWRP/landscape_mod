@@ -11,7 +11,7 @@ link-citations: true
 
 ```{r setup, echo = F, warning = F, message = F, results = 'hide'}
 # figure path, chunk options
-knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev = 'jpeg', dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev = 'tiff', dev.args = list(family = 'sans', compression = 'lzw'), dpi = 500, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
   fig.process = function(x) {
   x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
   if (file.rename(x, x2)) x2 else x
@@ -324,14 +324,14 @@ for(i in theta) {
   p1 <- p1 + geom_text_repel(data = psalab, 
                              aes_q(x = bquote(long +.(cos(i)*xo)),
                                    y = bquote(lat +.(sin(i)*yo)),
-                                   label = ~Region), point.padding = NA, parse = T, family = 'serif', size = 6.5, colour = 'black')
+                                   label = ~Region), point.padding = NA, parse = T, family = 'sans', size = 6.5, colour = 'black')
   
 }
 p1 <- p1 +
-  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'serif', size = 6.5, colour = 'white') + 
+  geom_text_repel(data = psalab, aes(x = long, y = lat, label = Region), point.padding = NA, parse = T, family = 'sans', size = 6.5, colour = 'white') + 
   coord_map() + 
   scale_fill_manual(values = lucol) +
-  theme_void(base_family = 'serif') + 
+  theme_void(base_family = 'sans') + 
   theme(
     legend.position = 'top',
     legend.title = element_blank()
@@ -339,7 +339,7 @@ p1 <- p1 +
   guides(fill = guide_legend(ncol = 1)) +
   ggsn::scalebar(location = 'bottomleft', y.min = 33, y.max = 35, x.min = -124, x.max = -120, 
                  dist = 150, st.dist=.15, st.size = 3, height = 0.1, dist_unit = 'km', model = 'WGS84', transform = T) +
-  ggtitle('(a) Land use and regions')
+  ggtitle('A Land use and regions')
 
 p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   scale_colour_manual(
@@ -350,13 +350,13 @@ p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
   coord_map() + 
-  theme_void(base_family = 'serif') + 
+  theme_void(base_family = 'sans') + 
   theme(
     legend.position = 'top',
     legend.title = element_blank()
     ) +
   guides(colour = guide_legend(ncol = 2)) +
-  ggtitle('(b) CSCI scores')
+  ggtitle('B CSCI scores')
 
 pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   geom_polygon( fill = NA, color = "black", size = 0.3) +
@@ -369,7 +369,7 @@ v1 <- viewport(width = 1, height = 1, x = 0.3, y = 0.48)
 v2 <- viewport(width = 1, height = 1, x = 0.7, y = 0.48) 
 v3 <- viewport(width = 0.25, height = 0.25, x = 0.85, y = 0.63)
 
-# png('figs/calimap.png', height = 5, width = 7.1, units = 'in', res = 300, family = 'serif')
+# tiff('figs/calimap.tif', height = 5, width = 7.1, units = 'in', res = 300, family = 'sans')
 print(p1, vp = v1) 
 print(p2, vp = v2)
 print(pinset, vp = v3)
@@ -377,7 +377,7 @@ print(pinset, vp = v3)
 ```
 
 ```{r dpsirfig, fig.cap = "Conceptualized response and management pathways captured by the landscape model under the Driver-Pressure-Stress-Impact-Response (DPSIR) framework [@Smeets99].  Landscape predictors provided in StreamCat [@Hill17] were used to describe pressures from urban and agricultural development that could impact the macroinvertebrate community in streams by altering physical and chemical habitat.  Biological response was measured using the CSCI [@Mazor16] as an impact indicator and then evaluated relative to ranges of CSCI scores that were expected at each site provided by the landscape model.  Observed CSCI scores and context from the landscape model provide a basis for informing management actions that could address environmental impacts at different points in the response pathway, where the management pathway could address causes at different scales and efficiencies."}
-knitr::include_graphics('figs/dpsirfig.png')
+knitr::include_graphics('figs/dpsirfig.tif')
 ```
 
 ```{r ridges, fig.height = 5, fig.width = 8, fig.cap = 'Application of the landscape model to identify site expectations and bioassessment performance for sixteen example stream segments.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each segment with a chosen CSCI threshold (c) defines the stream segment classification as likely unconstrained, possibly unconstrained, possibly constrained, and likely constrained.  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
@@ -407,7 +407,7 @@ prflev <- c('over scoring', 'expected', 'under scoring')
 scrs <- tibble(
   scrshyp = c(1.35, 1.15, 0.84, 0.6, 1.25, 0.95, 0.75, 0.53, 1.1, 0.83, 0.60, 0.35, 1, 0.75, 0.45, 0.15),
   id = factor(rep(1:sel, each = 4), levels = rev(1:sel))
-  ) %>% 
+) %>% 
   group_by(id) %>% 
   nest %>% 
   rename(scrshyp = data)
@@ -418,7 +418,7 @@ rnd <- data.frame(
   id = factor(rev(1:sel), levels = rev(1:sel)),
   ave = rep(seq(0.5, 1.1, length = 4)),
   sds = sample(c(0.13), sel, replace = T)
-  ) %>%
+) %>%
   group_by(id) %>% 
   nest %>%
   left_join(scrs, by = 'id') %>% 
@@ -513,44 +513,49 @@ exp_col <- RColorBrewer::brewer.pal(9, 'Paired')[c(2, 1, 5, 6)] %>%
 ht <- 0.99
 
 # theme
-pthm <- theme_minimal(base_family = 'serif') + 
+pthm <- theme_minimal(base_family = 'sans') + 
   theme(
     axis.title.x = element_blank(), 
     axis.title.y = element_blank(), 
-    legend.position = 'top'
+    legend.position = 'top',
+    panel.grid.major.x = element_blank(), 
+    panel.grid.minor.x = element_blank(), 
+    panel.grid.major.y = element_line(colour = 'grey45'),
+    axis.text.y = element_blank(),
+    axis.ticks.x = element_line()
   )
 
 # base 
 pbase1 <- ggplot(toplo1[toplo1$id %in% '3', ], aes(x = xout, y = id, height = hght)) + 
-  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'grey', scale = ht) +
+  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'grey45', scale = ht) +
   scale_x_continuous(limits = c(0, 1.4)) + 
-  pthm + 
-  theme(axis.text.y = element_blank())
+  scale_y_discrete(expand = c(0, 0)) +
+  pthm
 
 pbase2 <- ggplot(toplo1, aes(x = xout, y = id, height = hght)) + 
-  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'grey', scale = ht) +
+  geom_density_ridges(stat = 'identity', alpha = 0.5, colour = NA, fill = 'grey45', scale = ht) +
   scale_x_continuous(limits = c(0, 1.4)) + 
+  scale_y_discrete(expand = c(0, 0)) +
   pthm
 
 
 p1 <- pbase1 +
-  geom_density_ridges(stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'darkgrey', scale = ht) +
+  geom_density_ridges(stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'grey40', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
   guides(fill = guide_colourbar('CSCI', barheight = 0.5, barwidth = 5, title.position = 'top')) +
-  ggtitle('(a) Range of expected CSCI\nscores for stream segments')
+  ggtitle('A Range of expected CSCI\nscores for stream segments')
 
 p2 <- pbase1 +
-  geom_density_ridges(data = toplo2[toplo2$id %in% '3', ], stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'darkgrey', scale = ht) +
+  geom_density_ridges(data = toplo2[toplo2$id %in% '3', ], stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'grey40', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
-  ggtitle('(b) Expected CSCI scores\nwithin certainty range') +
-  theme(legend.position = 'none')
+  ggtitle('B Expected CSCI scores\nwithin certainty range')
 
 p3 <- pbase2 +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
   geom_vline(xintercept = thrsh, linetype = 'dashed') +
   scale_fill_manual('Stream class', values = exp_col) +
   guides(fill = guide_legend(title.position = 'top', nrow = 2)) +
-  ggtitle('(c) Stream segment classification\nby CSCI threshold')
+  ggtitle('C Stream segment class\nby CSCI threshold')
 
 p4 <- pbase2 +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
@@ -560,13 +565,13 @@ p4 <- pbase2 +
   scale_colour_manual('Site performance', values = pal_prf(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
   scale_shape_manual('Observed site score', values = c(24, 21, 25)) +  
   guides(colour = guide_legend(title.position = 'top'), shape = guide_legend(title.position = 'top')) +
-  ggtitle('(d) Observed CSCI scores by\nstream classification')
+  ggtitle('D Observed CSCI scores by\nstream class')
 
 p3leg <- g_legend(p3)
-p3 <- p3 + theme(legend.position = 'none')
+p3 <- p3 + pthm %+replace% theme(legend.position = 'none')
 
 p4leg <- g_legend(p4)
-p4 <- p4 + theme(legend.position = 'none')
+p4 <- p4 + pthm %+replace% theme(legend.position = 'none')
 
 grid.arrange(
   arrangeGrob(p3leg, p4leg, ncol = 2, widths = c(0.75, 1)),
@@ -576,7 +581,7 @@ grid.arrange(
       textGrob('Example segments', rot = 90), p3, p4, ncol = 3, widths = c(0.1, 1, 1)
     ),
     ncol = 2, widths = c(0.5, 1)
-  ), 
+  ),  
   bottom = 'CSCI scores', ncol = 1, heights = c(0.2, 1)
 )
 ```
@@ -613,22 +618,22 @@ p1 <- ggplot(toplo) +
   coord_map() +
   scale_colour_manual(values = pal_exp(levels(toplo$strcls))) +
   guides(colour = guide_legend('Segment classification', title.position = 'top', ncol = 2)) +
-  theme_void(base_family = 'serif') +
+  theme_void(base_family = 'sans') +
   theme(
     legend.position = 'top',
     legend.direction = 'horizontal',
     plot.margin = grid::unit(c(0, 0, 0, 0), units = 'pt')
   )
 
-jpeg('figs/calires.jpeg', height = 5.5, width = 4, units = 'in', res = 400, family = 'serif')
+tiff('manuscript/figs/calires.tiff', height = 5.5, width = 4, units = 'in', res = 400, family = 'sans', compression = 'lzw')
 p1
 dev.off()
 ```
 ```{r calires, fig.cap = "Statewide application of the landscape model showing the stream segment classifications. Major regional boundaries are also shown (see Figure \\@ref(fig:calimap))."}
-knitr::include_graphics('figs/calires.jpeg')
+knitr::include_graphics('figs/calires.tiff')
 ```
 
-```{r sensplo, fig.height = 5, fig.width = 5.5, fig.cap = 'Changes in stream segment classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios from wide to narrow prediction ranges as identified by the tail cutoff for the expected quantiles) and potential CSCI thresholds (three scenarios from low to high).  The percentage of total stream length for likely unconstrained and likely constrained is shown for each scenario.  Stream classifications as possibly unconstrained or possibly constrained are not shown but can be inferred form the area of white space above or below each bar. The solid black line indicates the percentage division between unconstrained and constrained classifications.  CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r sensplo, fig.height = 6, fig.width = 5.5, fig.cap = 'Changes in stream segment classes by region and statewide for different scenarios used to define biological constraints.  Twenty-seven scenarios were tested that evaluated different combinations of certainty in the CSCI predictions (nine scenarios from wide to narrow prediction ranges as identified by the tail cutoff for the expected quantiles) and potential CSCI thresholds (three scenarios from low to high).  The percentage of total stream length for likely unconstrained and likely constrained is shown for each scenario.  Stream classifications as possibly unconstrained or possibly constrained are not shown but can be inferred form the area of white space above or below each bar. The solid black line indicates the percentage division between unconstrained and constrained classifications.  CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 # search grid
 grd_chk <- list(
@@ -662,7 +667,7 @@ pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls))
   geom_bar(stat = 'identity', width = 0.9, alpha = 0.7) +
   facet_grid(Region ~ thrsh) +
   scale_fill_manual('Stream segment class', breaks = c('likely unconstrained', 'likely constrained'), values = fills) +
-  theme_bw(base_family = 'serif') +     
+  theme_bw(base_family = 'sans') +     
   scale_y_continuous('% stream length', expand = c(0, 0)) + 
   scale_x_discrete('Width of CSCI prediction range (wide to narrow)', expand = c(0, 0), breaks = c('0.05', '0.15', '0.25', '0.35', '0.45')) +
   geom_hline(data = senscls, aes(yintercept = hlin)) +
@@ -670,7 +675,9 @@ pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls))
     strip.background = element_blank(), 
     axis.text.x = element_text(size = 7),
     axis.text.y = element_text(size = 7),
-    panel.grid = element_blank(), 
+    panel.grid.major.x = element_blank(), 
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
     panel.border = element_blank(),
     plot.title = element_text(size = 11, hjust = 0.5), 
     legend.position = 'top'

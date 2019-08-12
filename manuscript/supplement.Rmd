@@ -11,7 +11,7 @@ link-citations: true
 
 ```{r setup, echo = F, warning = F, message = F, results = 'hide'}
 # figure path, chunk options
-knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev.args = list(family = 'serif'), dpi = 300, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
+knitr::opts_chunk$set(fig.path = 'figs/', warning = F, message = F, echo = F, cache = T, dev = 'tiff', dev.args = list(family = 'sans', compression = 'lzw'), dpi = 500, warning = F, out.width = '100%', cache.path = 'manu_draft_cache/',
   fig.process = function(x) {
   x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
   if (file.rename(x, x2)) x2 else x
@@ -167,7 +167,7 @@ knitr::kable(tab, booktabs = T, caption = cap.val)
 
 # Supplemental figures
 
-```{r prddst, fig.height = 6, fig.width = 12, fig.cap = "Relationship of predictor variables (watershed only, see Table 1) with stream classes.  The top plot (a) shows boxplot distributions (median, interquartile ranges, and outliers) and the bottom plot (b) shows the relationship with CSCI scores.  All x-axes are in log-scale."}
+```{r prddst, fig.height = 6, fig.width = 12, fig.cap = "Relationship of predictor variables (watershed only, see Table 1) with stream classes.  The top plot (A) shows boxplot distributions (median, interquartile ranges, and outliers) and the bottom plot (B) shows the relationship with CSCI scores.  All x-axes are in log-scale."}
 toplo <- caliexp %>% 
   dplyr::select(StationCode, strcls) %>% 
   inner_join(coredat, by = 'StationCode') %>% 
@@ -181,14 +181,15 @@ toplo <- caliexp %>%
                  )
     )
 
-pthm <- theme_bw(base_family = 'serif', base_size = 16) + 
+pthm <- theme_bw(base_family = 'sans', base_size = 16) + 
   theme(
     axis.title.x = element_blank(), 
     # legend.title = element_blank(), 
     strip.background = element_blank(), 
     strip.placement = 'outside', 
     legend.position = 'top', 
-    axis.text.x = element_text(size = 8)
+    axis.text.x = element_text(size = 8), 
+    strip.text = element_text(size = 12)
   )
   
 p1 <- ggplot(toplo, aes(x = 1, y = val, fill = strcls)) + 
@@ -206,7 +207,7 @@ p1 <- ggplot(toplo, aes(x = 1, y = val, fill = strcls)) +
     axis.ticks.y = element_line(colour = 'white'), 
     legend.position = 'none'
     ) +
-  ggtitle('(a) Distribution of predictors by stream class')
+  ggtitle('A Distribution of predictors by stream class')
 
 p2 <- ggplot(toplo, aes(x = val, y = CSCI)) + 
   geom_point(aes(colour = strcls), size = 0.75) +
@@ -217,7 +218,7 @@ p2 <- ggplot(toplo, aes(x = val, y = CSCI)) +
   guides(colour = guide_legend(override.aes = list(size = 4, pch = 15))) + 
   pthm +
   scale_y_continuous(limits = c(0.15, 1.3)) +
-  ggtitle('(b) CSCI scores by predictors')
+  ggtitle('B CSCI scores by predictors')
 
 pleg <- g_legend(p2)
 p2 <- p2 + theme(legend.position = 'none')
@@ -259,7 +260,7 @@ dat <- dat %>%
     ominuse = Observed - Predicted
   )
 
-pthm <- theme_bw(base_family = 'serif') + 
+pthm <- theme_bw(base_family = 'sans') + 
   theme(
     strip.background = element_blank(),
     axis.title.x = element_blank()
@@ -314,7 +315,7 @@ col <- c('grey', 'lightsalmon')#RColorBrewer::brewer.pal(8, 'Paired')[c(1, 3)]
 # residuals by land use
 p1 <- ggplot(dat, aes(x = val, y = modrsd, colour = var)) +
   geom_point(size = 1, alpha = 0.7) +
-  theme_bw(base_family = 'serif', base_size = 14) +
+  theme_bw(base_family = 'sans', base_size = 14) +
   facet_wrap(~var, strip.position = 'bottom', ncol = 2) +
   geom_hline(yintercept = 0) + 
   theme(
@@ -342,7 +343,7 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
-  theme_bw(base_family = 'serif', base_size = 12) +
+  theme_bw(base_family = 'sans', base_size = 12) +
   theme(
     legend.position = 'top', 
     legend.title = element_blank(),
@@ -352,7 +353,7 @@ p2 <- ggplot(toplo, aes(x = Region, y = val, fill = var)) +
 grid.arrange(p1, p2, ncol = 1, heights = c(0.9, 1))
 ```
 
-```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (a) and the predicted median CSCI scores at each stream segment and observed CSCI scores are shown in (b).'}
+```{r sgrshd, fig.height = 8, fig.width = 6, fig.cap = 'San Gabriel River watershed in southern California. Land cover is shown in plot (A) and the predicted median CSCI scores at each stream segment and observed CSCI scores are shown in (B).'}
 
 # csci seq for color pal
 palseq <- range(csci_raw$CSCI, na.rm = T) 
@@ -426,7 +427,7 @@ seqcsc <- seq(seqcsc[1], seqcsc[2], length = 5)
 # color legend
 colleg <- ggplot() +
   geom_point(data = spatfrt, aes(x = long.y, y = lat.y, colour = csci)) +
-  theme_bw(base_family = 'serif') +
+  theme_bw(base_family = 'sans') +
   theme(
     legend.position = 'top',
     legend.justification = 'left',
@@ -440,7 +441,7 @@ colleg <- g_legend(colleg)
 # separate lu legend
 luleg <- ggplot(luplo) + 
   geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
-  theme_bw(base_family = 'serif') +
+  theme_bw(base_family = 'sans') +
   theme(
     legend.position = 'top', 
     legend.justification = 'left',
@@ -454,16 +455,16 @@ luleg <- g_legend(luleg)
 # land use plot
 p1 <- ggplot(luplo) + 
   geom_tile(aes(x, y, fill = `Land cover`), alpha=0.8) +
-  theme_void(base_family = 'serif') +
+  theme_void(base_family = 'sans') +
   scale_fill_manual('Land cover', values = lucol) +
   geom_polygon(data = shedfrt, aes(x = long, y = lat, group = group), fill = NA, colour = 'black', alpha = 0.7) +
   coord_equal() +
-  theme_void(base_family = 'serif') +
+  theme_void(base_family = 'sans') +
   theme(
     legend.position = 'none', 
     axis.title = element_blank()
     ) +
-  ggtitle('(b) Land cover in the San Gabriel watershed')
+  ggtitle('B Land cover in the San Gabriel watershed')
 
 # hydrolines plot with CSCI pts
 p2 <- ggplot() +
@@ -477,18 +478,18 @@ p2 <- ggplot() +
   ggsn::scalebar(location = 'bottomright', y.min = 33.77, y.max = 33.8, x.min = -118, x.max = -117.7, dist = 10, st.dist=.5, st.size = 3, height = 0.3, transform = T, dist_unit = 'km', model = 'WGS84') +
   guides(fill = F, colour = F) +
   coord_equal() +
-  theme_void(base_family = 'serif') +
+  theme_void(base_family = 'sans') +
   theme(
     # legend.position = 'top',
     legend.justification = 'left',
     # legend.box.just = 'left'#,
     axis.title = element_blank()
     ) + 
-  ggtitle('(a) Segment median predictions and observed scores for the CSCI')
+  ggtitle('A Segment median predictions and observed scores for the CSCI')
 p2leg <- g_legend(p2) 
 p2 <- p2 + theme(legend.position = 'none')
 
-# png('figs/sgrshd.png', height = 8, width = 5.5, units = 'in', res = 300, family = 'serif')
+# tiff('figs/sgrshd.tiff', height = 8, width = 5.5, units = 'in', dpi = 500, compression = 'lzw', family = 'sans')
 grid.arrange(
   arrangeGrob(p2, 
               arrangeGrob(colleg, p2leg, ncol = 1, heights = c(1,1)), ncol = 2, widths = c(1, 0.5)), 
@@ -499,7 +500,7 @@ grid.arrange(
 # dev.off()
 ```
 
-```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream segments in the San Gabriel River watershed, Los Angeles County, California.  CSCI scores with (a) no biological context from the model are on the left and (b) scores with context from the model are on the right. Relative site scores as under-scoring, expected, or over-scoring are based on observed scores given the segment class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Segment classes are based on overlap of the expectations with a biological threshold for the CSCI (0.79, dashed lined) and location of the median expectation (white ticks)."}
+```{r sgrresplo, fig.height = 7, fig.width = 9, fig.cap = "Application of the landscape model to stream segments in the San Gabriel River watershed, Los Angeles County, California.  CSCI scores with (A) context from the model are on the left and (B) no biological context from the model are on the right. Relative site scores as under-scoring, expected, or over-scoring are based on observed scores given the segment class as likely constrained, possibly constrained, possibly unconstrained, and likely unconstrained.  Segment classes are based on overlap of the expectations with a biological threshold for the CSCI (0.79, dashed lined) and location of the median expectation (white ticks)."}
 ##
 # ggplot of sgr site expecations, relative scores
 
@@ -562,30 +563,30 @@ toplo3 <- ggsgrexp %>%
 
 # plot, no context
 p1 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
-  theme_bw(base_family = 'serif', base_size = 12) +
+  theme_bw(base_family = 'sans', base_size = 12) +
   theme(
-    axis.text.y = element_text(size = 6.5), 
-    axis.title.y = element_text(size = 13),
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
     axis.title.x = element_blank(), 
+    axis.ticks.y = element_blank(), 
     title = element_text(size = 10)
   ) +
   scale_x_continuous('CSCI') +
   scale_y_discrete('Stream segment') +
   geom_point(aes(x = csci), shape = 16, size = 1.5, alpha = 0.8) +
   geom_vline(xintercept = thrsh, linetype = 'dashed', size = 1) + 
-  ggtitle('(a) CSCI scores with no context')
+  ggtitle('B CSCI scores with no context')
 
 # plot, context
 p2 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
   geom_line(data = toplo1, aes(x = val, colour = `Stream Class`), alpha = 0.1, size = 2) +
   geom_line(aes(colour = `Stream Class`), alpha = 0.6, size = 2) +
   geom_point(data = toplo3, colour = 'white', size = 1, alpha = 1, shape = 15) +
-  theme_bw(base_family = 'serif', base_size = 12) +
+  theme_bw(base_family = 'sans', base_size = 12) +
   theme(
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 6.5), 
+    axis.title.y = element_text(size = 13),
     axis.title.x = element_blank(), 
-    axis.ticks.y = element_blank(), 
     legend.position = 'top', 
     title = element_text(size = 10)
   ) +
@@ -597,14 +598,14 @@ p2 <- ggplot(toplo1, aes(y = StationCode, x = val)) +
   scale_shape_manual('Relative site score', values = c(25, 21, 24)) +
   scale_fill_manual(values = pal_exp(levels(toplo1$`Stream Class`)), na.value = 'yellow', guide = F, drop = F) +
   guides(shape = guide_legend(title.position = 'top'), colour = guide_legend(title.position = 'top', ncol = 2)) +
-  ggtitle('(b) CSCI scores with context from the landscape model')
+  ggtitle('A CSCI scores with context from the model')
 p2leg <- g_legend(p2)
 p2 <- p2 + theme(legend.position = 'none')
 
-# png('figs/sgrresplo.png', height = 7, width = 9, units = 'in', res = 300, family = 'serif')
+# tiff('figs/sgrresplo.tiff', height = 7, width = 9, units = 'in', dpi = 500, compression = 'lzw', family = 'sans')
 grid.arrange(
   arrangeGrob(p2leg),
-  arrangeGrob(p1, p2, ncol = 2, bottom = 'CSCI', widths = c(1, 0.9)),
+  arrangeGrob(p2, p1, ncol = 2, bottom = 'CSCI', widths = c(1, 0.9)),
   ncol = 1, heights = c(0.15, 1)
 )
 # dev.off()
@@ -644,7 +645,7 @@ pritab <- tibble(
   ) %>% 
   gather('action', 'priority', -Type)
 
-mythm <- theme_minimal(base_family = 'serif', base_size = 12) +
+mythm <- theme_minimal(base_family = 'sans', base_size = 12) +
   theme(
     panel.grid.major = element_blank(), 
     panel.grid.minor = element_blank(), 
@@ -677,7 +678,7 @@ p1leg <- g_legend(p1)
 p1 <- p1 + mythm %+replace% theme(legend.position = 'none')
 
 p2 <- ggplot(pritab, aes(x = Type, y = 1)) +
-  geom_text(aes(label = priority), family = 'serif') + 
+  geom_text(aes(label = priority), family = 'sans') + 
   facet_wrap(~action) + 
   coord_flip() + 
   scale_x_reverse(breaks = c(1:length(sts)), labels = c(1:length(sts))) + 
@@ -686,12 +687,12 @@ p2 <- ggplot(pritab, aes(x = Type, y = 1)) +
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     strip.background = element_blank(),
-    strip.text = element_text(family = 'serif', size = 11),
+    strip.text = element_text(family = 'sans', size = 11),
     axis.ticks.x = element_line(color = 'white'),
     axis.text.x = element_blank(),
     axis.ticks.y = element_blank(),
     axis.text.y = element_blank(), 
-    # axis.text.y = element_text(family = 'serif', size = 12),
+    # axis.text.y = element_text(family = 'sans', size = 12),
     axis.title = element_text(colour = 'white'), 
     plot.margin = grid::unit(c(4, 5.5, 5.5, -3), units = 'pt')
   )
@@ -791,7 +792,7 @@ shedfrt <- shed %>%
   fortify 
 
 
-thm <- theme_void(base_family = 'serif') +
+thm <- theme_void(base_family = 'sans') +
   theme(
     legend.position = 'top',
     # legend.justification = 'left',
@@ -917,7 +918,6 @@ p6 <- ggplot() +
 prileg <- g_legend(p6)
 p6 <- p6 + theme(legend.position = 'none')
 
-# png('figs/sgrresmap.png', height = 7.5, width = 8, units = 'in', res = 400, family = 'serif')
 grid.arrange(
   arrangeGrob(clsleg),
   arrangeGrob(p1, p2, p3, ncol = 3),
@@ -925,7 +925,6 @@ grid.arrange(
   arrangeGrob(p4, p5, p6, ncol = 3),
   ncol = 1, heights = c(0.2, 1, 0.1, 1)
 )
-# dev.off()
 ```
 
 ```{r tecolote, fig.cap = 'Tecolote Creek (San Diego County, USA) is a constrained channel in an urban landscape (a, Source: 32.81736, -117.19986. Google Earth. November 8, 2016. Accessed July 20, 2018.).  Physical habitat (b, Source: R. Mazor) at the sample site suggests no channel alteration. The CSCI was scored at 0.61 indicating degraded biological integrity.', fig.height = 9}
