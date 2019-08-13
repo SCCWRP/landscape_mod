@@ -928,7 +928,7 @@ grid.arrange(
 ```
 
 ```{r tecolote, fig.cap = 'Tecolote Creek (San Diego County, USA) is a constrained channel in an urban landscape (a, Source: 32.81736, -117.19986. Google Earth. November 8, 2016. Accessed July 20, 2018.).  Physical habitat (b, Source: R. Mazor) at the sample site suggests no channel alteration. The CSCI was scored at 0.61 indicating degraded biological integrity.', fig.height = 9}
-knitr::include_graphics('figs/Tecolotefig.jpeg')
+knitr::include_graphics('figs/Tecolotefig.jpg')
 ```
 
 # References
