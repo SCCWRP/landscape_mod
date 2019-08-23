@@ -244,7 +244,7 @@ The authors acknowledge support from the San Gabriel River Regional Monitoring P
 
 # Figures
 
-```{r calimap, fig.height = 5, fig.width = 7, fig.cap = 'Urban and agricultural land use (a) and distribution of observed stream CSCI scores (b) in California. Cover of urban and agricultural land use in stream watersheds was used to develop a landscape model for stream segment expectations of bioassessment scores.  Breakpoints for CSCI scores are the 1st, 10th, and 30th percentile of scores at least-disturbed, reference sites throughout the state.  Altered and intact refers to biological condition [@Mazor16]. Grey lines are major environmental regions in California defined by ecoregional and watershed boundaries, CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
+```{r calimap, fig.height = 5.5, fig.width = 7, fig.cap = 'Urban and agricultural land use (a) and distribution of observed stream CSCI scores (b) in California. Cover of urban and agricultural land use in stream watersheds was used to develop a landscape model for stream segment expectations of bioassessment scores.  Breakpoints for CSCI scores are the 1st, 10th, and 30th percentile of scores at least-disturbed, reference sites throughout the state.  Altered and intact refers to biological condition [@Mazor16]. Grey lines are major environmental regions in California defined by ecoregional and watershed boundaries, CV: Central Valley, CH: Chaparral, DM: Deserts and Modoc Plateau, NC: North Coast, SN: Sierra Nevada, SC: South Coast.'}
 
 lucol <- c('grey80', 'grey45')
 
@@ -298,12 +298,12 @@ toplo <- ludat %>%
 csci_raw <- csci_raw %>% 
   mutate(
     CSCI = cut(CSCI, 
-                   breaks = c(-Inf, 0.63, 0.79, 0.92, Inf), 
-                   labels = c('< 0.63', '0.63 - 0.79', '0.79 - 0.92', '> 30^{th}')
-                   )
+               breaks = c(-Inf, 0.63, 0.79, 0.92, Inf), 
+               labels = c('< 0.63', '0.63 - 0.79', '0.79 - 0.92', '> 30^{th}')
+    )
   ) %>% 
   filter(!is.na(CSCI))
-  
+
 # legend labels for csci categories in p2
 leglab <- list(
   expression(paste('<1' ^ 'st', ': Very likely altered')),
@@ -335,18 +335,19 @@ p1 <- p1 +
   theme_void(base_family = 'sans') + 
   theme(
     legend.position = 'top',
-    legend.title = element_blank()
+    legend.title = element_blank(), 
+    plot.caption = element_text(size = 14, hjust = 0.5)
   ) + 
   guides(fill = guide_legend(ncol = 1)) +
   ggsn::scalebar(location = 'bottomleft', y.min = 33, y.max = 35, x.min = -124, x.max = -120, 
                  dist = 150, st.dist=.15, st.size = 3, height = 0.1, dist_unit = 'km', model = 'WGS84', transform = T) +
-  ggtitle('A Land use and regions')
+  labs(title = 'A', caption = 'Land use and regions')
 
 p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   scale_colour_manual(
     values = pal(seq(0, 1.4, length = 4)), 
     labels = leglab
-    ) +
+  ) +
   geom_point(size = 1.25, alpha = 0.7) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.1, colour = scales::alpha('black', 0.5)) +
   geom_polygon(data = calista, aes(x = long, y = lat, group = group), fill = NA, colour = scales::alpha('black', 0.5)) +
@@ -354,10 +355,11 @@ p2 <- ggplot(csci_raw, aes(x = Longitude, y = Latitude, colour = CSCI)) +
   theme_void(base_family = 'sans') + 
   theme(
     legend.position = 'top',
-    legend.title = element_blank()
-    ) +
+    legend.title = element_blank(), 
+    plot.caption = element_text(size = 12, hjust = 0.5)
+  ) +
   guides(colour = guide_legend(ncol = 2)) +
-  ggtitle('B CSCI scores')
+  labs(title = 'B', caption = 'CSCI scores')
 
 pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   geom_polygon( fill = NA, color = "black", size = 0.3) +
@@ -366,11 +368,11 @@ pinset <- ggplot(country, aes(x = long, y = lat, group = group)) +
   theme_void() 
 
 grid.newpage()
-v1 <- viewport(width = 1, height = 1, x = 0.3, y = 0.48) 
-v2 <- viewport(width = 1, height = 1, x = 0.7, y = 0.48) 
-v3 <- viewport(width = 0.25, height = 0.25, x = 0.85, y = 0.63)
+v1 <- viewport(width = 1, height = 1, x = 0.3, y = 0.51) 
+v2 <- viewport(width = 1, height = 1, x = 0.7, y = 0.51) 
+v3 <- viewport(width = 0.25, height = 0.25, x = 0.85, y = 0.65)
 
-# tiff('figs/calimap.tif', height = 5, width = 7.1, units = 'in', res = 300, family = 'sans')
+# tiff(here('manuscript/figs', 'calimap.tiff'), height = 5.5, width = 7, units = 'in', res = 500, family = 'sans', compression = 'lzw')
 print(p1, vp = v1) 
 print(p2, vp = v2)
 print(pinset, vp = v3)
@@ -381,7 +383,7 @@ print(pinset, vp = v3)
 knitr::include_graphics('figs/dpsirfig.tif')
 ```
 
-```{r ridges, fig.height = 5, fig.width = 8, fig.cap = 'Application of the landscape model to identify site expectations and bioassessment performance for sixteen example stream segments.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each segment with a chosen CSCI threshold (c) defines the stream segment classification as likely unconstrained, possibly unconstrained, possibly constrained, and likely constrained.  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d).'}
+```{r ridges, fig.height = 6, fig.width = 7, fig.cap = 'Application of the landscape model to identify site expectations and bioassessment performance for sixteen example stream segments.  A range of CSCI scores is predicted from the model (a) and the lower and upper limits of the expectations are cut to define a certainty range for the predictions (b).  Overlap of the certainty range at each segment with a chosen CSCI threshold (c, stream segment class by CSCI threshold) defines the stream segment classification as likely unconstrained, possibly unconstrained, possibly constrained, and likely constrained.  The observed bioassessment scores are described relative to the classification as over scoring (above the certainty threshold), expected (within), and under scoring (below) for each of four stream classes (d, observed CSCI scores by stream class).'}
 ##
 # plot data
 
@@ -394,16 +396,16 @@ thrsh <- 0.79
 
 catcds <- data.frame(
   int = c('111', '011', '001', '000'),
-  cls = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'),
+  cls = c('Likely unconstrained', 'Possibly unconstrained', 'Possibly constrained', 'Likely constrained'),
   clsabv = c('lu', 'pu', 'pc', 'lc')
 )
 
 prfcds <- data.frame(
   int = c('00', '01', '11'), 
-  cls = c('over scoring', 'expected', 'under scoring')
+  cls = c('Over-scoring', 'Expected', 'Under-scoring')
 )
 
-prflev <- c('over scoring', 'expected', 'under scoring')
+prflev <- c('Over-scoring', 'Expected', 'Under-scoring')
 
 scrs <- tibble(
   scrshyp = c(1.35, 1.15, 0.84, 0.6, 1.25, 0.95, 0.75, 0.53, 1.1, 0.83, 0.60, 0.35, 1, 0.75, 0.45, 0.15),
@@ -519,6 +521,7 @@ pthm <- theme_minimal(base_family = 'sans') +
     axis.title.x = element_blank(), 
     axis.title.y = element_blank(), 
     legend.position = 'top',
+    plot.caption = element_text(size = 12, hjust = 0.5),
     panel.grid.major.x = element_blank(), 
     panel.grid.minor.x = element_blank(), 
     panel.grid.major.y = element_line(colour = 'grey45'),
@@ -544,19 +547,22 @@ p1 <- pbase1 +
   geom_density_ridges(stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'grey40', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
   guides(fill = guide_colourbar('CSCI', barheight = 0.5, barwidth = 5, title.position = 'top')) +
-  ggtitle('A Range of expected CSCI\nscores for stream segments')
+  labs(title = 'A', caption = 'Range of expected CSCI\nscores for stream segments')
 
 p2 <- pbase1 +
   geom_density_ridges(data = toplo2[toplo2$id %in% '3', ], stat = 'identity', rel_min_height = 0.001, colour = 'black', fill = 'grey40', scale = ht) +
   scale_fill_gradient2(low = '#d7191c', mid = '#abd9e9', high = '#2c7bb6', midpoint = 1) +
-  ggtitle('B Expected CSCI scores\nwithin certainty range')
+  labs(title = 'B', caption = 'Expected CSCI scores\nwithin certainty range')
 
 p3 <- pbase2 +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
   geom_vline(xintercept = thrsh, linetype = 'dashed') +
   scale_fill_manual('Stream class', values = exp_col) +
-  guides(fill = guide_legend(title.position = 'top', nrow = 2)) +
-  ggtitle('C Stream segment class\nby CSCI threshold')
+  guides(
+    fill = guide_legend(title.position = 'top', nrow = 2, override.aes = list(colour = NA))
+  ) +
+  labs(title = 'C')
+
 
 p4 <- pbase2 +
   geom_density_ridges(data = toplo3, aes(fill = `Stream class`), stat = 'identity', colour = 'black', scale = ht) +
@@ -566,7 +572,8 @@ p4 <- pbase2 +
   scale_colour_manual('Site performance', values = pal_prf(levels(toplo4$`Site performance`)), na.value = 'yellow') + 
   scale_shape_manual('Observed site score', values = c(24, 21, 25)) +  
   guides(colour = guide_legend(title.position = 'top'), shape = guide_legend(title.position = 'top')) +
-  ggtitle('D Observed CSCI scores by\nstream class')
+  labs(title = 'D')
+
 
 p3leg <- g_legend(p3)
 p3 <- p3 + pthm %+replace% theme(legend.position = 'none')
@@ -575,19 +582,21 @@ p4leg <- g_legend(p4)
 p4 <- p4 + pthm %+replace% theme(legend.position = 'none')
 
 grid.arrange(
-  arrangeGrob(p3leg, p4leg, ncol = 2, widths = c(0.75, 1)),
+  arrangeGrob(textGrob(''), p3leg, p4leg, ncol = 3, widths = c(0.1, 1, 1)),
   arrangeGrob(
-    arrangeGrob(p1, p2, ncol = 1),
     arrangeGrob(
-      textGrob('Example segments', rot = 90), p3, p4, ncol = 3, widths = c(0.1, 1, 1)
+      textGrob('', rot = 90), p1, p2, ncol = 3, widths = c(0.1, 1, 1)
     ),
-    ncol = 2, widths = c(0.5, 1)
+    arrangeGrob(
+      textGrob('Example segments            ', rot = 90), p3, p4, ncol = 3, widths = c(0.1, 1, 1)
+    ),
+    ncol = 1, heights = c(0.6, 1)
   ),  
-  bottom = 'CSCI scores', ncol = 1, heights = c(0.2, 1)
+  bottom = '          CSCI scores', ncol = 1, heights = c(0.2, 1)
 )
 ```
 
-```{r eval = F}
+```{r eval = T}
 # state base
 calista <- map_data('state', region = 'california')
 
@@ -610,6 +619,9 @@ psafrt <- calipsa %>%
 
 # all comid class
 toplo <- caliclsplo %>% 
+  mutate(
+    strcls = factor(strcls, levels = levels(strcls), labels = c('Likely unconstrained', 'Possibly unconstrained', 'Possibly constrained', 'Likely constrained'))
+  ) %>% 
   na.omit
 
 # comid class
@@ -617,7 +629,7 @@ p1 <- ggplot(toplo) +
   geom_path(aes(x = long, y = lat, group = id, colour = strcls), size = 0.30) +
   geom_polygon(data = psafrt, aes(x = long, y = lat, group = group), fill = NA, size = 0.5, colour = scales::alpha('black', 0.9)) +
   coord_map() +
-  scale_colour_manual(values = pal_exp(levels(toplo$strcls))) +
+  scale_colour_manual(values = pal_exp2(levels(toplo$strcls))) +
   guides(colour = guide_legend('Segment classification', title.position = 'top', ncol = 2)) +
   theme_void(base_family = 'sans') +
   theme(
@@ -651,23 +663,26 @@ senscls <- sensres %>%
   dplyr::select(-name) %>% 
   unnest %>% 
   mutate(
-    thrsh = factor(thrsh, levels = c(0.63, 0.79, 0.92), labels = c('low CSCI threshold (0.63)', 'medium (0.79)', 'high CSCI threshold (0.92)')), 
+    thrsh = factor(thrsh, levels = c(0.63, 0.79, 0.92), labels = c('Low CSCI threshold (0.63)', 'Medium (0.79)', 'High CSCI threshold (0.92)')), 
     tails = as.character(tails), 
     Region = gsub('^statewide$', 'Statewide', Region),
-    strcls = factor(strcls, levels = c('possibly unconstrained', 'likely unconstrained', 'likely constrained', 'possibly constrained'))
+    strcls = factor(strcls, 
+                    levels = c('possibly unconstrained', 'likely unconstrained', 'likely constrained', 'possibly constrained'),
+                    labels = c('Possibly unconstrained', 'Likely unconstrained', 'Likely constrained', 'Possibly constrained')
+    )
   ) %>% 
   group_by(Region, thrsh, tails) %>% 
-  mutate(hlin = sum(perc[strcls %in% c('likely constrained', 'possibly constrained')]))
+  mutate(hlin = sum(perc[strcls %in% c('Likely constrained', 'Possibly constrained')]))
 
 # fill colors
-fills <- pal_exp(levels(senscls$strcls))
+fills <- pal_exp2(levels(senscls$strcls))
 fills[c(1, 4)] <- NA
 
 # results plot
 pres <- ggplot(senscls, aes(x = tails, y = perc, fill = strcls, group = strcls)) + 
   geom_bar(stat = 'identity', width = 0.9, alpha = 0.7) +
   facet_grid(Region ~ thrsh) +
-  scale_fill_manual('Stream segment class', breaks = c('likely unconstrained', 'likely constrained'), values = fills) +
+  scale_fill_manual('Stream segment class', breaks = c('Likely unconstrained', 'Likely constrained'), values = fills) +
   theme_bw(base_family = 'sans') +     
   scale_y_continuous('% stream length', expand = c(0, 0)) + 
   scale_x_discrete('Width of CSCI prediction range (wide to narrow)', expand = c(0, 0), breaks = c('0.05', '0.15', '0.25', '0.35', '0.45')) +

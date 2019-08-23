@@ -53,6 +53,12 @@ pal_exp <- colorFactor(
   na.color = 'yellow',
   levels = c('likely unconstrained', 'possibly unconstrained', 'possibly constrained', 'likely constrained'))
 
+# color palette for stream expectations
+pal_exp2 <- colorFactor(
+  palette = brewer.pal(9, 'Paired')[c(2, 1, 5, 6)],
+  na.color = 'yellow',
+  levels = c('Likely unconstrained', 'Possibly unconstrained', 'Possibly constrained', 'Likely constrained'))
+
 # color palette for CSCI scoring performance
 pal_prf <- colorFactor(
   palette = c(
